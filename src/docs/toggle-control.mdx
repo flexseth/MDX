@@ -1,0 +1,171 @@
+import { useState } from 'react';
+import ToggleControl from '../components/ToggleControl';
+
+export const EnableFeatureDemo = () => {
+  const [checked, setChecked] = useState(false);
+  return (
+    <ToggleControl
+      label="Enable Feature"
+      checked={checked}
+      onChange={setChecked}
+    />
+  );
+};
+
+export const ShowDateDemo = () => {
+  const [checked, setChecked] = useState(true);
+  return (
+    <ToggleControl
+      label="Show Date"
+      checked={checked}
+      help="Display the publication date below the title."
+      onChange={setChecked}
+    />
+  );
+};
+
+# ToggleControl
+
+A toggle switch for boolean on/off settings. Mirrors the WordPress [`ToggleControl`](https://developer.wordpress.org/block-editor/reference-guides/components/toggle-control/) from `@wordpress/components`.
+
+## Basic Usage
+
+<EnableFeatureDemo />
+
+```jsx
+<ToggleControl
+  label="Enable Feature"
+  checked={isEnabled}
+  onChange={(value) => setAttributes({ isEnabled: value })}
+/>
+```
+
+## With Help Text
+
+<ShowDateDemo />
+
+```jsx
+<ToggleControl
+  label="Show Date"
+  checked={showDate}
+  help="Display the publication date below the title."
+  onChange={(value) => setAttributes({ showDate: value })}
+/>
+```
+
+## Disabled State
+
+<ToggleControl
+  label="Premium Feature"
+  checked={false}
+  help="This feature requires a premium subscription."
+  disabled
+  onChange={(value) => {}}
+/>
+
+```jsx
+<ToggleControl
+  label="Premium Feature"
+  checked={isPremiumEnabled}
+  help="This feature requires a premium subscription."
+  disabled
+  onChange={(value) => setAttributes({ isPremiumEnabled: value })}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { ToggleControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { isDarkMode, hasAnimation } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Display Settings', 'your-text-domain' ) }>
+          <ToggleControl
+            label={ __( 'Dark Mode', 'your-text-domain' ) }
+            checked={ isDarkMode }
+            onChange={ ( value ) => setAttributes( { isDarkMode: value } ) }
+          />
+          <ToggleControl
+            label={ __( 'Enable Animation', 'your-text-domain' ) }
+            checked={ hasAnimation }
+            onChange={ ( value ) => setAttributes( { hasAnimation: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps }>
+        { __( 'Content with toggleable features', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "isDarkMode": { "type": "boolean", "default": false },
+    "hasAnimation": { "type": "boolean", "default": true }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'Label text displayed next to the toggle.'
+  },
+  {
+    name: 'checked',
+    type: 'boolean',
+    default: 'false',
+    required: true,
+    description: 'Controlled checked state of the toggle.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired with the new boolean value when toggled.'
+  },
+  {
+    name: 'help',
+    type: 'string',
+    default: '',
+    required: false,
+    description: 'Optional help text displayed below the toggle.'
+  },
+  {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Disables the toggle when true.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper.'
+  }
+]} />
+
+## WordPress Mapping
+
+In WordPress, `ToggleControl` is imported directly from `@wordpress/components` — no custom component needed. Use it inside `InspectorControls` with a `PanelBody` for sidebar settings, or inline in the block editor for in-canvas controls. Store state in `block.json` boolean attributes.

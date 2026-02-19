@@ -1,0 +1,219 @@
+import { useState } from 'react';
+import SelectControl from '../components/SelectControl';
+
+export const AlignmentDemo = () => {
+  const [value, setValue] = useState('left');
+  return (
+    <SelectControl
+      label="Alignment"
+      value={value}
+      options={[
+        { label: 'Left', value: 'left' },
+        { label: 'Center', value: 'center' },
+        { label: 'Right', value: 'right' },
+      ]}
+      onChange={setValue}
+    />
+  );
+};
+
+export const FontSizeDemo = () => {
+  const [value, setValue] = useState('medium');
+  return (
+    <SelectControl
+      label="Font Size"
+      value={value}
+      options={[
+        { label: 'Small', value: 'small' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Large', value: 'large' },
+      ]}
+      help="Choose the font size for your content."
+      onChange={setValue}
+    />
+  );
+};
+
+# SelectControl
+
+A dropdown select menu for choosing from predefined options. Mirrors the WordPress [`SelectControl`](https://developer.wordpress.org/block-editor/reference-guides/components/select-control/) from `@wordpress/components`.
+
+## Basic Usage
+
+<AlignmentDemo />
+
+```jsx
+<SelectControl
+  label="Alignment"
+  value={alignment}
+  options={[
+    { label: 'Left', value: 'left' },
+    { label: 'Center', value: 'center' },
+    { label: 'Right', value: 'right' },
+  ]}
+  onChange={(value) => setAttributes({ alignment: value })}
+/>
+```
+
+## With Help Text
+
+<FontSizeDemo />
+
+```jsx
+<SelectControl
+  label="Font Size"
+  value={fontSize}
+  options={[
+    { label: 'Small', value: 'small' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Large', value: 'large' },
+  ]}
+  help="Choose the font size for your content."
+  onChange={(value) => setAttributes({ fontSize: value })}
+/>
+```
+
+## Disabled State
+
+<SelectControl
+  label="Custom Option"
+  value="option1"
+  options={[
+    { label: 'Option 1', value: 'option1' },
+    { label: 'Option 2', value: 'option2' },
+    { label: 'Option 3', value: 'option3' }
+  ]}
+  disabled
+  onChange={(value) => {}}
+/>
+
+```jsx
+<SelectControl
+  label="Custom Option"
+  value={customOption}
+  options={options}
+  disabled={!enableCustom}
+  onChange={(value) => setAttributes({ customOption: value })}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { SelectControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { layout, animation } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Layout Settings', 'your-text-domain' ) }>
+          <SelectControl
+            label={ __( 'Layout Type', 'your-text-domain' ) }
+            value={ layout }
+            options={ [
+              { label: __( 'Grid', 'your-text-domain' ), value: 'grid' },
+              { label: __( 'List', 'your-text-domain' ), value: 'list' },
+              { label: __( 'Masonry', 'your-text-domain' ), value: 'masonry' },
+            ] }
+            onChange={ ( value ) => setAttributes( { layout: value } ) }
+          />
+          <SelectControl
+            label={ __( 'Animation', 'your-text-domain' ) }
+            value={ animation }
+            options={ [
+              { label: __( 'None', 'your-text-domain' ), value: 'none' },
+              { label: __( 'Fade In', 'your-text-domain' ), value: 'fade' },
+              { label: __( 'Slide Up', 'your-text-domain' ), value: 'slide' },
+            ] }
+            onChange={ ( value ) => setAttributes( { animation: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps } className={ `layout-${ layout } animation-${ animation }` }>
+        { __( 'Content with layout and animation', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "layout": { "type": "string", "default": "grid" },
+    "animation": { "type": "string", "default": "none" }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'Label text displayed above the select.'
+  },
+  {
+    name: 'value',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'The currently selected value (controlled).'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired with the new string value when selection changes.'
+  },
+  {
+    name: 'options',
+    type: 'Array<{ label: string, value: string }>',
+    default: '[]',
+    required: false,
+    description: 'Array of option objects. Each must have label and value.'
+  },
+  {
+    name: 'help',
+    type: 'string',
+    default: '',
+    required: false,
+    description: 'Optional help text displayed below the select.'
+  },
+  {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Disables the select when true.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper.'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    default: '',
+    required: false,
+    description: 'Advanced: pass optgroup elements as children instead of using options.'
+  }
+]} />
+
+## WordPress Mapping
+
+In WordPress, `SelectControl` is imported directly from `@wordpress/components`. For dynamic options (post types, taxonomies), use `useSelect` from `@wordpress/data` to populate the `options` array at runtime. Always store the selected value as a string attribute in `block.json`, converting to a number with `parseInt()` only when needed.
