@@ -73,7 +73,7 @@ const formattedDate = new Date().toLocaleDateString( 'en-US', {
   help="Toggle on to display today's date."
   onChange={(value) => setAttributes({ showDate: value })}
 />
-{ showDate && <p>📅 { formattedDate }</p> }
+{ showDate && <p>{ formattedDate }</p> }
 ```
 
 ## Disabled State
