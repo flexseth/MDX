@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import ToggleControl from '../components/ToggleControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export const EnableFeatureDemo = () => {
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useLocalStorage('demo-toggle-enable-feature', false);
   return (
     <ToggleControl
       label="Enable Feature"
@@ -13,7 +13,7 @@ export const EnableFeatureDemo = () => {
 };
 
 export const ShowDateDemo = () => {
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useLocalStorage('demo-toggle-show-date', false);
   const formattedDate = new Date().toLocaleDateString( 'en-US', {
     weekday: 'long',
     year: 'numeric',

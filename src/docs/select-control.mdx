@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import SelectControl from '../components/SelectControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export const AlignmentDemo = () => {
-  const [value, setValue] = useState('left');
+  const [value, setValue] = useLocalStorage('demo-select-alignment', 'left');
   return (
     <SelectControl
       label="Alignment"
@@ -18,7 +18,7 @@ export const AlignmentDemo = () => {
 };
 
 export const FontSizeDemo = () => {
-  const [value, setValue] = useState('medium');
+  const [value, setValue] = useLocalStorage('demo-select-font-size', 'medium');
   return (
     <SelectControl
       label="Font Size"
