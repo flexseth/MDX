@@ -8,6 +8,33 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.1.0] - 2026-02-19
+
+Project renamed to `Gutendocs` — a documentation system for WordPress projects using MDX.
+
+### Notes
+- Non-persistent: Component resets on page refresh
+
+### Reworked
+- `ToggleControl` and `SelectControl` use state management for demos
+
+### Added
+
+- `ToggleControl` component — boolean toggle switch mirroring `@wordpress/components`
+  - Props: `label`, `checked`, `onChange`, `help`, `disabled`, `className`
+  - Accessible: keyboard navigable, focus-visible ring, ARIA `describedby` for help text
+- `SelectControl` component — dropdown select mirroring `@wordpress/components`
+  - Props: `label`, `value`, `options`, `onChange`, `help`, `disabled`, `className`, `children` (optgroup)
+  - Controlled via `options` array or raw `<optgroup>` children
+- `toggle-control.mdx` — interactive demos with stateful `EnableFeatureDemo` and `ShowDateDemo` wrappers, WordPress `edit.js` examples, `block.json` snippets, and PropsTable
+- `select-control.mdx` — interactive demos with stateful `AlignmentDemo` and `FontSizeDemo` wrappers, WordPress `edit.js` examples, `block.json` snippets, and PropsTable
+- Both components registered globally in `MDXComponentsProvider` — no imports needed in `.mdx` files
+- Sidebar nav and routes added for `/docs/toggle-control` and `/docs/select-control`
+- BEM styles for both components added to `docs.css`
+- PR [#2](https://github.com/flexseth/MDX/pull/2) — fix: SelectControl value saving and ToggleControl toggling in MDX docs (merged)
+
+---
+
 ## [1.0.0] - 2026-02-19
 
 ### Added

@@ -20,7 +20,7 @@ export default function DocLayout( { children } ) {
 		<div className="doc-layout">
 			<aside className="doc-sidebar">
 				<div className="doc-sidebar__brand">
-					<h2>MDX Docs</h2>
+					<h2>Gutendocs</h2>
 				</div>
 				<nav className="doc-sidebar__nav">
 					<ul>
