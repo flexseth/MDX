@@ -8,6 +8,26 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.3.0] - 2026-02-19
+
+### Added
+
+- `src/hooks/useLocalStorage.js` — a `useState` drop-in hook that reads from `localStorage` on mount and writes on every change, persisting demo state across page reloads
+- Persistent state applied to all interactive demos:
+  - `ToggleControl` → `EnableFeatureDemo` (`demo-toggle-enable-feature`), `ShowDateDemo` (`demo-toggle-show-date`)
+  - `SelectControl` → `AlignmentDemo` (`demo-select-alignment`), `FontSizeDemo` (`demo-select-font-size`)
+
+### Changed
+
+- All stateful demo components now use `useLocalStorage` instead of `useState` — selections and toggles survive page refreshes
+
+### Notes
+
+- Key naming convention: `demo-<component>-<field>` — must be unique per demo
+- Mirrors the way WordPress block attributes persist state in the editor
+
+---
+
 ## [1.1.0] - 2026-02-19
 
 Project renamed to `Gutendocs` — a documentation system for WordPress projects using MDX.
