@@ -13,14 +13,27 @@ export const EnableFeatureDemo = () => {
 };
 
 export const ShowDateDemo = () => {
-  const [checked, setChecked] = useState(true);
+  const [checked, setChecked] = useState(false);
+  const formattedDate = new Date().toLocaleDateString( 'en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
   return (
-    <ToggleControl
-      label="Show Date"
-      checked={checked}
-      help="Display the publication date below the title."
-      onChange={setChecked}
-    />
+    <div>
+      <ToggleControl
+        label="Show Current Date"
+        checked={checked}
+        help="Toggle on to display today's date."
+        onChange={setChecked}
+      />
+      { checked && (
+        <p style={{ marginTop: '0.5rem', fontSize: '0.9375rem', color: '#1e293b' }}>
+          { formattedDate }
+        </p>
+      ) }
+    </div>
   );
 };
 
@@ -42,15 +55,25 @@ A toggle switch for boolean on/off settings. Mirrors the WordPress [`ToggleContr
 
 ## With Help Text
 
+Toggle the switch on to reveal today's date — this demonstrates conditional rendering with a live JSX expression inside MDX.
+
 <ShowDateDemo />
 
 ```jsx
+const formattedDate = new Date().toLocaleDateString( 'en-US', {
+  weekday: 'long',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
 <ToggleControl
-  label="Show Date"
+  label="Show Current Date"
   checked={showDate}
-  help="Display the publication date below the title."
+  help="Toggle on to display today's date."
   onChange={(value) => setAttributes({ showDate: value })}
 />
+{ showDate && <p>{ formattedDate }</p> }
 ```
 
 ## Disabled State

@@ -8,6 +8,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.2.0] - 2026-02-19
+
+### Added
+
+- Live date display demo in `toggle-control.mdx` — "With Help Text" section now shows today's date (formatted as `Weekday, Month Day, Year`) when the toggle is switched on
+- Demonstrates conditional JSX rendering inside MDX using a `useState` hook and `toLocaleDateString`
+- Sidebar brand renamed from "MDX Docs" to "Gutendoc"
+
+### Changed
+
+- `ShowDateDemo` updated: toggle defaults to off, conditionally renders current date on enable
 ## [1.1.0] - 2026-02-19
 
 Project renamed to `Gutendocs` — a documentation system for WordPress projects using MDX.
