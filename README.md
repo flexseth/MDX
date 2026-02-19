@@ -37,6 +37,16 @@ Then open `http://localhost:5173` — you'll see the sidebar navigation and live
 | `src/docs/card.mdx` | Card docs with nesting examples + PropsTable |
 | `USAGE.md` | WordPress porting strategy guide |
 
+## MDX Resources
+
+- [mdxjs.com](https://mdxjs.com/) — Official MDX documentation
+- [What is MDX?](https://mdxjs.com/docs/what-is-mdx/) — Overview of the format
+- [Getting Started](https://mdxjs.com/docs/getting-started/) — Setup guides for various bundlers and frameworks
+- [Using MDX](https://mdxjs.com/docs/using-mdx/) — Component injection, layouts, and provider patterns
+- [Extending MDX](https://mdxjs.com/docs/extending-mdx/) — Remark/rehype plugins (e.g. `remark-gfm`)
+- [Packages](https://mdxjs.com/packages/) — `@mdx-js/rollup`, `@mdx-js/react`, and other integrations
+- [Playground](https://mdxjs.com/playground/) — Interactive MDX editor in the browser
+
 ## Key Dependencies
 
 - **react / react-dom** — React 18+
