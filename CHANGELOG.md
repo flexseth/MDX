@@ -8,6 +8,25 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.8.0] - 2026-02-19
+
+### Added
+
+- `ColorPalette` component — color swatch grid mirroring `@wordpress/components`
+  - Props: `colors`, `value`, `onChange`, `disableCustomColors`, `clearable`, `className`
+  - Clickable swatches with selected state ring, hover scale, and smooth transitions
+  - Optional custom color `<input type="color">` for freeform selection
+  - `clearable` button to reset selection back to `undefined`
+  - Live selected color preview (swatch + code value) below the palette
+- `color-palette.mdx` — three interactive persistent demos:
+  - `BackgroundDemo` — pick a background color for a live preview box
+  - `TextColorDemo` — restricted palette (`disableCustomColors`) drives live text color
+  - `BorderDemo` — clearable palette controls a bordered box (`clearable`)
+- All demos persist state via `useLocalStorage` (keys: `demo-colorpalette-background`, `demo-colorpalette-text`, `demo-colorpalette-border`)
+- Registered in `MDXProvider`, barrel export, route `/docs/color-palette`, sidebar nav, and `docs.css`
+
+---
+
 ## [1.7.2] - 2026-02-19
 
 ### Fixed

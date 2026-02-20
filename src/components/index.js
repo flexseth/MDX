@@ -9,3 +9,4 @@ export { default as SelectControl } from './SelectControl';
 export { default as RangeControl } from './RangeControl';
 export { default as TextControl } from './TextControl';
 export { default as DateTimePicker } from './DateTimePicker';
+export { default as ColorPalette } from './ColorPalette';

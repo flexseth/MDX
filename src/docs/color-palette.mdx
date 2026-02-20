@@ -1,0 +1,265 @@
+import ColorPalette from '../components/ColorPalette';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BackgroundDemo = () => {
+  const [color, setColor] = useLocalStorage('demo-colorpalette-background', '#2196f3');
+  const colors = [
+    { name: 'Red', color: '#f44336' },
+    { name: 'Blue', color: '#2196f3' },
+    { name: 'Green', color: '#4caf50' },
+    { name: 'Yellow', color: '#ffeb3b' },
+    { name: 'Purple', color: '#9c27b0' },
+  ];
+  return (
+    <div>
+      <ColorPalette
+        colors={colors}
+        value={color}
+        onChange={setColor}
+      />
+      <div style={{
+        backgroundColor: color || 'transparent',
+        padding: '1.25rem',
+        marginTop: '0.75rem',
+        borderRadius: '0.375rem',
+        border: '1px solid #e2e8f0',
+        color: '#fff',
+        textAlign: 'center',
+        textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+        transition: 'background-color 0.2s ease',
+        minHeight: '3rem',
+      }}>
+        Background color preview
+      </div>
+    </div>
+  );
+};
+
+export const TextColorDemo = () => {
+  const [color, setColor] = useLocalStorage('demo-colorpalette-text', '#000000');
+  const colors = [
+    { name: 'Black', color: '#000000' },
+    { name: 'Dark Gray', color: '#333333' },
+    { name: 'Medium Gray', color: '#666666' },
+    { name: 'Blue', color: '#1d4ed8' },
+    { name: 'Green', color: '#15803d' },
+    { name: 'Red', color: '#b91c1c' },
+  ];
+  return (
+    <div>
+      <ColorPalette
+        colors={colors}
+        value={color}
+        onChange={setColor}
+        disableCustomColors
+      />
+      <p style={{
+        color: color || 'inherit',
+        fontSize: '1.125rem',
+        fontWeight: 500,
+        marginTop: '0.75rem',
+        transition: 'color 0.2s ease',
+      }}>
+        Text displayed in the selected color.
+      </p>
+    </div>
+  );
+};
+
+export const BorderDemo = () => {
+  const [color, setColor] = useLocalStorage('demo-colorpalette-border', '');
+  const colors = [
+    { name: 'Red', color: '#ff0000' },
+    { name: 'Green', color: '#00cc44' },
+    { name: 'Blue', color: '#0000ff' },
+    { name: 'Orange', color: '#ff6600' },
+    { name: 'Purple', color: '#7c3aed' },
+  ];
+  return (
+    <div>
+      <ColorPalette
+        colors={colors}
+        value={color}
+        onChange={setColor}
+        clearable
+      />
+      <div style={{
+        border: color ? `3px solid ${color}` : '3px solid transparent',
+        padding: '1rem',
+        marginTop: '0.75rem',
+        borderRadius: '0.375rem',
+        background: '#f8fafc',
+        textAlign: 'center',
+        fontSize: '0.9rem',
+        color: '#64748b',
+        transition: 'border-color 0.2s ease',
+        minHeight: '3rem',
+      }}>
+        {color ? `Border color: ${color}` : 'Select a color to see the border'}
+      </div>
+    </div>
+  );
+};
+
+# ColorPalette
+
+A color swatch grid for selecting from a predefined palette. Mirrors the WordPress [`ColorPalette`](https://developer.wordpress.org/block-editor/reference-guides/components/color-palette/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BackgroundDemo />
+
+```jsx
+<ColorPalette
+  colors={[
+    { name: 'Red', color: '#f44336' },
+    { name: 'Blue', color: '#2196f3' },
+    { name: 'Green', color: '#4caf50' },
+  ]}
+  value={backgroundColor}
+  onChange={(color) => setAttributes({ backgroundColor: color })}
+/>
+```
+
+## With Custom Colors Disabled
+
+<TextColorDemo />
+
+```jsx
+<ColorPalette
+  colors={colors}
+  value={textColor}
+  onChange={(color) => setAttributes({ textColor: color })}
+  disableCustomColors
+/>
+```
+
+## With Clear Button
+
+<BorderDemo />
+
+```jsx
+<ColorPalette
+  colors={colors}
+  value={borderColor}
+  onChange={(color) => setAttributes({ borderColor: color })}
+  clearable
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { ColorPalette, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { backgroundColor, textColor } = attributes;
+
+  const colors = [
+    { name: 'Red', color: '#f44336' },
+    { name: 'Blue', color: '#2196f3' },
+    { name: 'Green', color: '#4caf50' },
+    { name: 'Black', color: '#000000' },
+    { name: 'White', color: '#ffffff' },
+  ];
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Color Settings', 'your-text-domain' ) }>
+          <p>{ __( 'Background Color', 'your-text-domain' ) }</p>
+          <ColorPalette
+            colors={ colors }
+            value={ backgroundColor }
+            onChange={ ( color ) => setAttributes( { backgroundColor: color } ) }
+          />
+          <p>{ __( 'Text Color', 'your-text-domain' ) }</p>
+          <ColorPalette
+            colors={ colors }
+            value={ textColor }
+            onChange={ ( color ) => setAttributes( { textColor: color } ) }
+            disableCustomColors
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div
+        { ...blockProps }
+        style={ { backgroundColor, color: textColor, padding: '20px' } }
+      >
+        { __( 'Styled content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "backgroundColor": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "textColor": {
+      "type": "string",
+      "default": "#000000"
+    }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'colors',
+    type: 'array',
+    default: '[]',
+    required: true,
+    description: 'Array of color objects with `name` and `color` properties.'
+  },
+  {
+    name: 'value',
+    type: 'string',
+    default: '',
+    required: false,
+    description: 'The currently selected color value (hex, rgb, or rgba).'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired with the selected color string when a swatch is clicked.'
+  },
+  {
+    name: 'disableCustomColors',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Hide the custom color picker input when true.'
+  },
+  {
+    name: 'clearable',
+    type: 'boolean',
+    default: 'true',
+    required: false,
+    description: 'Show a Clear button to reset the selected color.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper.'
+  }
+]} />
+
+## WordPress Mapping
+
+In WordPress, `ColorPalette` is imported from `@wordpress/components`. Store selected colors as `string` attributes in `block.json` with a sensible hex default. For sidebar placement, wrap in `InspectorControls` + `PanelBody`. Use `disableCustomColors` when you want to restrict choices to your defined palette. For advanced color management with contrast checking, consider `PanelColorSettings` from `@wordpress/block-editor`.
