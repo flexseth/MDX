@@ -357,6 +357,56 @@ body {
 }
 
 /* ==========================================================================
+   CodeTabs Component
+   ========================================================================== */
+
+.code-tabs {
+	margin-bottom: 1.5rem;
+}
+
+.code-tabs .code-block {
+	margin-bottom: 0;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+
+.code-tabs__tablist {
+	display: flex;
+	background: #1e293b;
+	border-radius: 8px 8px 0 0;
+	border: 1px solid var(--color-border);
+	border-bottom: none;
+	overflow: hidden;
+}
+
+.code-tabs__tab {
+	padding: 0.45rem 1rem;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	color: #94a3b8;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+	border-right: 1px solid #334155;
+}
+
+.code-tabs__tab:last-child {
+	border-right: none;
+}
+
+.code-tabs__tab:hover {
+	color: #e2e8f0;
+	background: #263547;
+}
+
+.code-tabs__tab--active {
+	color: #e2e8f0;
+	background: #0f172a;
+}
+
+/* ==========================================================================
    Responsive
    ========================================================================== */
 

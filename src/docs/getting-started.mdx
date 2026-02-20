@@ -49,7 +49,7 @@ You can also use expressions inline: there are **{[1, 2, 3, 4, 5].length}** item
 
 ## Code Blocks
 
-Standard fenced code blocks get styled automatically:
+Standard fenced code blocks get styled automatically with syntax highlighting:
 
 ```jsx
 import { Alert } from './components';
@@ -62,6 +62,37 @@ function MyPage() {
   );
 }
 ```
+
+You can also use the `CodeTabs` component to show the same example in multiple languages:
+
+<CodeTabs tabs={[
+  {
+    label: 'JSX',
+    language: 'jsx',
+    code: `import { Alert } from './components';
+
+function MyPage() {
+  return (
+    <Alert variant="warning" title="Heads up!">
+      This is a custom component in MDX.
+    </Alert>
+  );
+}`
+  },
+  {
+    label: 'TSX',
+    language: 'tsx',
+    code: `import { Alert } from './components';
+
+function MyPage(): JSX.Element {
+  return (
+    <Alert variant="warning" title="Heads up!">
+      This is a custom component in MDX.
+    </Alert>
+  );
+}`
+  }
+]} />
 
 ## GFM Support
 
