@@ -15,6 +15,7 @@ const navItems = [
 	{ path: '/docs/color-picker', label: 'ColorPicker' },
 	{ path: '/docs/combobox-control', label: 'ComboboxControl' },
 	{ path: '/docs/dropdown', label: 'Dropdown' },
+	{ path: '/docs/form-token-field', label: 'FormTokenField' },
 ];
 
 /**
