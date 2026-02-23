@@ -6,6 +6,46 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `Dropdown` component — composable dropdown with render-prop trigger and popover panel mirroring `@wordpress/components`
+  - Props: `renderToggle`, `renderContent`, `popoverProps` (placement), `className`, `contentClassName`, `defaultOpen`, `onToggle`, `onClose`
+  - Closes on outside click and Escape key; popover aligns via `placement` option
+  - `dropdown.mdx` — three interactive persistent demos:
+    - `StyleMenuDemo` — text menu with checkmark on selected item (key: `demo-dropdown-style`)
+    - `IconPickerDemo` — 3×3 symbol grid picker with large preview (key: `demo-dropdown-icon`)
+    - `ColorSwatchDemo` — colored circle trigger opens an 8-swatch palette (key: `demo-dropdown-color`)
+  - Registered in `MDXProvider`, barrel export, route `/docs/dropdown`, sidebar nav, and `docs.css`
+- `ComboboxControl` component — searchable autocomplete dropdown mirroring `@wordpress/components`
+  - Props: `label`, `value`, `options`, `onChange`, `onFilterValueChange`, `help`, `isLoading`, `messages`, `className`
+  - Full keyboard navigation: arrow keys, Enter to select, Escape to close
+  - Built-in × clear button, chevron indicator, "no results" and loading states
+  - Filtering is parent-controlled via `onFilterValueChange` — supports both static and async (REST API) option lists
+  - `combobox-control.mdx` — three interactive persistent demos:
+    - `CountriesDemo` — 16-country list with client-side filtering (key: `demo-combobox-country`)
+    - `FontFamilyDemo` — font picker with live preview paragraph (key: `demo-combobox-font`)
+    - `NoResultsDemo` — custom empty state message (key: `demo-combobox-noresults`)
+  - Includes ComboboxControl vs SelectControl comparison table
+  - Registered in `MDXProvider`, barrel export, route `/docs/combobox-control`, sidebar nav, and `docs.css`
+- `ColorPicker` component — free-form color picker mirroring `@wordpress/components`
+  - Props: `color`, `onChange`, `enableAlpha`, `defaultValue`, `copyFormat`, `className`
+  - Spectrum proxy via native `<input type="color">` overlaid on a large preview swatch
+  - Optional opacity slider (`enableAlpha`) — `onChange` returns `rgba()` string when enabled
+  - Hex text input showing the current color code
+  - `color-picker.mdx` — three interactive persistent demos:
+    - `BasicDemo` — basic picker driving live text color preview (key: `demo-colorpicker-basic`)
+    - `AlphaDemo` — `enableAlpha` with checkerboard transparency visualization (key: `demo-colorpicker-alpha`)
+    - `ResetDemo` — picker with reset-to-default button and accent border preview (key: `demo-colorpicker-reset`)
+  - Includes ColorPicker vs ColorPalette comparison table
+  - Registered in `MDXProvider`, barrel export, route `/docs/color-picker`, sidebar nav, and `docs.css`
+- `CheckboxControl` component — labeled checkbox mirroring `@wordpress/components`
+  - Props: `label`, `checked`, `onChange`, `help`, `indeterminate`, `disabled`, `className`, `id`
+  - `indeterminate` state applied via DOM ref (cannot be set as a JSX attribute); sets `aria-checked="mixed"` automatically
+  - `checkbox-control.mdx` — three interactive persistent demos:
+    - `BasicDemo` — single checkbox reveals a live title preview (key: `demo-checkbox-show-title`)
+    - `MultipleDemo` — three checkboxes drive a simulated post card with title, date, and excerpt (keys: `demo-checkbox-show-title-multi`, `demo-checkbox-show-excerpt`, `demo-checkbox-show-date`)
+    - `HelpTextDemo` — checkbox with `help` prop for lazy-load setting (key: `demo-checkbox-lazy-load`)
+  - Registered in `MDXProvider`, barrel export, route `/docs/checkbox-control`, sidebar nav
+
 ---
 
 ## [1.8.1] - 2026-02-20

@@ -5,12 +5,16 @@ const navItems = [
 	{ path: '/docs/alert', label: 'Alert' },
 	{ path: '/docs/button', label: 'Button' },
 	{ path: '/docs/card', label: 'Card' },
+	{ path: '/docs/checkbox-control', label: 'CheckboxControl' },
 	{ path: '/docs/toggle-control', label: 'ToggleControl' },
 	{ path: '/docs/select-control', label: 'SelectControl' },
 	{ path: '/docs/range-control', label: 'RangeControl' },
 	{ path: '/docs/text-control', label: 'TextControl' },
 	{ path: '/docs/date-time-picker', label: 'DateTimePicker' },
 	{ path: '/docs/color-palette', label: 'ColorPalette' },
+	{ path: '/docs/color-picker', label: 'ColorPicker' },
+	{ path: '/docs/combobox-control', label: 'ComboboxControl' },
+	{ path: '/docs/dropdown', label: 'Dropdown' },
 ];
 
 /**

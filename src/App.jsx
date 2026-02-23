@@ -9,7 +9,11 @@ import SelectControlDocs from './docs/select-control.mdx';
 import RangeControlDocs from './docs/range-control.mdx';
 import TextControlDocs from './docs/text-control.mdx';
 import DateTimePickerDocs from './docs/date-time-picker.mdx';
+import CheckboxControlDocs from './docs/checkbox-control.mdx';
 import ColorPaletteDocs from './docs/color-palette.mdx';
+import ColorPickerDocs from './docs/color-picker.mdx';
+import ComboboxControlDocs from './docs/combobox-control.mdx';
+import DropdownDocs from './docs/dropdown.mdx';
 
 /**
  * Application root with documentation routes.
@@ -28,7 +32,11 @@ export default function App() {
 				<Route path="/docs/range-control" element={ <RangeControlDocs /> } />
 				<Route path="/docs/text-control" element={ <TextControlDocs /> } />
 				<Route path="/docs/date-time-picker" element={ <DateTimePickerDocs /> } />
+				<Route path="/docs/checkbox-control" element={ <CheckboxControlDocs /> } />
 				<Route path="/docs/color-palette" element={ <ColorPaletteDocs /> } />
+				<Route path="/docs/color-picker" element={ <ColorPickerDocs /> } />
+				<Route path="/docs/combobox-control" element={ <ComboboxControlDocs /> } />
+				<Route path="/docs/dropdown" element={ <DropdownDocs /> } />
 			</Routes>
 		</DocLayout>
 	);

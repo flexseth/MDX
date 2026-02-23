@@ -1,0 +1,340 @@
+import ComboboxControl from '../components/ComboboxControl';
+import { useState } from 'react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const COUNTRIES = [
+  { value: 'au', label: 'Australia' },
+  { value: 'br', label: 'Brazil' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'cn', label: 'China' },
+  { value: 'fr', label: 'France' },
+  { value: 'de', label: 'Germany' },
+  { value: 'in', label: 'India' },
+  { value: 'it', label: 'Italy' },
+  { value: 'jp', label: 'Japan' },
+  { value: 'mx', label: 'Mexico' },
+  { value: 'nl', label: 'Netherlands' },
+  { value: 'nz', label: 'New Zealand' },
+  { value: 'es', label: 'Spain' },
+  { value: 'se', label: 'Sweden' },
+  { value: 'gb', label: 'United Kingdom' },
+  { value: 'us', label: 'United States' },
+];
+
+export const FONTS = [
+  { value: 'inherit', label: 'Default (inherit)' },
+  { value: 'Georgia, serif', label: 'Georgia' },
+  { value: "'Times New Roman', serif", label: 'Times New Roman' },
+  { value: 'Arial, sans-serif', label: 'Arial' },
+  { value: "'Helvetica Neue', sans-serif", label: 'Helvetica Neue' },
+  { value: 'Verdana, sans-serif', label: 'Verdana' },
+  { value: "'Courier New', monospace", label: 'Courier New' },
+  { value: "'Trebuchet MS', sans-serif", label: 'Trebuchet MS' },
+  { value: 'Impact, sans-serif', label: 'Impact' },
+];
+
+export const CountriesDemo = () => {
+  const [value, setValue] = useLocalStorage('demo-combobox-country', null);
+  const [filtered, setFiltered] = useState(COUNTRIES);
+
+  const handleFilter = (input) => {
+    setFiltered(
+      COUNTRIES.filter((c) =>
+        c.label.toLowerCase().includes(input.toLowerCase())
+      )
+    );
+  };
+
+  const selectedLabel = COUNTRIES.find((c) => c.value === value)?.label;
+
+  return (
+    <div>
+      <ComboboxControl
+        label="Country"
+        value={value}
+        options={filtered}
+        onChange={setValue}
+        onFilterValueChange={handleFilter}
+        help="Type to filter the list. Click × to clear."
+      />
+      { value && (
+        <p style={{ marginTop: '0.5rem', fontSize: '0.9375rem', color: '#1e293b' }}>
+          Selected: <strong>{ selectedLabel }</strong> <code style={{ fontSize: '0.8125rem', color: '#64748b' }}>({ value })</code>
+        </p>
+      ) }
+    </div>
+  );
+};
+
+export const FontFamilyDemo = () => {
+  const [value, setValue] = useLocalStorage('demo-combobox-font', null);
+  const [filtered, setFiltered] = useState(FONTS);
+
+  const handleFilter = (input) => {
+    setFiltered(
+      FONTS.filter((f) =>
+        f.label.toLowerCase().includes(input.toLowerCase())
+      )
+    );
+  };
+
+  return (
+    <div>
+      <ComboboxControl
+        label="Font Family"
+        value={value}
+        options={filtered}
+        onChange={setValue}
+        onFilterValueChange={handleFilter}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        fontFamily: value || 'inherit',
+        fontSize: '1.0625rem',
+      }}>
+        The quick brown fox jumps over the lazy dog.
+        { !value && <span style={{ color: '#94a3b8', fontStyle: 'italic' }}> — select a font above</span> }
+      </div>
+    </div>
+  );
+};
+
+export const NoResultsDemo = () => {
+  const [value, setValue] = useLocalStorage('demo-combobox-noresults', null);
+  const [filtered, setFiltered] = useState(COUNTRIES);
+
+  const handleFilter = (input) => {
+    setFiltered(
+      COUNTRIES.filter((c) =>
+        c.label.toLowerCase().includes(input.toLowerCase())
+      )
+    );
+  };
+
+  return (
+    <ComboboxControl
+      label="Country"
+      value={value}
+      options={filtered}
+      onChange={setValue}
+      onFilterValueChange={handleFilter}
+      messages={{ noResultsFound: 'No matching countries found.' }}
+      help='Try typing "xyz" to see the empty state.'
+    />
+  );
+};
+
+# ComboboxControl
+
+A searchable combobox for selecting from long option lists. Mirrors the WordPress [`ComboboxControl`](https://developer.wordpress.org/block-editor/reference-guides/components/combobox-control/) from `@wordpress/components`.
+
+Use `ComboboxControl` when a list has more than ~10 items and users need to search rather than scroll. For short static lists, use `SelectControl` instead.
+
+## Country Selector
+
+Type to filter. Use arrow keys to navigate, Enter to select, Escape to close.
+
+<CountriesDemo />
+
+```jsx
+const [filteredOptions, setFilteredOptions] = useState(COUNTRIES);
+
+<ComboboxControl
+  label="Country"
+  value={selectedCountry}
+  options={filteredOptions}
+  onChange={(value) => setAttributes({ selectedCountry: value })}
+  onFilterValueChange={(input) =>
+    setFilteredOptions(
+      COUNTRIES.filter((c) =>
+        c.label.toLowerCase().includes(input.toLowerCase())
+      )
+    )
+  }
+  help="Type to filter the list. Click × to clear."
+/>
+```
+
+## Font Family Picker
+
+Select a font to see a live preview below.
+
+<FontFamilyDemo />
+
+```jsx
+<ComboboxControl
+  label="Font Family"
+  value={fontFamily}
+  options={filteredFonts}
+  onChange={(value) => setAttributes({ fontFamily: value })}
+  onFilterValueChange={(input) =>
+    setFilteredFonts(
+      FONTS.filter((f) =>
+        f.label.toLowerCase().includes(input.toLowerCase())
+      )
+    )
+  }
+/>
+<div style={{ fontFamily }}>
+  The quick brown fox jumps over the lazy dog.
+</div>
+```
+
+## Custom Empty State
+
+<NoResultsDemo />
+
+```jsx
+<ComboboxControl
+  label="Country"
+  value={selectedCountry}
+  options={filteredOptions}
+  onChange={(value) => setAttributes({ selectedCountry: value })}
+  onFilterValueChange={handleFilterChange}
+  messages={{ noResultsFound: 'No matching countries found.' }}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { ComboboxControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+const COUNTRIES = [
+  { value: 'us', label: 'United States' },
+  { value: 'ca', label: 'Canada' },
+  { value: 'gb', label: 'United Kingdom' },
+  // ...more options
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { selectedCountry } = attributes;
+  const [ filteredOptions, setFilteredOptions ] = useState( COUNTRIES );
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Location', 'your-text-domain' ) }>
+          <ComboboxControl
+            label={ __( 'Country', 'your-text-domain' ) }
+            value={ selectedCountry }
+            options={ filteredOptions }
+            onChange={ ( value ) => setAttributes( { selectedCountry: value } ) }
+            onFilterValueChange={ ( input ) =>
+              setFilteredOptions(
+                COUNTRIES.filter( ( c ) =>
+                  c.label.toLowerCase().includes( input.toLowerCase() )
+                )
+              )
+            }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps }>
+        { selectedCountry || __( 'No country selected.', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "selectedCountry": { "type": "string", "default": null },
+    "fontFamily":      { "type": "string", "default": null }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'Label text displayed above the input.'
+  },
+  {
+    name: 'value',
+    type: 'string | number | null',
+    default: 'null',
+    required: false,
+    description: 'Currently selected option value. Controlled — must match an option\'s value field.'
+  },
+  {
+    name: 'options',
+    type: 'Array<{ value, label }>',
+    default: '[]',
+    required: true,
+    description: 'Array of option objects. Update this array in response to onFilterValueChange to implement filtering.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: false,
+    description: 'Callback fired with the selected option value, or null when cleared.'
+  },
+  {
+    name: 'onFilterValueChange',
+    type: 'function',
+    default: '',
+    required: false,
+    description: 'Callback fired with the current filter text as the user types. Use this to filter or fetch options.'
+  },
+  {
+    name: 'help',
+    type: 'string | ReactNode',
+    default: '',
+    required: false,
+    description: 'Optional help text displayed below the control.'
+  },
+  {
+    name: 'isLoading',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Shows a loading indicator in the dropdown while async options are being fetched.'
+  },
+  {
+    name: 'messages',
+    type: 'object',
+    default: '{}',
+    required: false,
+    description: 'Override UI strings. Supports { noResultsFound } key.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper element.'
+  }
+]} />
+
+## ComboboxControl vs SelectControl
+
+| | `ComboboxControl` | `SelectControl` |
+|---|---|---|
+| Searchable | Yes | No |
+| Long lists | Yes (10+ options) | Best for < 10 options |
+| Async options | Yes (`isLoading` + `onFilterValueChange`) | No |
+| Clearable | Yes (built-in ×) | No |
+| Keyboard nav | Full (arrows + Enter + Escape) | Native browser |
+
+## WordPress Mapping
+
+In WordPress, `ComboboxControl` is imported from `@wordpress/components`. The key pattern is that **filtering happens in the parent** — `onFilterValueChange` fires with the typed text, and you update the `options` array accordingly. For async data (REST API searches), call `apiFetch` inside `onFilterValueChange` and set results into local state with `isLoading` while the request is pending. Store the option's `value` (not `label`) in `block.json` attributes.
