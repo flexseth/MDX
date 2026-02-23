@@ -33,6 +33,7 @@ export default function FormTokenField( {
 	const [ activeIndex, setActiveIndex ] = useState( -1 );
 	const inputRef = useRef( null );
 	const listRef = useRef( null );
+	const blurTimerRef = useRef( null );
 
 	const filtered = inputValue.trim()
 		? suggestions.filter(
@@ -47,6 +48,14 @@ export default function FormTokenField( {
 	useEffect( () => {
 		setActiveIndex( -1 );
 	}, [ inputValue ] );
+
+	useEffect( () => {
+		return () => {
+			if ( blurTimerRef.current ) {
+				clearTimeout( blurTimerRef.current );
+			}
+		};
+	}, [] );
 
 	function addToken( token ) {
 		const trimmed = token.trim();
@@ -148,8 +157,19 @@ export default function FormTokenField( {
 						className="form-token-field__input"
 						value={ inputValue }
 						onChange={ handleInputChange }
-						onFocus={ () => setIsOpen( true ) }
-						onBlur={ () => setTimeout( () => setIsOpen( false ), 150 ) }
+						onFocus={ () => {
+							if ( blurTimerRef.current ) {
+								clearTimeout( blurTimerRef.current );
+								blurTimerRef.current = null;
+							}
+							setIsOpen( true );
+						} }
+						onBlur={ () => {
+							blurTimerRef.current = setTimeout( () => {
+								setIsOpen( false );
+								blurTimerRef.current = null;
+							}, 150 );
+						} }
 						onKeyDown={ handleKeyDown }
 						placeholder={ value.length === 0 ? placeholder : '' }
 						disabled={ disabled }
