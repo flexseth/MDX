@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 
 /**
  * FormTokenField — tag/token input with autocomplete suggestions.
@@ -34,6 +34,10 @@ export default function FormTokenField( {
 	const inputRef = useRef( null );
 	const listRef = useRef( null );
 	const blurTimerRef = useRef( null );
+	const generatedId = useId();
+	const suggestionsId = label
+		? `formtoken-${ label.toLowerCase().replace( /\s+/g, '-' ).replace( /[^a-z0-9-_]/g, '' ) }`
+		: `formtoken-${ generatedId }`;
 
 	const filtered = inputValue.trim()
 		? suggestions.filter(
@@ -176,14 +180,14 @@ export default function FormTokenField( {
 						aria-label={ label || 'Token input' }
 						aria-expanded={ isOpen && filtered.length > 0 }
 						aria-autocomplete="list"
-						aria-controls="ftf-suggestions"
+						aria-controls={ suggestionsId }
 					/>
 				) }
 			</div>
 
 			{ isOpen && filtered.length > 0 && (
 				<ul
-					id="ftf-suggestions"
+					id={ suggestionsId }
 					ref={ listRef }
 					className="form-token-field__suggestions"
 					role="listbox"
