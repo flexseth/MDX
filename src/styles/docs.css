@@ -1244,3 +1244,127 @@ body {
 .dropdown-demo-swatch--selected {
 	border-color: var(--color-text);
 }
+
+/* ============================================================
+   FontSizePicker
+   ============================================================ */
+
+.font-size-picker {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	max-width: 360px;
+}
+
+.font-size-picker__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.font-size-picker__label {
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--color-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.font-size-picker__reset {
+	background: none;
+	border: none;
+	font-size: 0.75rem;
+	color: var(--color-primary, #007cba);
+	cursor: pointer;
+	padding: 0.125rem 0.25rem;
+	border-radius: 0.25rem;
+}
+
+.font-size-picker__reset:hover {
+	background: var(--color-bg-code);
+}
+
+.font-size-picker__presets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.375rem;
+}
+
+.font-size-picker__preset {
+	padding: 0.25rem 0.625rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.25rem;
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-size: 0.8125rem;
+	cursor: pointer;
+	transition: background 0.1s ease, border-color 0.1s ease;
+}
+
+.font-size-picker__preset:hover {
+	border-color: var(--color-primary, #007cba);
+}
+
+.font-size-picker__preset--active {
+	background: var(--color-primary, #007cba);
+	border-color: var(--color-primary, #007cba);
+	color: #fff;
+}
+
+.font-size-picker__slider-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.font-size-picker__slider {
+	flex: 1;
+	accent-color: var(--color-primary, #007cba);
+}
+
+.font-size-picker__slider-value {
+	min-width: 3rem;
+	text-align: right;
+	font-size: 0.875rem;
+	color: var(--color-text);
+	font-variant-numeric: tabular-nums;
+}
+
+.font-size-picker__custom {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+}
+
+.font-size-picker__custom-label {
+	font-size: 0.75rem;
+	color: var(--color-text-muted);
+	min-width: 3.5rem;
+}
+
+.font-size-picker__custom-input-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.font-size-picker__custom-input {
+	width: 4.5rem;
+	padding: 0.375rem 0.5rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.25rem;
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-size: 0.875rem;
+	text-align: right;
+}
+
+.font-size-picker__custom-input:focus {
+	outline: 2px solid var(--color-primary, #007cba);
+	outline-offset: 1px;
+}
+
+.font-size-picker__unit {
+	font-size: 0.75rem;
+	color: var(--color-text-muted);
+}

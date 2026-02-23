@@ -1,0 +1,276 @@
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+	const [fontSize, setFontSize] = useLocalStorage( 'demo-fontsize-basic', 16 );
+	return (
+		<div className="demo-preview">
+			<FontSizePicker
+				label="Font Size"
+				value={ fontSize }
+				onChange={ setFontSize }
+			/>
+			<p
+				className="demo-output"
+				style={ { fontSize: fontSize ? `${ fontSize }px` : undefined } }
+			>
+				{ fontSize ? `Preview text at ${ fontSize }px` : 'No size selected — inherits default.' }
+			</p>
+		</div>
+	);
+};
+
+export const HEADING_SIZES = [
+	{ name: 'H4', slug: 'h4', size: 16 },
+	{ name: 'H3', slug: 'h3', size: 20 },
+	{ name: 'H2', slug: 'h2', size: 28 },
+	{ name: 'H1', slug: 'h1', size: 36 },
+];
+
+export const CustomPresetsDemo = () => {
+	const [fontSize, setFontSize] = useLocalStorage( 'demo-fontsize-presets', 20 );
+	return (
+		<div className="demo-preview">
+			<FontSizePicker
+				label="Heading Size"
+				fontSizes={ HEADING_SIZES }
+				value={ fontSize }
+				onChange={ setFontSize }
+				withReset
+			/>
+			<p
+				className="demo-output"
+				style={ { fontSize: fontSize ? `${ fontSize }px` : undefined, fontWeight: 600 } }
+			>
+				{ fontSize ? `Heading preview — ${ fontSize }px` : 'Reset — using theme default.' }
+			</p>
+		</div>
+	);
+};
+
+export const SliderDemo = () => {
+	const [fontSize, setFontSize] = useLocalStorage( 'demo-fontsize-slider', 16 );
+	return (
+		<div className="demo-preview">
+			<FontSizePicker
+				label="Font Size with Slider"
+				value={ fontSize }
+				onChange={ setFontSize }
+				withSlider
+				withReset
+			/>
+			<p className="demo-output" style={ { fontSize: fontSize ? `${ fontSize }px` : undefined } }>
+				{ fontSize ? `Live preview at ${ fontSize }px.` : 'No size selected.' }
+			</p>
+		</div>
+	);
+};
+
+# FontSizePicker
+
+`FontSizePicker` provides a set of preset font size buttons and an optional custom numeric input. It mirrors the [`FontSizePicker`](https://developer.wordpress.org/block-editor/reference-guides/components/font-size-picker/) component from `@wordpress/components`.
+
+It is most commonly used in `InspectorControls` to let editors choose the text size of a block, wiring up to a `fontSize` block attribute.
+
+---
+
+## Basic Usage
+
+Choose from preset sizes (Small → X-Large) or type a custom value. Clicking an active preset deselects it, returning `undefined` to signal "use theme default".
+
+<BasicDemo />
+
+```jsx
+import { useState } from 'react';
+import { FontSizePicker } from '@wordpress/components';
+
+function Example() {
+	const [ fontSize, setFontSize ] = useState( 16 );
+
+	return (
+		<FontSizePicker
+			label="Font Size"
+			value={ fontSize }
+			onChange={ setFontSize }
+		/>
+	);
+}
+```
+
+---
+
+## Custom Presets
+
+Pass a `fontSizes` array to replace the default presets. Combined with `withReset`, users can restore the theme default by clicking Reset.
+
+<CustomPresetsDemo />
+
+```jsx
+const HEADING_SIZES = [
+	{ name: 'H4', slug: 'h4', size: 16 },
+	{ name: 'H3', slug: 'h3', size: 20 },
+	{ name: 'H2', slug: 'h2', size: 28 },
+	{ name: 'H1', slug: 'h1', size: 36 },
+];
+
+<FontSizePicker
+	label="Heading Size"
+	fontSizes={ HEADING_SIZES }
+	value={ fontSize }
+	onChange={ setFontSize }
+	withReset
+/>
+```
+
+---
+
+## With Slider
+
+Enable `withSlider` to add a range slider between the preset buttons and the custom input. Useful for fine-grained size selection.
+
+<SliderDemo />
+
+```jsx
+<FontSizePicker
+	label="Font Size with Slider"
+	value={ fontSize }
+	onChange={ setFontSize }
+	withSlider
+	withReset
+/>
+```
+
+---
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { FontSizePicker, PanelBody } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+const FONT_SIZES = [
+	{ name: __( 'Small', 'my-block' ),  slug: 'small',  size: 13 },
+	{ name: __( 'Normal', 'my-block' ), slug: 'normal', size: 16 },
+	{ name: __( 'Large', 'my-block' ),  slug: 'large',  size: 24 },
+	{ name: __( 'Huge', 'my-block' ),   slug: 'huge',   size: 32 },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const { fontSize } = attributes;
+	const blockProps = useBlockProps( {
+		style: { fontSize: fontSize ? `${ fontSize }px` : undefined },
+	} );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'my-block' ) }>
+					<FontSizePicker
+						fontSizes={ FONT_SIZES }
+						value={ fontSize }
+						onChange={ ( newSize ) =>
+							setAttributes( { fontSize: newSize } )
+						}
+						withReset
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<p { ...blockProps }>
+				{ __( 'Hello World', 'my-block' ) }
+			</p>
+		</>
+	);
+}
+```
+
+---
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"fontSize": {
+			"type": "number",
+			"default": 16
+		}
+	}
+}
+```
+
+---
+
+## Props
+
+<PropsTable props={[
+	{
+		name: 'fontSizes',
+		type: 'Array<{ name, slug, size }>',
+		default: 'built-in presets',
+		description: 'Array of preset size objects. Each must have name (string), slug (string), and size (number).',
+	},
+	{
+		name: 'value',
+		type: 'number | string',
+		default: '—',
+		description: 'Currently selected font size. A number is treated as px; a CSS string is parsed.',
+	},
+	{
+		name: 'onChange',
+		type: '( value: number | undefined ) => void',
+		default: '—',
+		description: 'Called with the new size, or undefined when the active preset is deselected.',
+	},
+	{
+		name: 'withSlider',
+		type: 'boolean',
+		default: 'false',
+		description: 'Render a range slider between preset buttons and custom input.',
+	},
+	{
+		name: 'withReset',
+		type: 'boolean',
+		default: 'false',
+		description: 'Show a Reset button that fires onChange( undefined ) to restore the theme default.',
+	},
+	{
+		name: 'disableCustomFontSizes',
+		type: 'boolean',
+		default: 'false',
+		description: 'Hide the custom numeric input, restricting choice to presets only.',
+	},
+	{
+		name: 'units',
+		type: 'string',
+		default: '"px"',
+		description: 'Unit label displayed next to the custom input.',
+	},
+	{
+		name: 'label',
+		type: 'string',
+		default: '—',
+		description: 'Visible label displayed above the control.',
+	},
+	{
+		name: 'className',
+		type: 'string',
+		default: '—',
+		description: 'Additional CSS class applied to the root element.',
+	},
+]} />
+
+---
+
+## WordPress Mapping
+
+| This component | `@wordpress/components` |
+|---|---|
+| `FontSizePicker` | [`FontSizePicker`](https://developer.wordpress.org/block-editor/reference-guides/components/font-size-picker/) |
+| `fontSizes` | `fontSizes` |
+| `value` | `value` |
+| `onChange` | `onChange` |
+| `withSlider` | `withSlider` |
+| `withReset` | `withReset` |
+| `disableCustomFontSizes` | `disableCustomFontSizes` |
+
+When `onChange` receives `undefined`, this signals that the user wants to use the theme's default font size. In WordPress, a `null` attribute value causes the block to inherit the theme's typographic settings rather than applying an inline style.
