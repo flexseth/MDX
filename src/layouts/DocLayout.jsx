@@ -12,6 +12,7 @@ const navItems = [
 	{ path: '/docs/text-control', label: 'TextControl' },
 	{ path: '/docs/date-time-picker', label: 'DateTimePicker' },
 	{ path: '/docs/color-palette', label: 'ColorPalette' },
+	{ path: '/docs/color-picker', label: 'ColorPicker' },
 ];
 
 /**
