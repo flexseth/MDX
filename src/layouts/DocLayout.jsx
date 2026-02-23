@@ -14,6 +14,7 @@ const navItems = [
 	{ path: '/docs/color-palette', label: 'ColorPalette' },
 	{ path: '/docs/color-picker', label: 'ColorPicker' },
 	{ path: '/docs/combobox-control', label: 'ComboboxControl' },
+	{ path: '/docs/dropdown', label: 'Dropdown' },
 ];
 
 /**
