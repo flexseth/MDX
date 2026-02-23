@@ -2,7 +2,7 @@ import ComboboxControl from '../components/ComboboxControl';
 import { useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-const COUNTRIES = [
+export const COUNTRIES = [
   { value: 'au', label: 'Australia' },
   { value: 'br', label: 'Brazil' },
   { value: 'ca', label: 'Canada' },
@@ -21,7 +21,7 @@ const COUNTRIES = [
   { value: 'us', label: 'United States' },
 ];
 
-const FONTS = [
+export const FONTS = [
   { value: 'inherit', label: 'Default (inherit)' },
   { value: 'Georgia, serif', label: 'Georgia' },
   { value: "'Times New Roman', serif", label: 'Times New Roman' },
