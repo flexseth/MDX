@@ -14,6 +14,7 @@ import ColorPaletteDocs from './docs/color-palette.mdx';
 import ColorPickerDocs from './docs/color-picker.mdx';
 import ComboboxControlDocs from './docs/combobox-control.mdx';
 import DropdownDocs from './docs/dropdown.mdx';
+import FormTokenFieldDocs from './docs/form-token-field.mdx';
 
 /**
  * Application root with documentation routes.
@@ -37,6 +38,7 @@ export default function App() {
 				<Route path="/docs/color-picker" element={ <ColorPickerDocs /> } />
 				<Route path="/docs/combobox-control" element={ <ComboboxControlDocs /> } />
 				<Route path="/docs/dropdown" element={ <DropdownDocs /> } />
+				<Route path="/docs/form-token-field" element={ <FormTokenFieldDocs /> } />
 			</Routes>
 		</DocLayout>
 	);

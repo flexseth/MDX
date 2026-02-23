@@ -1,0 +1,299 @@
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const CATEGORY_SUGGESTIONS = [
+	'Technology', 'Design', 'Business', 'Health', 'Science',
+	'Travel', 'Food', 'Lifestyle', 'Finance', 'Education',
+	'Sports', 'Entertainment', 'Politics', 'Art', 'Music',
+];
+
+export const TAG_SUGGESTIONS = [
+	'react', 'wordpress', 'gutenberg', 'javascript', 'typescript',
+	'css', 'html', 'php', 'node', 'api',
+	'blocks', 'components', 'hooks', 'rest', 'graphql',
+];
+
+export const COUNTRY_SUGGESTIONS = [
+	'Argentina', 'Australia', 'Brazil', 'Canada', 'China',
+	'France', 'Germany', 'India', 'Italy', 'Japan',
+	'Mexico', 'Netherlands', 'New Zealand', 'Spain', 'United Kingdom',
+	'United States',
+];
+
+export const BasicDemo = () => {
+	const [tokens, setTokens] = useLocalStorage( 'demo-formtoken-basic', [] );
+	return (
+		<div className="demo-preview">
+			<FormTokenField
+				label="Post Categories"
+				value={ tokens }
+				suggestions={ CATEGORY_SUGGESTIONS }
+				onChange={ setTokens }
+				placeholder="Add a category…"
+				help="Type to search suggestions or enter any category name."
+			/>
+			{ tokens.length > 0 && (
+				<p className="demo-output">Selected: <strong>{ tokens.join( ', ' ) }</strong></p>
+			) }
+		</div>
+	);
+};
+
+export const TagsDemo = () => {
+	const [tags, setTags] = useLocalStorage( 'demo-formtoken-tags', ['react', 'wordpress'] );
+	return (
+		<div className="demo-preview">
+			<FormTokenField
+				label="Post Tags"
+				value={ tags }
+				suggestions={ TAG_SUGGESTIONS }
+				onChange={ setTags }
+				placeholder="Add a tag…"
+				maxLength={ 8 }
+				help="Maximum 8 tags. Press Enter or comma to add."
+			/>
+			{ tags.length > 0 && (
+				<p className="demo-output">
+					{ tags.map( ( t ) => (
+						<code key={ t } style={ { marginRight: '0.375rem' } }>{ t }</code>
+					) ) }
+				</p>
+			) }
+		</div>
+	);
+};
+
+export const MaxLengthDemo = () => {
+	const [countries, setCountries] = useLocalStorage( 'demo-formtoken-countries', ['Canada'] );
+	return (
+		<div className="demo-preview">
+			<FormTokenField
+				label="Target Countries (max 3)"
+				value={ countries }
+				suggestions={ COUNTRY_SUGGESTIONS }
+				onChange={ setCountries }
+				placeholder="Add a country…"
+				maxLength={ 3 }
+				help="Select up to 3 countries. Input disappears when the limit is reached."
+			/>
+		</div>
+	);
+};
+
+# FormTokenField
+
+`FormTokenField` is a tag/token input that accepts free-form values or autocomplete suggestions. It mirrors the [`FormTokenField`](https://developer.wordpress.org/block-editor/reference-guides/components/form-token-field/) component from `@wordpress/components`.
+
+Users type into the field to filter suggestions or enter custom values. Tokens are added with Enter (or space if `tokenizeOnSpace` is enabled) and removed with the × button or Backspace.
+
+---
+
+## Basic Usage
+
+Type to filter suggestions from the list, or press Enter to add a custom value. Backspace on empty input removes the last token.
+
+<BasicDemo />
+
+```jsx
+import { useState } from 'react';
+import { FormTokenField } from '@wordpress/components';
+
+const SUGGESTIONS = [
+	'Technology', 'Design', 'Business', 'Health', 'Science',
+];
+
+function Example() {
+	const [ tokens, setTokens ] = useState( [] );
+
+	return (
+		<FormTokenField
+			label="Post Categories"
+			value={ tokens }
+			suggestions={ SUGGESTIONS }
+			onChange={ setTokens }
+		/>
+	);
+}
+```
+
+---
+
+## Post Tags with Max Length
+
+Use `maxLength` to cap the number of tokens. The input disappears once the limit is reached. Pre-populate `value` to show existing tags.
+
+<TagsDemo />
+
+```jsx
+<FormTokenField
+	label="Post Tags"
+	value={ tags }
+	suggestions={ TAG_SUGGESTIONS }
+	onChange={ setTags }
+	maxLength={ 8 }
+	help="Maximum 8 tags."
+/>
+```
+
+---
+
+## Max 3 Tokens
+
+`maxLength` combined with a curated suggestions list creates a constrained picker — useful for limiting country, language, or category selections.
+
+<MaxLengthDemo />
+
+```jsx
+<FormTokenField
+	label="Target Countries (max 3)"
+	value={ countries }
+	suggestions={ COUNTRY_SUGGESTIONS }
+	onChange={ setCountries }
+	maxLength={ 3 }
+	help="Select up to 3 countries."
+/>
+```
+
+---
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { InspectorControls } from '@wordpress/block-editor';
+import { FormTokenField, PanelBody } from '@wordpress/components';
+import { useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
+import { __ } from '@wordpress/i18n';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const { selectedTags } = attributes;
+
+	// Load available tags from the REST API.
+	const allTags = useSelect( ( select ) =>
+		select( coreStore ).getEntityRecords( 'taxonomy', 'post_tag', {
+			per_page: 100,
+		} ) ?? []
+	);
+
+	const suggestions = allTags.map( ( tag ) => tag.name );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Tags', 'my-block' ) }>
+					<FormTokenField
+						label={ __( 'Filter by Tags', 'my-block' ) }
+						value={ selectedTags }
+						suggestions={ suggestions }
+						onChange={ ( newTags ) =>
+							setAttributes( { selectedTags: newTags } )
+						}
+						help={ __( 'Show posts matching these tags.', 'my-block' ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+		</>
+	);
+}
+```
+
+---
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"selectedTags": {
+			"type": "array",
+			"items": { "type": "string" },
+			"default": []
+		}
+	}
+}
+```
+
+---
+
+## Props
+
+<PropsTable props={[
+	{
+		name: 'value',
+		type: 'string[]',
+		default: '[]',
+		description: 'Array of currently selected token strings.',
+	},
+	{
+		name: 'suggestions',
+		type: 'string[]',
+		default: '[]',
+		description: 'Array of suggestion strings shown in the autocomplete dropdown.',
+	},
+	{
+		name: 'onChange',
+		type: '( value: string[] ) => void',
+		default: '—',
+		description: 'Called with the full updated token array whenever tokens are added or removed.',
+	},
+	{
+		name: 'label',
+		type: 'string',
+		default: '—',
+		description: 'Visible label displayed above the token input.',
+	},
+	{
+		name: 'placeholder',
+		type: 'string',
+		default: '"Add item…"',
+		description: 'Placeholder text shown when no tokens exist.',
+	},
+	{
+		name: 'maxLength',
+		type: 'number',
+		default: '—',
+		description: 'Maximum number of tokens allowed. Input hides when the limit is reached.',
+	},
+	{
+		name: 'disabled',
+		type: 'boolean',
+		default: 'false',
+		description: 'Disables input and token removal.',
+	},
+	{
+		name: 'help',
+		type: 'string',
+		default: '—',
+		description: 'Descriptive help text shown below the field.',
+	},
+	{
+		name: 'tokenizeOnSpace',
+		type: 'boolean',
+		default: 'false',
+		description: 'If true, pressing Space adds the current input as a token.',
+	},
+	{
+		name: 'className',
+		type: 'string',
+		default: '—',
+		description: 'Additional CSS class applied to the root element.',
+	},
+]} />
+
+---
+
+## WordPress Mapping
+
+| This component | `@wordpress/components` |
+|---|---|
+| `FormTokenField` | [`FormTokenField`](https://developer.wordpress.org/block-editor/reference-guides/components/form-token-field/) |
+| `value` | `value` |
+| `suggestions` | `suggestions` |
+| `onChange` | `onChange` |
+| `label` | `label` |
+| `placeholder` | `placeholder` |
+| `maxLength` | `maxLength` |
+| `disabled` | `disabled` |
+| `help` | `help` |
+| `tokenizeOnSpace` | `tokenizeOnSpace` |
+
+In WordPress, `FormTokenField` is typically paired with `useSelect` to load taxonomy terms or post types from the REST API, making it the go-to component for tag/category selectors in block Inspector Controls.

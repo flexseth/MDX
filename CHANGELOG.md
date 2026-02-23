@@ -7,6 +7,15 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- `FormTokenField` component — tag/token input with autocomplete suggestions mirroring `@wordpress/components`
+  - Props: `value`, `suggestions`, `onChange`, `label`, `placeholder`, `maxLength`, `disabled`, `help`, `tokenizeOnSpace`, `className`
+  - Keyboard nav: ↑↓ through suggestions, Enter to add, Backspace to remove last token, Escape to close
+  - `onMouseDown` + `preventDefault` prevents blur-before-select for reliable suggestion clicks
+  - `form-token-field.mdx` — three interactive persistent demos:
+    - `BasicDemo` — post category picker with 15 suggestions (key: `demo-formtoken-basic`)
+    - `TagsDemo` — pre-populated tags, `maxLength` 8 (key: `demo-formtoken-tags`)
+    - `MaxLengthDemo` — country selector capped at 3 (key: `demo-formtoken-countries`)
+  - Registered in `MDXProvider`, barrel export, route `/docs/form-token-field`, sidebar nav, and `docs.css`
 - `Dropdown` component — composable dropdown with render-prop trigger and popover panel mirroring `@wordpress/components`
   - Props: `renderToggle`, `renderContent`, `popoverProps` (placement), `className`, `contentClassName`, `defaultOpen`, `onToggle`, `onClose`
   - Closes on outside click and Escape key; popover aligns via `placement` option
