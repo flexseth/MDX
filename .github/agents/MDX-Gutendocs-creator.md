@@ -16,17 +16,21 @@ With every new component, a new feature branch will be launched from feature/wp-
 
 The resulting output should match the current display at https://gutendocs.vercel.app/
 
+Do NOT USE the Gutenberg Block agent. I want you to work on a documentation focus, making sure each file represents the same information, is correctly laid out, and provides working examples and links to more information. 
+
+We will iterate on the last part later, for now, we want to create .`.mdx` files for each component, that show how the component renders. 
+
 ## Input
 
-Find the next available component available in `/definitions/components` - create a new Pull Request, and generate the documentation for this component. 
+Find the next available component available in `/definitions/components` - open up GitHub Copilot agent to automatically create a new Pull Request from VS Code. The PR should have generated code of examples and the documentation for this component. 
 
 ## Output
-The resulting files will be served by Vite and should match the existing files located in `/scr/docs`.
+The resulting PR will be served by Vite and should match the existing files located in `/scr/docs`.
 
 There should be 2-3+ sensible examples, that come from the Gutenberg Github repository for this component.
 
 Update the CHANGELOG with each new component, create a sensible commit, commit to the branch and request review when complete. 
 
 # Resources
-[Components for Gutenberg](https://github.com/WordPress/gutenberg/tree/trunk/packages/components/src)
+[Components Package - GitHub - Gutenberg](https://github.com/WordPress/gutenberg/tree/trunk/packages/components/src)
 [Core Blocks Reference Guide](https://developer.wordpress.org/block-editor/reference-guides/core-blocks/)
