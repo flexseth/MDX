@@ -12,6 +12,7 @@ import DateTimePickerDocs from './docs/date-time-picker.mdx';
 import CheckboxControlDocs from './docs/checkbox-control.mdx';
 import ColorPaletteDocs from './docs/color-palette.mdx';
 import ColorPickerDocs from './docs/color-picker.mdx';
+import BoxControlDocs from './docs/box-control.mdx';
 import ComboboxControlDocs from './docs/combobox-control.mdx';
 
 /**
@@ -34,6 +35,7 @@ export default function App() {
 				<Route path="/docs/checkbox-control" element={ <CheckboxControlDocs /> } />
 				<Route path="/docs/color-palette" element={ <ColorPaletteDocs /> } />
 				<Route path="/docs/color-picker" element={ <ColorPickerDocs /> } />
+				<Route path="/docs/box-control" element={ <BoxControlDocs /> } />
 				<Route path="/docs/combobox-control" element={ <ComboboxControlDocs /> } />
 			</Routes>
 		</DocLayout>

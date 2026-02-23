@@ -1,5 +1,5 @@
 import { MDXProvider } from '@mdx-js/react';
-import { Alert, Button, Card, CheckboxControl, CodeBlock, CodeTabs, ComboboxControl, PropsTable, ToggleControl, SelectControl, RangeControl, TextControl, DateTimePicker, ColorPalette, ColorPicker } from '../components';
+import { Alert, BoxControl, Button, Card, CheckboxControl, CodeBlock, CodeTabs, ComboboxControl, PropsTable, ToggleControl, SelectControl, RangeControl, TextControl, DateTimePicker, ColorPalette, ColorPicker } from '../components';
 
 /**
  * Maps standard markdown elements and custom components
@@ -31,6 +31,7 @@ const components = {
 
 	// Custom components available in MDX without imports.
 	Alert,
+	BoxControl,
 	Button,
 	Card,
 	CheckboxControl,
