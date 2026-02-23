@@ -145,9 +145,12 @@ export default function BoxControl( {
 									className="box-control__input"
 									value={ num }
 									onChange={ ( e ) => {
-										item.sides.forEach( ( s ) =>
-											handleChange( s, e.target.value )
-										);
+										if ( ! onChange ) return;
+										const updated = {};
+										item.sides.forEach( ( s ) => {
+											updated[ s ] = buildValue( e.target.value );
+										} );
+										onChange( { ...values, ...updated } );
 									} }
 									placeholder="—"
 									aria-label={ item.label }
