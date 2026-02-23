@@ -1,0 +1,288 @@
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useState } from 'react';
+
+export const BasicDemo = () => {
+	const [focalPoint, setFocalPoint] = useLocalStorage( 'demo-focal-basic', { x: 0.5, y: 0.5 } );
+	return (
+		<div className="demo-preview">
+			<FocalPointPicker
+				label="Focal Point"
+				url="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=480&q=60"
+				value={ focalPoint }
+				onChange={ setFocalPoint }
+			/>
+			<p className="demo-output">
+				x: <strong>{ Math.round( focalPoint.x * 100 ) }%</strong>, y: <strong>{ Math.round( focalPoint.y * 100 ) }%</strong>
+			</p>
+		</div>
+	);
+};
+
+export const BackgroundDemo = () => {
+	const [focalPoint, setFocalPoint] = useLocalStorage( 'demo-focal-bg', { x: 0.5, y: 0.3 } );
+	const bgPosition = `${ Math.round( focalPoint.x * 100 ) }% ${ Math.round( focalPoint.y * 100 ) }%`;
+	return (
+		<div className="demo-preview">
+			<FocalPointPicker
+				label="Choose the focal point"
+				url="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=480&q=60"
+				value={ focalPoint }
+				onChange={ setFocalPoint }
+				help="Drag the crosshair or type values to set the focal point."
+			/>
+			<div
+				className="focal-point-picker__bg-preview"
+				style={ {
+					backgroundImage: `url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=480&q=60)`,
+					backgroundPosition: bgPosition,
+					backgroundSize: 'cover',
+				} }
+				aria-label="Background image preview"
+			>
+				<span className="focal-point-picker__bg-label">Preview: object-position { bgPosition }</span>
+			</div>
+		</div>
+	);
+};
+
+export const DisabledDemo = () => (
+	<div className="demo-preview">
+		<FocalPointPicker
+			label="Focal Point (disabled)"
+			url="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=480&q=60"
+			value={ { x: 0.3, y: 0.6 } }
+			onChange={ () => {} }
+			disabled
+			help="This picker is disabled."
+		/>
+	</div>
+);
+
+# FocalPointPicker
+
+`FocalPointPicker` lets users select a focal point on an image by dragging a crosshair or entering numeric X/Y percentages. It mirrors the [`FocalPointPicker`](https://developer.wordpress.org/block-editor/reference-guides/components/focal-point-picker/) component from `@wordpress/components`.
+
+It is commonly used with cover blocks to control `object-position` and `background-position` CSS values for responsive image cropping.
+
+---
+
+## Basic Usage
+
+Click or drag anywhere on the image to reposition the focal point. Numeric inputs allow precise control.
+
+<BasicDemo />
+
+```jsx
+import { useState } from 'react';
+import { FocalPointPicker } from '@wordpress/components';
+
+function Example() {
+	const [ focalPoint, setFocalPoint ] = useState( { x: 0.5, y: 0.5 } );
+
+	return (
+		<FocalPointPicker
+			label="Focal Point"
+			url="/path/to/image.jpg"
+			value={ focalPoint }
+			onChange={ setFocalPoint }
+		/>
+	);
+}
+```
+
+---
+
+## Live Background Preview
+
+A common pattern uses the focal point to drive `background-position` on a preview element, letting editors see exactly how the image will be cropped at runtime.
+
+<BackgroundDemo />
+
+```jsx
+import { useState } from 'react';
+import { FocalPointPicker } from '@wordpress/components';
+
+function CoverBlockSidebar( { imageUrl } ) {
+	const [ focalPoint, setFocalPoint ] = useState( { x: 0.5, y: 0.3 } );
+	const bgPosition = `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`;
+
+	return (
+		<>
+			<FocalPointPicker
+				label="Focal Point"
+				url={ imageUrl }
+				value={ focalPoint }
+				onChange={ setFocalPoint }
+				help="Drag to choose the focal point for the cover image."
+			/>
+			<div
+				style={ {
+					backgroundImage: `url(${ imageUrl })`,
+					backgroundPosition: bgPosition,
+					backgroundSize: 'cover',
+					height: '200px',
+				} }
+			/>
+		</>
+	);
+}
+```
+
+---
+
+## Disabled State
+
+<DisabledDemo />
+
+```jsx
+<FocalPointPicker
+	label="Focal Point (disabled)"
+	url="/path/to/image.jpg"
+	value={ { x: 0.3, y: 0.6 } }
+	onChange={ () => {} }
+	disabled
+/>
+```
+
+---
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { InspectorControls, MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { FocalPointPicker, PanelBody, Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const { imageUrl, focalPoint } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Image Settings', 'my-block' ) }>
+					<MediaUploadCheck>
+						<MediaUpload
+							onSelect={ ( media ) =>
+								setAttributes( { imageUrl: media.url } )
+							}
+							allowedTypes={ [ 'image' ] }
+							render={ ( { open } ) => (
+								<Button variant="secondary" onClick={ open }>
+									{ imageUrl
+										? __( 'Replace Image', 'my-block' )
+										: __( 'Choose Image', 'my-block' ) }
+								</Button>
+							) }
+						/>
+					</MediaUploadCheck>
+					{ imageUrl && (
+						<FocalPointPicker
+							label={ __( 'Focal Point', 'my-block' ) }
+							url={ imageUrl }
+							value={ focalPoint }
+							onChange={ ( newFocalPoint ) =>
+								setAttributes( { focalPoint: newFocalPoint } )
+							}
+						/>
+					) }
+				</PanelBody>
+			</InspectorControls>
+
+			{ imageUrl && (
+				<div
+					style={ {
+						backgroundImage: `url(${ imageUrl })`,
+						backgroundPosition: `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`,
+						backgroundSize: 'cover',
+						minHeight: '300px',
+					} }
+				/>
+			) }
+		</>
+	);
+}
+```
+
+---
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"focalPoint": {
+			"type": "object",
+			"default": { "x": 0.5, "y": 0.5 }
+		}
+	}
+}
+```
+
+---
+
+## Props
+
+<PropsTable props={[
+	{
+		name: 'url',
+		type: 'string',
+		default: '—',
+		description: 'URL of the image to display inside the picker.',
+	},
+	{
+		name: 'value',
+		type: '{ x: number, y: number }',
+		default: '{ x: 0.5, y: 0.5 }',
+		description: 'Current focal point. x and y are floats in the range 0–1.',
+	},
+	{
+		name: 'onChange',
+		type: '( value ) => void',
+		default: '—',
+		description: 'Callback fired with the new { x, y } object when the user interacts.',
+	},
+	{
+		name: 'label',
+		type: 'string',
+		default: '—',
+		description: 'Visible label displayed above the image.',
+	},
+	{
+		name: 'help',
+		type: 'string',
+		default: '—',
+		description: 'Help text displayed below the numeric inputs.',
+	},
+	{
+		name: 'disabled',
+		type: 'boolean',
+		default: 'false',
+		description: 'Disables drag interaction and numeric inputs.',
+	},
+	{
+		name: 'className',
+		type: 'string',
+		default: '—',
+		description: 'Additional CSS class applied to the root element.',
+	},
+]} />
+
+---
+
+## WordPress Mapping
+
+| This component | `@wordpress/components` |
+|---|---|
+| `FocalPointPicker` | [`FocalPointPicker`](https://developer.wordpress.org/block-editor/reference-guides/components/focal-point-picker/) |
+| `url` | `url` |
+| `value` | `value` |
+| `onChange` | `onChange` |
+| `label` | `label` |
+| `help` | `help` |
+| `disabled` | `disabled` |
+
+The `value` object uses normalized floats (`0–1`) rather than percentage strings. When applying to CSS, multiply by 100 to get a percentage: `${ value.x * 100 }% ${ value.y * 100 }%`.
