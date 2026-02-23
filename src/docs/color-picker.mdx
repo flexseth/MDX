@@ -1,0 +1,266 @@
+import ColorPicker from '../components/ColorPicker';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [color, setColor] = useLocalStorage('demo-colorpicker-basic', '#0073aa');
+  return (
+    <div>
+      <ColorPicker
+        color={color}
+        onChange={setColor}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        color,
+        fontWeight: 600,
+        fontSize: '1.125rem',
+      }}>
+        Preview text in selected color
+      </div>
+    </div>
+  );
+};
+
+export const AlphaDemo = () => {
+  const [color, setColor] = useLocalStorage('demo-colorpicker-alpha', 'rgba(0, 115, 170, 0.5)');
+  return (
+    <div>
+      <ColorPicker
+        color={color}
+        onChange={setColor}
+        enableAlpha
+        defaultValue="rgba(0, 115, 170, 0.5)"
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        position: 'relative',
+        height: '80px',
+        borderRadius: '0.375rem',
+        overflow: 'hidden',
+        border: '1px solid #e2e8f0',
+      }}>
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: 'repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%)',
+          backgroundSize: '16px 16px',
+        }} aria-hidden="true" />
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: color,
+        }} />
+      </div>
+      <p style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: '#64748b' }}>
+        Current value: <code>{color}</code>
+      </p>
+    </div>
+  );
+};
+
+export const ResetDemo = () => {
+  const DEFAULT_COLOR = '#e65100';
+  const [color, setColor] = useLocalStorage('demo-colorpicker-reset', DEFAULT_COLOR);
+  return (
+    <div>
+      <ColorPicker
+        color={color}
+        onChange={setColor}
+        defaultValue={DEFAULT_COLOR}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '0 0 0 0.75rem',
+        borderLeft: `4px solid ${color}`,
+        background: '#f8fafc',
+        borderRadius: '0 0.375rem 0.375rem 0',
+        paddingTop: '0.75rem',
+        paddingBottom: '0.75rem',
+      }}>
+        <p style={{ margin: 0, fontSize: '0.9375rem' }}>Block with accent border</p>
+      </div>
+      { color !== DEFAULT_COLOR && (
+        <button
+          type="button"
+          onClick={() => setColor(DEFAULT_COLOR)}
+          style={{
+            marginTop: '0.5rem',
+            background: 'none',
+            border: '1px solid #e2e8f0',
+            borderRadius: '0.25rem',
+            padding: '0.25rem 0.75rem',
+            fontSize: '0.8125rem',
+            cursor: 'pointer',
+            color: '#ef4444',
+          }}
+        >
+          Reset to default
+        </button>
+      ) }
+    </div>
+  );
+};
+
+# ColorPicker
+
+A free-form color input with spectrum canvas, hex/RGB text input, and optional opacity slider. Mirrors the WordPress [`ColorPicker`](https://developer.wordpress.org/block-editor/reference-guides/components/color-picker/) from `@wordpress/components`.
+
+Use `ColorPicker` when users need any arbitrary color. For predefined theme colors, use `ColorPalette` instead.
+
+## Basic Usage
+
+Click the color swatch to open the native color picker.
+
+<BasicDemo />
+
+```jsx
+<ColorPicker
+  color={customColor}
+  onChange={(value) => setAttributes({ customColor: value })}
+/>
+```
+
+## With Opacity (enableAlpha)
+
+The checkerboard background shows transparency. The `onChange` callback receives an `rgba()` string when `enableAlpha` is set.
+
+<AlphaDemo />
+
+```jsx
+<ColorPicker
+  color={overlayColor}
+  onChange={(value) => setAttributes({ overlayColor: value })}
+  enableAlpha
+  defaultValue="rgba(0, 115, 170, 0.5)"
+/>
+```
+
+## With Reset Button
+
+<ResetDemo />
+
+```jsx
+const DEFAULT_COLOR = '#e65100';
+
+<ColorPicker
+  color={highlightColor}
+  onChange={(value) => setAttributes({ highlightColor: value })}
+  defaultValue={DEFAULT_COLOR}
+/>
+{ highlightColor !== DEFAULT_COLOR && (
+  <Button
+    variant="link"
+    isDestructive
+    onClick={() => setAttributes({ highlightColor: DEFAULT_COLOR })}
+  >
+    { __( 'Reset to default', 'your-text-domain' ) }
+  </Button>
+) }
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { ColorPicker, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { customColor } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Color', 'your-text-domain' ) }>
+          <ColorPicker
+            color={ customColor }
+            onChange={ ( value ) => setAttributes( { customColor: value } ) }
+            enableAlpha
+            defaultValue="#000000"
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps } style={ { color: customColor } }>
+        { __( 'Colored content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "customColor": { "type": "string", "default": "#000000" },
+    "overlayColor": { "type": "string", "default": "rgba(0, 0, 0, 0.5)" }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'color',
+    type: 'string',
+    default: '',
+    required: false,
+    description: 'Current color value as a hex string or rgba() CSS string. Controlled.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: false,
+    description: 'Callback fired with the new color string. Returns hex when enableAlpha is false; rgba() when true.'
+  },
+  {
+    name: 'enableAlpha',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Shows the opacity/alpha slider. onChange will receive an rgba() string instead of hex.'
+  },
+  {
+    name: 'defaultValue',
+    type: 'string',
+    default: "'#000000'",
+    required: false,
+    description: 'Fallback color used when color prop is empty or undefined.'
+  },
+  {
+    name: 'copyFormat',
+    type: 'string',
+    default: "'hex'",
+    required: false,
+    description: "Format for clipboard copy in the WordPress component: 'hex', 'rgb', or 'hsl'."
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper element.'
+  }
+]} />
+
+## ColorPicker vs ColorPalette
+
+| | `ColorPicker` | `ColorPalette` |
+|---|---|---|
+| Input type | Any arbitrary color | Predefined swatches |
+| Opacity support | Yes (`enableAlpha`) | No |
+| Theme color integration | No | Yes (reads `theme.json`) |
+| UI footprint | Large | Compact |
+| Best for | Custom / one-off colors | Brand and theme colors |
+
+## WordPress Mapping
+
+In WordPress, `ColorPicker` is imported from `@wordpress/components`. The `color` prop accepts any CSS-compatible color string — hex, `rgb()`, or `rgba()`. Use `enableAlpha` only when your block's CSS genuinely supports transparency (e.g. overlay backgrounds, shadows). For the full WordPress color workflow combining theme palette swatches with a freeform fallback, use `ColorGradientSettingsDropdown` from `@wordpress/block-editor`. Store colors as strings in `block.json` with a sensible hex default.

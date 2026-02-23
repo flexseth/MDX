@@ -11,6 +11,7 @@ import TextControlDocs from './docs/text-control.mdx';
 import DateTimePickerDocs from './docs/date-time-picker.mdx';
 import CheckboxControlDocs from './docs/checkbox-control.mdx';
 import ColorPaletteDocs from './docs/color-palette.mdx';
+import ColorPickerDocs from './docs/color-picker.mdx';
 
 /**
  * Application root with documentation routes.
@@ -31,6 +32,7 @@ export default function App() {
 				<Route path="/docs/date-time-picker" element={ <DateTimePickerDocs /> } />
 				<Route path="/docs/checkbox-control" element={ <CheckboxControlDocs /> } />
 				<Route path="/docs/color-palette" element={ <ColorPaletteDocs /> } />
+				<Route path="/docs/color-picker" element={ <ColorPickerDocs /> } />
 			</Routes>
 		</DocLayout>
 	);

@@ -7,6 +7,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- `ColorPicker` component — free-form color picker mirroring `@wordpress/components`
+  - Props: `color`, `onChange`, `enableAlpha`, `defaultValue`, `copyFormat`, `className`
+  - Spectrum proxy via native `<input type="color">` overlaid on a large preview swatch
+  - Optional opacity slider (`enableAlpha`) — `onChange` returns `rgba()` string when enabled
+  - Hex text input showing the current color code
+  - `color-picker.mdx` — three interactive persistent demos:
+    - `BasicDemo` — basic picker driving live text color preview (key: `demo-colorpicker-basic`)
+    - `AlphaDemo` — `enableAlpha` with checkerboard transparency visualization (key: `demo-colorpicker-alpha`)
+    - `ResetDemo` — picker with reset-to-default button and accent border preview (key: `demo-colorpicker-reset`)
+  - Includes ColorPicker vs ColorPalette comparison table
+  - Registered in `MDXProvider`, barrel export, route `/docs/color-picker`, sidebar nav, and `docs.css`
 - `CheckboxControl` component — labeled checkbox mirroring `@wordpress/components`
   - Props: `label`, `checked`, `onChange`, `help`, `indeterminate`, `disabled`, `className`, `id`
   - `indeterminate` state applied via DOM ref (cannot be set as a JSX attribute); sets `aria-checked="mixed"` automatically
