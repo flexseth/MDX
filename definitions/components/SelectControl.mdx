@@ -1,0 +1,558 @@
+---
+title: SelectControl Component
+component: SelectControl
+package: '@wordpress/components'
+category: Form Controls
+description: A dropdown select menu component for choosing from predefined options in WordPress blocks
+---
+
+# SelectControl Component
+
+The `SelectControl` component provides a dropdown select menu for choosing from a list of predefined options.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { SelectControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"alignment": {
+			"type": "string",
+			"default": "left"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { alignment } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<SelectControl
+				label={ __( 'Alignment', 'your-text-domain' ) }
+				value={ alignment }
+				options={ [
+					{ label: __( 'Left', 'your-text-domain' ), value: 'left' },
+					{ label: __( 'Center', 'your-text-domain' ), value: 'center' },
+					{ label: __( 'Right', 'your-text-domain' ), value: 'right' },
+				] }
+				onChange={ ( value ) => setAttributes( { alignment: value } ) }
+			/>
+			<p style={ { textAlign: alignment } }>
+				{ __( 'Aligned text', 'your-text-domain' ) }
+			</p>
+		</div>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { alignment } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<p style={ { textAlign: alignment } }>
+				Aligned text
+			</p>
+		</div>
+	);
+}
+```
+
+## With Help Text
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontSize } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<SelectControl
+				label={ __( 'Font Size', 'your-text-domain' ) }
+				value={ fontSize }
+				options={ [
+					{ label: __( 'Small', 'your-text-domain' ), value: 'small' },
+					{ label: __( 'Medium', 'your-text-domain' ), value: 'medium' },
+					{ label: __( 'Large', 'your-text-domain' ), value: 'large' },
+				] }
+				onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+				help={ __( 'Choose the font size for your content', 'your-text-domain' ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for help text
+
+```json
+{
+	"attributes": {
+		"fontSize": {
+			"type": "string",
+			"default": "medium"
+		}
+	}
+}
+```
+
+## Multiple SelectControls
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { columns, spacing, borderStyle } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<SelectControl
+				label={ __( 'Columns', 'your-text-domain' ) }
+				value={ columns }
+				options={ [
+					{ label: '1', value: '1' },
+					{ label: '2', value: '2' },
+					{ label: '3', value: '3' },
+					{ label: '4', value: '4' },
+				] }
+				onChange={ ( value ) => setAttributes( { columns: value } ) }
+			/>
+			<SelectControl
+				label={ __( 'Spacing', 'your-text-domain' ) }
+				value={ spacing }
+				options={ [
+					{ label: __( 'None', 'your-text-domain' ), value: 'none' },
+					{ label: __( 'Small', 'your-text-domain' ), value: 'small' },
+					{ label: __( 'Medium', 'your-text-domain' ), value: 'medium' },
+					{ label: __( 'Large', 'your-text-domain' ), value: 'large' },
+				] }
+				onChange={ ( value ) => setAttributes( { spacing: value } ) }
+			/>
+			<SelectControl
+				label={ __( 'Border Style', 'your-text-domain' ) }
+				value={ borderStyle }
+				options={ [
+					{ label: __( 'None', 'your-text-domain' ), value: 'none' },
+					{ label: __( 'Solid', 'your-text-domain' ), value: 'solid' },
+					{ label: __( 'Dashed', 'your-text-domain' ), value: 'dashed' },
+					{ label: __( 'Dotted', 'your-text-domain' ), value: 'dotted' },
+				] }
+				onChange={ ( value ) => setAttributes( { borderStyle: value } ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for multiple selects
+
+```json
+{
+	"attributes": {
+		"columns": {
+			"type": "string",
+			"default": "2"
+		},
+		"spacing": {
+			"type": "string",
+			"default": "medium"
+		},
+		"borderStyle": {
+			"type": "string",
+			"default": "none"
+		}
+	}
+}
+```
+
+## With InspectorControls (Sidebar)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { layout, animation } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout Settings', 'your-text-domain' ) }>
+					<SelectControl
+						label={ __( 'Layout Type', 'your-text-domain' ) }
+						value={ layout }
+						options={ [
+							{ label: __( 'Grid', 'your-text-domain' ), value: 'grid' },
+							{ label: __( 'List', 'your-text-domain' ), value: 'list' },
+							{ label: __( 'Masonry', 'your-text-domain' ), value: 'masonry' },
+						] }
+						onChange={ ( value ) => setAttributes( { layout: value } ) }
+					/>
+					<SelectControl
+						label={ __( 'Animation', 'your-text-domain' ) }
+						value={ animation }
+						options={ [
+							{ label: __( 'None', 'your-text-domain' ), value: 'none' },
+							{ label: __( 'Fade In', 'your-text-domain' ), value: 'fade' },
+							{ label: __( 'Slide Up', 'your-text-domain' ), value: 'slide' },
+						] }
+						onChange={ ( value ) => setAttributes( { animation: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } className={ `layout-${ layout } animation-${ animation }` }>
+				{ __( 'Content with layout and animation', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for sidebar
+
+```json
+{
+	"attributes": {
+		"layout": {
+			"type": "string",
+			"default": "grid"
+		},
+		"animation": {
+			"type": "string",
+			"default": "none"
+		}
+	}
+}
+```
+
+## Dynamic Styling Based on Selection
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { theme } = attributes;
+
+	const themeStyles = {
+		light: { backgroundColor: '#ffffff', color: '#000000' },
+		dark: { backgroundColor: '#000000', color: '#ffffff' },
+		blue: { backgroundColor: '#2196f3', color: '#ffffff' },
+	};
+
+	return (
+		<div { ...blockProps }>
+			<SelectControl
+				label={ __( 'Theme', 'your-text-domain' ) }
+				value={ theme }
+				options={ [
+					{ label: __( 'Light', 'your-text-domain' ), value: 'light' },
+					{ label: __( 'Dark', 'your-text-domain' ), value: 'dark' },
+					{ label: __( 'Blue', 'your-text-domain' ), value: 'blue' },
+				] }
+				onChange={ ( value ) => setAttributes( { theme: value } ) }
+			/>
+			<div style={ { ...themeStyles[ theme ], padding: '20px', marginTop: '10px' } }>
+				{ __( 'Themed content', 'your-text-domain' ) }
+			</div>
+		</div>
+	);
+}
+```
+
+### block.json for dynamic styling
+
+```json
+{
+	"attributes": {
+		"theme": {
+			"type": "string",
+			"default": "light"
+		}
+	}
+}
+```
+
+## Post Type Selector
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useSelect } from '@wordpress/data';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { postType } = attributes;
+
+	const postTypes = useSelect( ( select ) => {
+		const types = select( 'core' ).getPostTypes( { per_page: -1 } );
+		return types
+			? types
+				.filter( ( type ) => type.viewable )
+				.map( ( type ) => ( {
+					label: type.name,
+					value: type.slug,
+				} ) )
+			: [];
+	}, [] );
+
+	return (
+		<div { ...blockProps }>
+			<SelectControl
+				label={ __( 'Post Type', 'your-text-domain' ) }
+				value={ postType }
+				options={ postTypes }
+				onChange={ ( value ) => setAttributes( { postType: value } ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for post types
+
+```json
+{
+	"attributes": {
+		"postType": {
+			"type": "string",
+			"default": "post"
+		}
+	}
+}
+```
+
+## With Disabled State
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl, ToggleControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { enableCustom, customOption } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<ToggleControl
+				label={ __( 'Enable Custom Options', 'your-text-domain' ) }
+				checked={ enableCustom }
+				onChange={ ( value ) => setAttributes( { enableCustom: value } ) }
+			/>
+			<SelectControl
+				label={ __( 'Custom Option', 'your-text-domain' ) }
+				value={ customOption }
+				options={ [
+					{ label: __( 'Option 1', 'your-text-domain' ), value: 'option1' },
+					{ label: __( 'Option 2', 'your-text-domain' ), value: 'option2' },
+					{ label: __( 'Option 3', 'your-text-domain' ), value: 'option3' },
+				] }
+				onChange={ ( value ) => setAttributes( { customOption: value } ) }
+				disabled={ ! enableCustom }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for disabled state
+
+```json
+{
+	"attributes": {
+		"enableCustom": {
+			"type": "boolean",
+			"default": false
+		},
+		"customOption": {
+			"type": "string",
+			"default": "option1"
+		}
+	}
+}
+```
+
+## Grouped Options
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { font } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<SelectControl
+				label={ __( 'Font Family', 'your-text-domain' ) }
+				value={ font }
+				onChange={ ( value ) => setAttributes( { font: value } ) }
+			>
+				<optgroup label={ __( 'System Fonts', 'your-text-domain' ) }>
+					<option value="Arial">Arial</option>
+					<option value="Helvetica">Helvetica</option>
+					<option value="Times New Roman">Times New Roman</option>
+				</optgroup>
+				<optgroup label={ __( 'Web Fonts', 'your-text-domain' ) }>
+					<option value="Roboto">Roboto</option>
+					<option value="Open Sans">Open Sans</option>
+					<option value="Lato">Lato</option>
+				</optgroup>
+			</SelectControl>
+		</div>
+	);
+}
+```
+
+### block.json for grouped options
+
+```json
+{
+	"attributes": {
+		"font": {
+			"type": "string",
+			"default": "Arial"
+		}
+	}
+}
+```
+
+## Number Selection
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { itemsPerPage } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<SelectControl
+				label={ __( 'Items Per Page', 'your-text-domain' ) }
+				value={ itemsPerPage }
+				options={ [
+					{ label: '5', value: '5' },
+					{ label: '10', value: '10' },
+					{ label: '15', value: '15' },
+					{ label: '20', value: '20' },
+					{ label: '50', value: '50' },
+				] }
+				onChange={ ( value ) => setAttributes( { itemsPerPage: parseInt( value ) } ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for numbers
+
+```json
+{
+	"attributes": {
+		"itemsPerPage": {
+			"type": "number",
+			"default": 10
+		}
+	}
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Label text for the select control |
+| `value` | string | - | Currently selected value |
+| `onChange` | function | - | Callback when selection changes |
+| `options` | array | - | Array of option objects with `label` and `value` |
+| `help` | string | - | Help text displayed below the control |
+| `disabled` | boolean | `false` | Disable the select control |
+| `className` | string | - | Additional CSS classes |
+| `children` | node | - | For advanced usage with optgroup |
+
+## Option Object Format
+
+```javascript
+{
+	label: 'Display Text',  // Text shown to user
+	value: 'value'          // Value stored in attribute
+}
+```
+
+## Common Use Cases
+
+1. **Alignment**: Text/content alignment options
+2. **Layout**: Choose between layout types
+3. **Styling**: Theme, color scheme, or style variants
+4. **Post Type**: Select WordPress post types
+5. **Taxonomy**: Choose categories or tags
+6. **Size/Scale**: Predefined size options
+
+## Best Practices
+
+- Provide clear, descriptive labels
+- Use consistent option naming
+- Set sensible defaults in `block.json`
+- Consider using help text for complex options
+- Order options logically (alphabetical, by frequency, etc.)
+- For many options (>10), consider using a different control
+- Use string values in attributes, convert to numbers if needed
+
+## Accessibility
+
+- Labels automatically associated with selects
+- Keyboard navigable (arrow keys, Enter, Escape)
+- Screen reader friendly
+- ARIA attributes handled automatically
+- Focus management built-in
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for translatable text
+- Define string attributes in `block.json`
+- Use `useSelect` from `@wordpress/data` for dynamic options
+- Follow block editor design patterns

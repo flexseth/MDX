@@ -1,0 +1,316 @@
+---
+title: Guide Component
+component: Guide
+package: '@wordpress/components'
+category: Feedback
+description: A multi-step tutorial modal that walks users through a series of pages with navigation controls
+---
+
+# Guide Component
+
+The `Guide` component from `@wordpress/components` renders a multi-page tutorial inside a modal. Users can navigate forward and backward through pages, making it ideal for onboarding flows, feature introductions, and step-by-step instructions.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Guide } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Guide, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="primary"
+				onClick={ () => setIsOpen( true ) }
+			>
+				{ __( 'Open Guide', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Guide
+					contentLabel={ __( 'Welcome Guide', 'your-text-domain' ) }
+					finishButtonText={ __( 'Get Started', 'your-text-domain' ) }
+					onFinish={ () => setIsOpen( false ) }
+					pages={ [
+						{
+							content: (
+								<p>
+									{ __( 'Welcome! This guide will walk you through the basics.', 'your-text-domain' ) }
+								</p>
+							),
+						},
+						{
+							content: (
+								<p>
+									{ __( 'You have completed the guide. Click "Get Started" to begin.', 'your-text-domain' ) }
+								</p>
+							),
+						},
+					] }
+				/>
+			) }
+		</div>
+	);
+}
+```
+
+## Guide with Images
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Guide, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="primary"
+				onClick={ () => setIsOpen( true ) }
+			>
+				{ __( 'Launch Tutorial', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Guide
+					contentLabel={ __( 'Feature Tutorial', 'your-text-domain' ) }
+					finishButtonText={ __( 'Done', 'your-text-domain' ) }
+					onFinish={ () => setIsOpen( false ) }
+					pages={ [
+						{
+							image: (
+								<img
+									src="https://s.w.org/images/core/5.5/edit-702702f1.png"
+									alt={ __( 'Editor screenshot', 'your-text-domain' ) }
+									style={ { width: '100%', height: 'auto' } }
+								/>
+							),
+							content: (
+								<>
+									<h2>{ __( 'Welcome to the Editor', 'your-text-domain' ) }</h2>
+									<p>
+										{ __( 'The block editor lets you build your content with individual blocks.', 'your-text-domain' ) }
+									</p>
+								</>
+							),
+						},
+						{
+							image: (
+								<img
+									src="https://s.w.org/images/core/5.5/drag-handle-2fcf498f.png"
+									alt={ __( 'Drag handle screenshot', 'your-text-domain' ) }
+									style={ { width: '100%', height: 'auto' } }
+								/>
+							),
+							content: (
+								<>
+									<h2>{ __( 'Drag and Drop', 'your-text-domain' ) }</h2>
+									<p>
+										{ __( 'You can rearrange blocks by dragging and dropping them.', 'your-text-domain' ) }
+									</p>
+								</>
+							),
+						},
+						{
+							content: (
+								<>
+									<h2>{ __( 'You\'re All Set!', 'your-text-domain' ) }</h2>
+									<p>
+										{ __( 'Start creating amazing content with the block editor.', 'your-text-domain' ) }
+									</p>
+								</>
+							),
+						},
+					] }
+				/>
+			) }
+		</div>
+	);
+}
+```
+
+## Custom Navigation Labels
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Guide, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="secondary"
+				onClick={ () => setIsOpen( true ) }
+			>
+				{ __( 'Show Walkthrough', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Guide
+					contentLabel={ __( 'Setup Walkthrough', 'your-text-domain' ) }
+					nextButtonText={ __( 'Continue', 'your-text-domain' ) }
+					previousButtonText={ __( 'Go Back', 'your-text-domain' ) }
+					finishButtonText={ __( 'Complete Setup', 'your-text-domain' ) }
+					onFinish={ () => setIsOpen( false ) }
+					pages={ [
+						{
+							content: (
+								<>
+									<h2>{ __( 'Step 1: Configure', 'your-text-domain' ) }</h2>
+									<p>{ __( 'Set up your preferences.', 'your-text-domain' ) }</p>
+								</>
+							),
+						},
+						{
+							content: (
+								<>
+									<h2>{ __( 'Step 2: Customize', 'your-text-domain' ) }</h2>
+									<p>{ __( 'Choose your layout and style.', 'your-text-domain' ) }</p>
+								</>
+							),
+						},
+						{
+							content: (
+								<>
+									<h2>{ __( 'Step 3: Publish', 'your-text-domain' ) }</h2>
+									<p>{ __( 'You\'re ready to go live!', 'your-text-domain' ) }</p>
+								</>
+							),
+						},
+					] }
+				/>
+			) }
+		</div>
+	);
+}
+```
+
+## Guide with Rich Content Pages
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Guide, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+import { header, page, cog } from '@wordpress/icons';
+import { Icon } from '@wordpress/components';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="primary"
+				onClick={ () => setIsOpen( true ) }
+			>
+				{ __( 'Open Onboarding', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Guide
+					className="my-custom-guide"
+					contentLabel={ __( 'Plugin Onboarding', 'your-text-domain' ) }
+					finishButtonText={ __( 'Start Using Plugin', 'your-text-domain' ) }
+					onFinish={ () => setIsOpen( false ) }
+					pages={ [
+						{
+							content: (
+								<div style={ { textAlign: 'center', padding: '20px' } }>
+									<Icon icon={ header } size={ 48 } />
+									<h2>{ __( 'Welcome', 'your-text-domain' ) }</h2>
+									<p>{ __( 'Thanks for installing our plugin!', 'your-text-domain' ) }</p>
+								</div>
+							),
+						},
+						{
+							content: (
+								<div style={ { textAlign: 'center', padding: '20px' } }>
+									<Icon icon={ cog } size={ 48 } />
+									<h2>{ __( 'Settings', 'your-text-domain' ) }</h2>
+									<p>{ __( 'Configure your settings from the admin panel.', 'your-text-domain' ) }</p>
+								</div>
+							),
+						},
+						{
+							content: (
+								<div style={ { textAlign: 'center', padding: '20px' } }>
+									<Icon icon={ page } size={ 48 } />
+									<h2>{ __( 'Create Content', 'your-text-domain' ) }</h2>
+									<p>{ __( 'Add the block to any page or post to get started.', 'your-text-domain' ) }</p>
+								</div>
+							),
+						},
+					] }
+				/>
+			) }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | string | - | Custom CSS class added to the Guide modal |
+| `contentLabel` | string | **Required** | Accessible label for the modal (used by screen readers) |
+| `finishButtonText` | string | `'Finish'` | Text for the button on the last page |
+| `nextButtonText` | string | `'Next'` | Text for the forward navigation button |
+| `previousButtonText` | string | `'Previous'` | Text for the backward navigation button |
+| `onFinish` | function | **Required** | Callback when the guide is closed or the finish button is clicked |
+| `pages` | array | `[]` | Array of page objects defining each step |
+
+## Page Object Properties
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `content` | ReactNode | Yes | The main content for the page |
+| `image` | ReactNode | No | An optional image displayed above the content |
+
+## Common Use Cases
+
+1. **Plugin Onboarding**: Welcome new users with a guided tour after activation
+2. **Feature Introductions**: Highlight new features after a plugin update
+3. **Setup Wizards**: Walk users through initial configuration steps
+4. **Block Tutorials**: Explain how to use a custom block within the editor
+
+## Accessibility
+
+- Always provide a descriptive `contentLabel` for screen readers
+- The modal traps focus while open, supporting keyboard navigation
+- Page indicators (dots) are rendered for visual progress tracking
+- Previous/Next buttons are keyboard accessible by default
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for all translatable strings
+- Use `@wordpress/element` for `useState` and other React hooks
+- Use icons from `@wordpress/icons` for visual elements within pages
+- Follow block editor design patterns for consistent UI

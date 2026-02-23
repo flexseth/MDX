@@ -1,0 +1,347 @@
+---
+title: BlockControls Component
+component: BlockControls
+package: '@wordpress/block-editor'
+category: Block Editor Infrastructure
+description: Container for controls that appear in the block toolbar above the selected block; used for alignment, formatting, and contextual actions
+---
+
+# BlockControls Component
+
+`BlockControls` renders its children into the **block toolbar** — the floating bar that appears above a block when it is selected. Use it for alignment toggles, custom toolbar buttons, and formatting controls that relate directly to the block's content.
+
+## Installation
+
+This component is included in the `@wordpress/block-editor` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { BlockControls } from '@wordpress/block-editor';
+import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"alignment": {
+			"type": "string",
+			"default": "none"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { alignLeft, alignCenter, alignRight } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { alignment } = attributes;
+
+	return (
+		<>
+			<BlockControls>
+				<ToolbarGroup>
+					<ToolbarButton
+						icon={ alignLeft }
+						label={ __( 'Align left', 'your-text-domain' ) }
+						isActive={ alignment === 'left' }
+						onClick={ () => setAttributes( { alignment: 'left' } ) }
+					/>
+					<ToolbarButton
+						icon={ alignCenter }
+						label={ __( 'Align center', 'your-text-domain' ) }
+						isActive={ alignment === 'center' }
+						onClick={ () => setAttributes( { alignment: 'center' } ) }
+					/>
+					<ToolbarButton
+						icon={ alignRight }
+						label={ __( 'Align right', 'your-text-domain' ) }
+						isActive={ alignment === 'right' }
+						onClick={ () => setAttributes( { alignment: 'right' } ) }
+					/>
+				</ToolbarGroup>
+			</BlockControls>
+			<div { ...blockProps } style={ { textAlign: alignment } }>
+				{ __( 'Block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## AlignmentControl (Built-in Alignment Toolbar)
+
+For standard text alignment, use the `AlignmentControl` shorthand:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls, AlignmentControl } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { textAlign } = attributes;
+
+	return (
+		<>
+			<BlockControls>
+				<AlignmentControl
+					value={ textAlign }
+					onChange={ ( value ) => setAttributes( { textAlign: value } ) }
+				/>
+			</BlockControls>
+			<div { ...blockProps } style={ { textAlign } }>
+				{ __( 'Aligned content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for alignment
+
+```json
+{
+	"attributes": {
+		"textAlign": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Custom Toolbar Actions
+
+Add custom buttons to the toolbar for block-specific actions:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { update, trash } from '@wordpress/icons';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const [ isEditing, setIsEditing ] = useState( false );
+
+	const handleRefresh = () => {
+		// Custom action — e.g. re-fetch API data
+		setAttributes( { lastUpdated: Date.now() } );
+	};
+
+	return (
+		<>
+			<BlockControls>
+				<ToolbarGroup>
+					<ToolbarButton
+						icon={ update }
+						label={ __( 'Refresh data', 'your-text-domain' ) }
+						onClick={ handleRefresh }
+					/>
+				</ToolbarGroup>
+				<ToolbarGroup>
+					<ToolbarButton
+						icon={ trash }
+						label={ __( 'Clear content', 'your-text-domain' ) }
+						isDestructive
+						onClick={ () => setAttributes( { content: '' } ) }
+					/>
+				</ToolbarGroup>
+			</BlockControls>
+			<div { ...blockProps }>
+				{ isEditing
+					? __( 'Editing mode...', 'your-text-domain' )
+					: __( 'Block content', 'your-text-domain' )
+				}
+			</div>
+		</>
+	);
+}
+```
+
+## BlockControls with MediaReplaceFlow
+
+Combine with media controls for image/video blocks:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls, MediaReplaceFlow } from '@wordpress/block-editor';
+import { ToolbarGroup } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageUrl, imageId, imageAlt } = attributes;
+
+	const onSelectImage = ( media ) => {
+		setAttributes( {
+			imageId: media.id,
+			imageUrl: media.url,
+			imageAlt: media.alt,
+		} );
+	};
+
+	return (
+		<>
+			{ imageUrl && (
+				<BlockControls>
+					<ToolbarGroup>
+						<MediaReplaceFlow
+							mediaId={ imageId }
+							mediaURL={ imageUrl }
+							allowedTypes={ [ 'image' ] }
+							accept="image/*"
+							onSelect={ onSelectImage }
+							name={ __( 'Replace', 'your-text-domain' ) }
+						/>
+					</ToolbarGroup>
+				</BlockControls>
+			) }
+			<div { ...blockProps }>
+				{ imageUrl
+					? <img src={ imageUrl } alt={ imageAlt } style={ { width: '100%' } } />
+					: <p>{ __( 'No image selected.', 'your-text-domain' ) }</p>
+				}
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for media replace
+
+```json
+{
+	"attributes": {
+		"imageId": { "type": "number", "default": 0 },
+		"imageUrl": { "type": "string", "default": "" },
+		"imageAlt": { "type": "string", "default": "" }
+	}
+}
+```
+
+## Combined BlockControls and InspectorControls
+
+Most blocks use both. `BlockControls` handles quick-access toolbar actions; `InspectorControls` handles detailed settings:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls, InspectorControls, AlignmentControl } from '@wordpress/block-editor';
+import { PanelBody, ToggleControl, ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { link } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { textAlign, showCaption, openInNewTab } = attributes;
+
+	return (
+		<>
+			<BlockControls>
+				<AlignmentControl
+					value={ textAlign }
+					onChange={ ( value ) => setAttributes( { textAlign: value } ) }
+				/>
+				<ToolbarGroup>
+					<ToolbarButton
+						icon={ link }
+						label={ __( 'Link options', 'your-text-domain' ) }
+						isActive={ openInNewTab }
+						onClick={ () => setAttributes( { openInNewTab: ! openInNewTab } ) }
+					/>
+				</ToolbarGroup>
+			</BlockControls>
+
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+					<ToggleControl
+						label={ __( 'Show caption', 'your-text-domain' ) }
+						checked={ showCaption }
+						onChange={ ( value ) => setAttributes( { showCaption: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } style={ { textAlign } }>
+				{ __( 'Block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`BlockControls` only renders in the editor. The saved values (like `alignment`) apply directly to the front-end HTML:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { alignment } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { textAlign: alignment } }>
+			{ /* block content */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### BlockControls
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | node | - | `ToolbarGroup` and `ToolbarButton` components |
+| `group` | string | `'default'` | Toolbar slot group. Options: `'default'`, `'block'`, `'inline'`, `'other'` |
+
+### ToolbarGroup
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | node | - | `ToolbarButton` components |
+| `className` | string | - | Additional CSS classes |
+
+### ToolbarButton
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `icon` | Component | - | Icon from `@wordpress/icons` |
+| `label` | string | - | Accessible tooltip text (required) |
+| `onClick` | function | - | Click handler |
+| `isActive` | boolean | `false` | Highlights the button when active |
+| `isDestructive` | boolean | `false` | Applies destructive (red) styling |
+| `disabled` | boolean | `false` | Disables the button |
+
+## Common Use Cases
+
+1. **Text alignment**: Use `AlignmentControl` for left/center/right/justify
+2. **Image actions**: Replace, remove, or edit focal point via toolbar
+3. **View toggle**: Switch between edit and preview modes
+4. **Format buttons**: Bold/italic for custom RichText formats
+5. **List controls**: Add/remove items in a repeating block
+
+## Accessibility
+
+- Every `ToolbarButton` requires a `label` prop — it renders as an accessible tooltip
+- `isActive` communicates pressed/selected state to screen readers via `aria-pressed`
+- Toolbar receives keyboard focus when the block is selected; buttons are Tab-navigable
+
+## WordPress Standards
+
+- Import from `@wordpress/block-editor`
+- Use icons from `@wordpress/icons`; never use emoji or custom SVGs as toolbar icons
+- Wrap buttons in `ToolbarGroup` for visual grouping and correct spacing
+- Use `AlignmentControl` for alignment rather than custom alignment buttons
+- `BlockControls` never appears in `save.js`

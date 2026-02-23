@@ -1,0 +1,308 @@
+---
+title: Card Component
+component: Card
+package: '@wordpress/components'
+category: Layout
+description: A structured container with header, body, media, and footer sections; ideal for plugin settings pages and block editor admin panels
+---
+
+# Card Component
+
+`Card` provides a bordered, padded container with semantic sub-components for headers, footers, body content, dividers, and media. Use it on plugin settings pages, admin panels, and anywhere you need visually distinct content groupings that follow WordPress design system patterns.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Card, CardHeader, CardBody, CardFooter, CardMedia, CardDivider } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Card, CardHeader, CardBody, CardFooter, Button } from '@wordpress/components';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<Card>
+				<CardHeader>
+					<strong>{ __( 'Block Preview', 'your-text-domain' ) }</strong>
+				</CardHeader>
+				<CardBody>
+					<p>{ __( 'Configure this block in the settings panel.', 'your-text-domain' ) }</p>
+				</CardBody>
+				<CardFooter>
+					<Button variant="secondary">
+						{ __( 'Learn more', 'your-text-domain' ) }
+					</Button>
+				</CardFooter>
+			</Card>
+		</div>
+	);
+}
+```
+
+## Card with Size Variants
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Card, CardHeader, CardBody } from '@wordpress/components';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps } style={ { display: 'flex', flexDirection: 'column', gap: '16px' } }>
+			<Card size="small">
+				<CardHeader>{ __( 'Small card', 'your-text-domain' ) }</CardHeader>
+				<CardBody>{ __( 'Compact padding, ideal for dense UI.', 'your-text-domain' ) }</CardBody>
+			</Card>
+
+			<Card size="medium">
+				<CardHeader>{ __( 'Medium card (default)', 'your-text-domain' ) }</CardHeader>
+				<CardBody>{ __( 'Standard padding for most use cases.', 'your-text-domain' ) }</CardBody>
+			</Card>
+
+			<Card size="large">
+				<CardHeader>{ __( 'Large card', 'your-text-domain' ) }</CardHeader>
+				<CardBody>{ __( 'Extra padding for prominent content areas.', 'your-text-domain' ) }</CardBody>
+			</Card>
+		</div>
+	);
+}
+```
+
+## Card with Media
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Card, CardHeader, CardMedia, CardBody, CardFooter, Button } from '@wordpress/components';
+
+export default function Edit( { attributes } ) {
+	const blockProps = useBlockProps();
+	const { imageUrl, title, description } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<Card>
+				{ imageUrl && (
+					<CardMedia>
+						<img
+							src={ imageUrl }
+							alt={ title }
+							style={ { width: '100%', display: 'block' } }
+						/>
+					</CardMedia>
+				) }
+				<CardHeader>
+					<h3 style={ { margin: 0 } }>{ title || __( 'Card Title', 'your-text-domain' ) }</h3>
+				</CardHeader>
+				<CardBody>
+					<p>{ description || __( 'Card description goes here.', 'your-text-domain' ) }</p>
+				</CardBody>
+				<CardFooter justify="flex-end">
+					<Button variant="primary">
+						{ __( 'Read more', 'your-text-domain' ) }
+					</Button>
+				</CardFooter>
+			</Card>
+		</div>
+	);
+}
+```
+
+## Multiple Cards (Grid Layout)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Card, CardHeader, CardBody, CardFooter, Button } from '@wordpress/components';
+
+const FEATURES = [
+	{
+		title: __( 'Performance', 'your-text-domain' ),
+		description: __( 'Optimized for speed with lazy loading and efficient queries.', 'your-text-domain' ),
+	},
+	{
+		title: __( 'Accessibility', 'your-text-domain' ),
+		description: __( 'WCAG 2.1 AA compliant with keyboard and screen reader support.', 'your-text-domain' ),
+	},
+	{
+		title: __( 'Customizable', 'your-text-domain' ),
+		description: __( 'Extensive settings panel with theme-compatible styles.', 'your-text-domain' ),
+	},
+];
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div
+			{ ...blockProps }
+			style={ { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' } }
+		>
+			{ FEATURES.map( ( feature, index ) => (
+				<Card key={ index }>
+					<CardHeader>
+						<strong>{ feature.title }</strong>
+					</CardHeader>
+					<CardBody>
+						<p>{ feature.description }</p>
+					</CardBody>
+				</Card>
+			) ) }
+		</div>
+	);
+}
+```
+
+## Card with Divider and Multiple Sections
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, Card, CardHeader, CardBody, CardDivider, ToggleControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { showMeta, showFooter, showSidebar } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout Options', 'your-text-domain' ) }>
+					<ToggleControl
+						label={ __( 'Show meta', 'your-text-domain' ) }
+						checked={ showMeta }
+						onChange={ ( value ) => setAttributes( { showMeta: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Show footer', 'your-text-domain' ) }
+						checked={ showFooter }
+						onChange={ ( value ) => setAttributes( { showFooter: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<Card>
+					<CardHeader>
+						<strong>{ __( 'Article Card', 'your-text-domain' ) }</strong>
+					</CardHeader>
+					<CardBody>
+						<p>{ __( 'Main article content.', 'your-text-domain' ) }</p>
+					</CardBody>
+					{ showMeta && (
+						<>
+							<CardDivider />
+							<CardBody size="small">
+								<small>{ __( 'Published: Jan 1, 2026', 'your-text-domain' ) }</small>
+							</CardBody>
+						</>
+					) }
+					{ showFooter && (
+						<>
+							<CardDivider />
+							<CardBody size="small">
+								{ __( 'Footer content', 'your-text-domain' ) }
+							</CardBody>
+						</>
+					) }
+				</Card>
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for divider example
+
+```json
+{
+	"attributes": {
+		"showMeta": { "type": "boolean", "default": true },
+		"showFooter": { "type": "boolean", "default": false }
+	}
+}
+```
+
+## save.js
+
+`Card` can be used in `save.js` when it represents front-end content. However, it is more commonly used in the block editor or admin UI. For front-end rendering, render plain semantic HTML instead:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { title, description, imageUrl } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<div className="wp-block-card">
+				{ imageUrl && <img src={ imageUrl } alt={ title } /> }
+				{ title && <h3>{ title }</h3> }
+				{ description && <p>{ description }</p> }
+			</div>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### Card
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | string | `'medium'` | Padding size: `'small'`, `'medium'`, `'large'`, `'xSmall'` |
+| `variant` | string | `'elevated'` | Visual style: `'elevated'`, `'outlined'`, `'muted'` |
+| `isRounded` | boolean | `true` | Applies rounded corners |
+| `className` | string | - | Additional CSS classes |
+| `children` | node | - | Card sub-components |
+
+### CardHeader / CardFooter
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `justify` | string | `'space-between'` | Flexbox `justify-content` value |
+| `size` | string | `'medium'` | Padding size (inherits from Card) |
+| `children` | node | - | Header/footer content |
+
+### CardBody
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `size` | string | - | Override padding size for this section |
+| `children` | node | - | Body content |
+
+## Common Use Cases
+
+1. **Plugin settings pages**: Group related settings visually
+2. **Feature showcases**: Display feature lists in a grid of cards
+3. **Onboarding screens**: Present step-by-step setup in card format
+4. **Admin dashboard widgets**: Display stats and quick-action cards
+5. **Block "empty state"**: Show a card prompt when block has no content
+
+## Accessibility
+
+- `Card` renders as a `<div>` — use appropriate ARIA roles when cards are interactive
+- For clickable cards, wrap in a `<button>` or `<a>` and apply focus styles
+- `CardHeader` renders as a `<div>` — add semantic heading tags (`<h2>`, `<h3>`) inside as needed
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- `Card` components follow the WordPress design system for spacing, shadows, and borders
+- For front-end rendering, use semantic HTML (`<article>`, `<section>`) rather than `Card` in `save.js`
+- Use `CardDivider` instead of `<hr>` between sections for consistent styling
+- Match `size` prop to surrounding UI density — `'small'` in sidebars, `'medium'` in main panels

@@ -1,0 +1,314 @@
+---
+title: TextareaControl Component
+component: TextareaControl
+package: '@wordpress/components'
+category: Form Controls
+description: A multi-line text input for longer content such as custom CSS, excerpts, captions, and description fields
+---
+
+# TextareaControl Component
+
+`TextareaControl` renders a multi-line `<textarea>` input. Use it whenever a single line of text is not enough — custom CSS, excerpts, long descriptions, or any content where the user needs to see multiple lines at once.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { TextareaControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"customCSS": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, TextareaControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { customCSS } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Advanced', 'your-text-domain' ) }>
+					<TextareaControl
+						label={ __( 'Custom CSS', 'your-text-domain' ) }
+						value={ customCSS }
+						onChange={ ( value ) => setAttributes( { customCSS: value } ) }
+						help={ __( 'Add custom CSS styles for this block.', 'your-text-domain' ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ customCSS && <style>{ customCSS }</style> }
+				{ __( 'Block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Description / Excerpt Field
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, TextareaControl, TextControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title, description } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Content', 'your-text-domain' ) }>
+					<TextControl
+						label={ __( 'Title', 'your-text-domain' ) }
+						value={ title }
+						onChange={ ( value ) => setAttributes( { title: value } ) }
+					/>
+					<TextareaControl
+						label={ __( 'Description', 'your-text-domain' ) }
+						value={ description }
+						placeholder={ __( 'Enter a description…', 'your-text-domain' ) }
+						rows={ 4 }
+						onChange={ ( value ) => setAttributes( { description: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ title && <h2>{ title }</h2> }
+				{ description && <p>{ description }</p> }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for description
+
+```json
+{
+	"attributes": {
+		"title": { "type": "string", "default": "" },
+		"description": { "type": "string", "default": "" }
+	}
+}
+```
+
+## JSON / Code Input
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, TextareaControl, Notice } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { jsonConfig } = attributes;
+	const [ jsonError, setJsonError ] = useState( '' );
+
+	const handleJsonChange = ( value ) => {
+		setAttributes( { jsonConfig: value } );
+
+		if ( value.trim() === '' ) {
+			setJsonError( '' );
+			return;
+		}
+
+		try {
+			JSON.parse( value );
+			setJsonError( '' );
+		} catch ( e ) {
+			setJsonError( __( 'Invalid JSON format.', 'your-text-domain' ) );
+		}
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Configuration', 'your-text-domain' ) }>
+					{ jsonError && (
+						<Notice status="error" isDismissible={ false }>
+							{ jsonError }
+						</Notice>
+					) }
+					<TextareaControl
+						label={ __( 'JSON Configuration', 'your-text-domain' ) }
+						value={ jsonConfig }
+						rows={ 6 }
+						onChange={ handleJsonChange }
+						help={ __( 'Enter valid JSON to configure this block.', 'your-text-domain' ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ __( 'Block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for JSON config
+
+```json
+{
+	"attributes": {
+		"jsonConfig": { "type": "string", "default": "" }
+	}
+}
+```
+
+## Character Count
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, TextareaControl } from '@wordpress/components';
+
+const MAX_LENGTH = 160;
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { metaDescription } = attributes;
+	const charCount = metaDescription.length;
+	const isOverLimit = charCount > MAX_LENGTH;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'SEO', 'your-text-domain' ) }>
+					<TextareaControl
+						label={ __( 'Meta description', 'your-text-domain' ) }
+						value={ metaDescription }
+						rows={ 3 }
+						onChange={ ( value ) => setAttributes( { metaDescription: value } ) }
+						help={
+							<span style={ { color: isOverLimit ? '#cc1818' : 'inherit' } }>
+								{ `${ charCount } / ${ MAX_LENGTH } ${ __( 'characters', 'your-text-domain' ) }` }
+							</span>
+						}
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ __( 'Page content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for meta description
+
+```json
+{
+	"attributes": {
+		"metaDescription": { "type": "string", "default": "" }
+	}
+}
+```
+
+## Resizable Textarea in Block Canvas
+
+Use `TextareaControl` directly inside the block (not just the sidebar) for inline multi-line editing:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { TextareaControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { notes } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<TextareaControl
+				label={ __( 'Notes', 'your-text-domain' ) }
+				hideLabelFromVision
+				placeholder={ __( 'Add notes here…', 'your-text-domain' ) }
+				value={ notes }
+				rows={ 5 }
+				onChange={ ( value ) => setAttributes( { notes: value } ) }
+			/>
+		</div>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { title, description } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ title && <h2>{ title }</h2> }
+			{ description && <p>{ description }</p> }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Visible label above the textarea |
+| `value` | string | `''` | Controlled value |
+| `onChange` | function | - | Callback receiving the updated string value |
+| `rows` | number | `4` | Number of visible text rows |
+| `placeholder` | string | - | Placeholder text when empty |
+| `help` | string\|node | - | Help text displayed below the textarea |
+| `disabled` | boolean | `false` | Disables the textarea |
+| `className` | string | - | Additional CSS classes |
+| `hideLabelFromVision` | boolean | `false` | Visually hides the label (still accessible) |
+| `id` | string | - | HTML id; auto-generated if omitted |
+
+## Common Use Cases
+
+1. **Custom CSS fields**: Block-scoped style overrides
+2. **Descriptions / excerpts**: Summary text stored as an attribute
+3. **JSON / code configuration**: Structured data input with validation
+4. **Meta descriptions**: SEO-related text with character count feedback
+5. **Notes fields**: Internal annotations or captions
+
+## Accessibility
+
+- `label` renders as a `<label>` associated with the textarea via `htmlFor`
+- `help` text is linked via `aria-describedby`
+- `hideLabelFromVision` uses `.screen-reader-text` — label is still read aloud
+- Standard browser resize handle remains accessible via keyboard
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for all user-facing strings
+- For **rich text editing** inside the block canvas, prefer `RichText` from `@wordpress/block-editor`
+- For **single-line text**, use `TextControl`
+- Sanitize textarea values server-side with `sanitize_textarea_field()` in PHP

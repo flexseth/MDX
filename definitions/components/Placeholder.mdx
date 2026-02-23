@@ -1,0 +1,319 @@
+---
+title: Placeholder Component
+component: Placeholder
+package: '@wordpress/components'
+category: Layout
+description: An empty-state UI container for blocks that haven't been configured yet; used by dozens of core blocks as the initial setup experience
+---
+
+# Placeholder Component
+
+`Placeholder` provides the standard WordPress empty-state UI that appears when a block has no content selected or configured. It displays an icon, label, instructions, and action buttons in a visually distinct bordered area. Dozens of core blocks (Image, Video, Cover, Embed) use this exact pattern for their initial state.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Placeholder } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Placeholder, Button } from '@wordpress/components';
+import { image } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageUrl } = attributes;
+
+	if ( imageUrl ) {
+		return (
+			<div { ...blockProps }>
+				<img src={ imageUrl } alt="" style={ { width: '100%' } } />
+			</div>
+		);
+	}
+
+	return (
+		<div { ...blockProps }>
+			<Placeholder
+				icon={ image }
+				label={ __( 'Image Block', 'your-text-domain' ) }
+				instructions={ __( 'Upload an image or choose one from your media library.', 'your-text-domain' ) }
+			>
+				<Button variant="primary" onClick={ () => setAttributes( { imageUrl: '/placeholder.jpg' } ) }>
+					{ __( 'Upload Image', 'your-text-domain' ) }
+				</Button>
+				<Button variant="secondary">
+					{ __( 'Media Library', 'your-text-domain' ) }
+				</Button>
+			</Placeholder>
+		</div>
+	);
+}
+```
+
+## Placeholder with MediaUpload
+
+The most common pattern: show `Placeholder` until media is selected, then show the content:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Placeholder, Button } from '@wordpress/components';
+import { image } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageId, imageUrl, imageAlt } = attributes;
+
+	const onSelectImage = ( media ) => {
+		setAttributes( {
+			imageId: media.id,
+			imageUrl: media.url,
+			imageAlt: media.alt,
+		} );
+	};
+
+	if ( ! imageUrl ) {
+		return (
+			<div { ...blockProps }>
+				<Placeholder
+					icon={ image }
+					label={ __( 'Featured Image', 'your-text-domain' ) }
+					instructions={ __( 'Select or upload an image to feature in this block.', 'your-text-domain' ) }
+				>
+					<MediaUploadCheck>
+						<MediaUpload
+							onSelect={ onSelectImage }
+							allowedTypes={ [ 'image' ] }
+							value={ imageId }
+							render={ ( { open } ) => (
+								<Button variant="primary" onClick={ open }>
+									{ __( 'Select Image', 'your-text-domain' ) }
+								</Button>
+							) }
+						/>
+					</MediaUploadCheck>
+				</Placeholder>
+			</div>
+		);
+	}
+
+	return (
+		<div { ...blockProps }>
+			<img src={ imageUrl } alt={ imageAlt } style={ { width: '100%' } } />
+			<Button
+				variant="link"
+				onClick={ () => setAttributes( { imageId: 0, imageUrl: '', imageAlt: '' } ) }
+			>
+				{ __( 'Remove image', 'your-text-domain' ) }
+			</Button>
+		</div>
+	);
+}
+```
+
+### block.json for media placeholder
+
+```json
+{
+	"attributes": {
+		"imageId": { "type": "number", "default": 0 },
+		"imageUrl": { "type": "string", "default": "" },
+		"imageAlt": { "type": "string", "default": "" }
+	}
+}
+```
+
+## Placeholder with Form Input (Embed-Style)
+
+Many core embed blocks use a form inside `Placeholder`:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Placeholder, TextControl, Button, Spinner } from '@wordpress/components';
+import { external } from '@wordpress/icons';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { embedUrl, embedTitle } = attributes;
+	const [ inputUrl, setInputUrl ] = useState( '' );
+	const [ isLoading, setIsLoading ] = useState( false );
+
+	const handleEmbed = () => {
+		if ( ! inputUrl.trim() ) return;
+		setIsLoading( true );
+		// Simulate resolving the embed
+		setTimeout( () => {
+			setAttributes( { embedUrl: inputUrl, embedTitle: 'Embedded content' } );
+			setIsLoading( false );
+		}, 1000 );
+	};
+
+	if ( embedUrl ) {
+		return (
+			<div { ...blockProps }>
+				<div style={ { background: '#f0f0f0', padding: '16px', borderRadius: '4px' } }>
+					<p>{ __( 'Embedded:', 'your-text-domain' ) } { embedTitle }</p>
+					<Button variant="link" onClick={ () => setAttributes( { embedUrl: '', embedTitle: '' } ) }>
+						{ __( 'Replace', 'your-text-domain' ) }
+					</Button>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div { ...blockProps }>
+			<Placeholder
+				icon={ external }
+				label={ __( 'Embed', 'your-text-domain' ) }
+				instructions={ __( 'Enter a URL to embed content from an external source.', 'your-text-domain' ) }
+			>
+				<form
+					onSubmit={ ( e ) => { e.preventDefault(); handleEmbed(); } }
+					style={ { display: 'flex', gap: '8px', width: '100%' } }
+				>
+					<TextControl
+						value={ inputUrl }
+						onChange={ setInputUrl }
+						placeholder={ __( 'Enter URL to embed…', 'your-text-domain' ) }
+						type="url"
+						style={ { flex: 1 } }
+					/>
+					<Button
+						variant="primary"
+						type="submit"
+						isBusy={ isLoading }
+						disabled={ isLoading || ! inputUrl.trim() }
+					>
+						{ __( 'Embed', 'your-text-domain' ) }
+					</Button>
+				</form>
+				{ isLoading && <Spinner /> }
+			</Placeholder>
+		</div>
+	);
+}
+```
+
+## Placeholder with API Connection
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, Placeholder, TextControl, Button, Notice } from '@wordpress/components';
+import { key } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { apiKey, isConnected } = attributes;
+	const [ inputKey, setInputKey ] = useState( '' );
+
+	const handleConnect = () => {
+		// Validate key and connect
+		if ( inputKey.length >= 20 ) {
+			setAttributes( { apiKey: inputKey, isConnected: true } );
+		}
+	};
+
+	if ( ! isConnected ) {
+		return (
+			<div { ...blockProps }>
+				<Placeholder
+					icon={ key }
+					label={ __( 'API Connection Required', 'your-text-domain' ) }
+					instructions={ __( 'Enter your API key to connect this block to the service.', 'your-text-domain' ) }
+				>
+					<TextControl
+						label={ __( 'API Key', 'your-text-domain' ) }
+						type="password"
+						value={ inputKey }
+						onChange={ setInputKey }
+					/>
+					<Button
+						variant="primary"
+						onClick={ handleConnect }
+						disabled={ inputKey.length < 20 }
+					>
+						{ __( 'Connect', 'your-text-domain' ) }
+					</Button>
+				</Placeholder>
+			</div>
+		);
+	}
+
+	return (
+		<div { ...blockProps }>
+			{ __( 'Connected! Block content loads here.', 'your-text-domain' ) }
+		</div>
+	);
+}
+```
+
+## save.js
+
+`Placeholder` is editor-only. In `save.js`, render appropriate front-end output or `null` for empty state:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { imageUrl, imageAlt } = attributes;
+
+	if ( ! imageUrl ) {
+		return null;
+	}
+
+	return (
+		<div { ...blockProps }>
+			<img src={ imageUrl } alt={ imageAlt } />
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `icon` | Component\|string | - | Icon from `@wordpress/icons` displayed in the header |
+| `label` | string | - | Block name / placeholder title |
+| `instructions` | string | - | Brief guidance text below the label |
+| `children` | node | - | Action buttons, inputs, and other interactive elements |
+| `className` | string | - | Additional CSS classes |
+| `isColumnLayout` | boolean | `false` | Stacks children vertically instead of in a row |
+| `preview` | node | - | Content to display as a side-by-side preview |
+
+## Common Use Cases
+
+1. **Empty media state**: Before an image, video, or file is selected
+2. **Embed URL input**: Before an external URL is provided
+3. **API configuration**: When an API key or external connection is needed
+4. **Query filter setup**: Before category/post type selections are made
+5. **Template chooser**: Display layout or style options before the block has content
+
+## Accessibility
+
+- Placeholder content is always visible and interactive — never hidden behind a click
+- Action buttons within `Placeholder` participate in normal keyboard tab order
+- `label` and `instructions` are rendered as visible text, not just ARIA labels
+- Icon is decorative — the `label` provides the accessible name for the empty-state region
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Always show `Placeholder` when required block configuration is missing — don't show a broken block
+- Return `null` from `save.js` when the block has no configured content (prevents invalid HTML)
+- Use `isColumnLayout` when placing a form or multiple inputs inside the placeholder
+- Follow the core WordPress pattern: show `Placeholder` → user configures → show block content

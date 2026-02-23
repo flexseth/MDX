@@ -1,0 +1,238 @@
+---
+title: DateTimePicker Component
+component: DateTimePicker
+package: '@wordpress/components'
+category: Form Controls
+description: A combined calendar and clock picker for selecting dates and times in WordPress blocks
+---
+
+# DateTimePicker Component
+
+The `DateTimePicker` component from `@wordpress/components` renders a calendar and clock interface for date and time selection. It can be used as a combined picker or as separate `DatePicker` and `TimePicker` components.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { DateTimePicker } from '@wordpress/components';
+```
+
+Or individually:
+
+```javascript
+import { DatePicker, TimePicker } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DateTimePicker } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ date, setDate ] = useState( new Date().toISOString() );
+
+	return (
+		<div { ...blockProps }>
+			<DateTimePicker
+				currentDate={ date }
+				onChange={ ( newDate ) => setDate( newDate ) }
+				is12Hour={ true }
+			/>
+		</div>
+	);
+}
+```
+
+## DateTimePicker with Block Attributes
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DateTimePicker, Dropdown, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { selectedDate } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<Dropdown
+				popoverProps={ { placement: 'bottom-start' } }
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<Button
+						variant="secondary"
+						onClick={ onToggle }
+						aria-expanded={ isOpen }
+					>
+						{ selectedDate
+							? new Date( selectedDate ).toLocaleString()
+							: __( 'Select Date & Time', 'your-text-domain' )
+						}
+					</Button>
+				) }
+				renderContent={ () => (
+					<DateTimePicker
+						currentDate={ selectedDate }
+						onChange={ ( newDate ) =>
+							setAttributes( { selectedDate: newDate } )
+						}
+						is12Hour={ true }
+					/>
+				) }
+			/>
+		</div>
+	);
+}
+```
+
+## DatePicker Only
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DatePicker } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ date, setDate ] = useState( new Date().toISOString() );
+
+	return (
+		<div { ...blockProps }>
+			<DatePicker
+				currentDate={ date }
+				onChange={ ( newDate ) => setDate( newDate ) }
+			/>
+		</div>
+	);
+}
+```
+
+## TimePicker Only
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { TimePicker } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ time, setTime ] = useState( new Date().toISOString() );
+
+	return (
+		<div { ...blockProps }>
+			<TimePicker
+				currentTime={ time }
+				onChange={ ( newTime ) => setTime( newTime ) }
+				is12Hour={ true }
+			/>
+		</div>
+	);
+}
+```
+
+## With Invalid Dates
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DateTimePicker } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ date, setDate ] = useState( new Date().toISOString() );
+
+	// Disable dates in the past
+	const isInvalidDate = ( checkDate ) => {
+		const today = new Date();
+		today.setHours( 0, 0, 0, 0 );
+		return checkDate < today;
+	};
+
+	return (
+		<div { ...blockProps }>
+			<DateTimePicker
+				currentDate={ date }
+				onChange={ ( newDate ) => setDate( newDate ) }
+				is12Hour={ true }
+				isInvalidDate={ isInvalidDate }
+			/>
+		</div>
+	);
+}
+```
+
+## With Calendar Events
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DateTimePicker } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ date, setDate ] = useState( new Date().toISOString() );
+
+	const events = [
+		{ date: new Date( 2025, 0, 15 ) },
+		{ date: new Date( 2025, 0, 22 ) },
+		{ date: new Date( 2025, 1, 5 ) },
+	];
+
+	return (
+		<div { ...blockProps }>
+			<DateTimePicker
+				currentDate={ date }
+				onChange={ ( newDate ) => setDate( newDate ) }
+				is12Hour={ true }
+				events={ events }
+			/>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `currentDate` | Date / string / number / null | Now | The current date and time value |
+| `onChange` | function | - | Callback when the date or time changes, receives ISO string |
+| `is12Hour` | boolean | `false` | Use 12-hour format with AM/PM selector |
+| `dateOrder` | string | `'dmy'` | Date field order: `'dmy'`, `'mdy'`, or `'ymd'` |
+| `isInvalidDate` | function | - | Function returning `true` for dates that cannot be selected |
+| `onMonthPreviewed` | function | - | Callback when the visible month changes |
+| `events` | array | - | Array of `{ date: Date }` objects shown as dots on the calendar |
+| `startOfWeek` | number | `0` | First day of the week (0 = Sunday, 1 = Monday, etc.) |
+
+## Common Use Cases
+
+1. **Event Scheduling**: Let users pick a date and time for events or appointments
+2. **Content Scheduling**: Schedule posts or content publication dates
+3. **Deadline Setting**: Set due dates or expiration dates on content
+4. **Date Ranges**: Use two DatePickers for start and end date selection
+
+## Accessibility
+
+- Calendar is keyboard navigable with arrow keys
+- AM/PM toggle is accessible via keyboard
+- Month navigation buttons have accessible labels
+- Invalid dates are marked as disabled for screen readers
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for translatable text
+- Use `@wordpress/element` for `useState` and other React hooks
+- Store dates as ISO 8601 strings in block attributes
+- Follow block editor design patterns

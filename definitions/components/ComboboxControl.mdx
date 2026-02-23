@@ -1,0 +1,346 @@
+---
+title: ComboboxControl Component
+component: ComboboxControl
+package: '@wordpress/components'
+category: Form Controls
+description: A searchable combobox (autocomplete dropdown) for selecting from long option lists; supports async filtering and custom render options
+---
+
+# ComboboxControl Component
+
+`ComboboxControl` combines a text input with a filterable dropdown. It is the right choice when your option list is long enough that users need to search rather than scroll. Common uses include post/page selectors, taxonomy pickers, and any list with more than ~10 options.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { ComboboxControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"selectedCountry": {
+			"type": "string",
+			"default": null
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ComboboxControl } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+const COUNTRIES = [
+	{ value: 'us', label: 'United States' },
+	{ value: 'ca', label: 'Canada' },
+	{ value: 'gb', label: 'United Kingdom' },
+	{ value: 'au', label: 'Australia' },
+	{ value: 'de', label: 'Germany' },
+	{ value: 'fr', label: 'France' },
+	{ value: 'jp', label: 'Japan' },
+	{ value: 'br', label: 'Brazil' },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { selectedCountry } = attributes;
+	const [ filteredOptions, setFilteredOptions ] = useState( COUNTRIES );
+
+	const handleFilterChange = ( input ) => {
+		const filtered = COUNTRIES.filter( ( option ) =>
+			option.label.toLowerCase().includes( input.toLowerCase() )
+		);
+		setFilteredOptions( filtered );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Location', 'your-text-domain' ) }>
+					<ComboboxControl
+						label={ __( 'Country', 'your-text-domain' ) }
+						value={ selectedCountry }
+						options={ filteredOptions }
+						onChange={ ( value ) => setAttributes( { selectedCountry: value } ) }
+						onFilterValueChange={ handleFilterChange }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ selectedCountry
+					? `${ __( 'Selected:', 'your-text-domain' ) } ${ selectedCountry }`
+					: __( 'No country selected.', 'your-text-domain' )
+				}
+			</div>
+		</>
+	);
+}
+```
+
+## Async Post Selector
+
+Fetch posts from the REST API as the user types:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ComboboxControl } from '@wordpress/components';
+import { useState, useCallback } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { selectedPostId } = attributes;
+	const [ postOptions, setPostOptions ] = useState( [] );
+	const [ isLoading, setIsLoading ] = useState( false );
+
+	const handleFilterChange = useCallback( ( search ) => {
+		if ( search.length < 2 ) {
+			setPostOptions( [] );
+			return;
+		}
+
+		setIsLoading( true );
+		apiFetch( {
+			path: `/wp/v2/posts?search=${ encodeURIComponent( search ) }&per_page=10&_fields=id,title`,
+		} ).then( ( posts ) => {
+			setPostOptions(
+				posts.map( ( post ) => ( {
+					value: post.id,
+					label: post.title.rendered,
+				} ) )
+			);
+			setIsLoading( false );
+		} ).catch( () => setIsLoading( false ) );
+	}, [] );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Post Settings', 'your-text-domain' ) }>
+					<ComboboxControl
+						label={ __( 'Select post', 'your-text-domain' ) }
+						help={ __( 'Type at least 2 characters to search posts.', 'your-text-domain' ) }
+						value={ selectedPostId }
+						options={ postOptions }
+						onChange={ ( value ) => setAttributes( { selectedPostId: value } ) }
+						onFilterValueChange={ handleFilterChange }
+						isLoading={ isLoading }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ selectedPostId
+					? `${ __( 'Post ID:', 'your-text-domain' ) } ${ selectedPostId }`
+					: __( 'No post selected.', 'your-text-domain' )
+				}
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for post selector
+
+```json
+{
+	"attributes": {
+		"selectedPostId": {
+			"type": "number",
+			"default": null
+		}
+	}
+}
+```
+
+## Taxonomy / Category Picker
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ComboboxControl } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { selectedTag } = attributes;
+	const [ allTags, setAllTags ] = useState( [] );
+	const [ filteredTags, setFilteredTags ] = useState( [] );
+
+	useEffect( () => {
+		apiFetch( { path: '/wp/v2/tags?per_page=100&_fields=id,name' } ).then( ( tags ) => {
+			const options = tags.map( ( tag ) => ( { value: tag.id, label: tag.name } ) );
+			setAllTags( options );
+			setFilteredTags( options );
+		} );
+	}, [] );
+
+	const handleFilterChange = ( input ) => {
+		setFilteredTags(
+			allTags.filter( ( t ) => t.label.toLowerCase().includes( input.toLowerCase() ) )
+		);
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Tag Filter', 'your-text-domain' ) }>
+					<ComboboxControl
+						label={ __( 'Filter by tag', 'your-text-domain' ) }
+						value={ selectedTag }
+						options={ filteredTags }
+						onChange={ ( value ) => setAttributes( { selectedTag: value } ) }
+						onFilterValueChange={ handleFilterChange }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ __( 'Posts filtered by tag', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for tag filter
+
+```json
+{
+	"attributes": {
+		"selectedTag": {
+			"type": "number",
+			"default": null
+		}
+	}
+}
+```
+
+## With Allow Reset
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ComboboxControl, Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+const FONT_OPTIONS = [
+	{ value: 'inherit', label: __( 'Default (inherit)', 'your-text-domain' ) },
+	{ value: 'serif', label: 'Serif' },
+	{ value: 'sans-serif', label: 'Sans Serif' },
+	{ value: 'monospace', label: 'Monospace' },
+	{ value: 'georgia', label: 'Georgia' },
+	{ value: 'times-new-roman', label: 'Times New Roman' },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontFamily } = attributes;
+	const [ filtered, setFiltered ] = useState( FONT_OPTIONS );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<ComboboxControl
+						label={ __( 'Font family', 'your-text-domain' ) }
+						value={ fontFamily }
+						options={ filtered }
+						onChange={ ( value ) => setAttributes( { fontFamily: value } ) }
+						onFilterValueChange={ ( input ) =>
+							setFiltered(
+								FONT_OPTIONS.filter( ( o ) =>
+									o.label.toLowerCase().includes( input.toLowerCase() )
+								)
+							)
+						}
+					/>
+					{ fontFamily && fontFamily !== 'inherit' && (
+						<Button
+							variant="link"
+							isDestructive
+							onClick={ () => setAttributes( { fontFamily: 'inherit' } ) }
+						>
+							{ __( 'Reset to default', 'your-text-domain' ) }
+						</Button>
+					) }
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { fontFamily } }>
+				{ __( 'Sample text', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`ComboboxControl` is editor-only. The saved value is used to render front-end output:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { selectedCountry } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ selectedCountry && (
+				<span className="selected-country">{ selectedCountry }</span>
+			) }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Label displayed above the input |
+| `value` | string\|number\|null | `null` | Currently selected value |
+| `options` | array | `[]` | Array of `{ value, label }` objects to display |
+| `onChange` | function | - | Callback receiving the selected value (or `null` when cleared) |
+| `onFilterValueChange` | function | - | Callback receiving the current filter text as the user types |
+| `help` | string\|node | - | Help text below the control |
+| `isLoading` | boolean | `false` | Shows a spinner in the dropdown while fetching options |
+| `messages` | object | - | Override `{ noResultsFound }` message text |
+| `className` | string | - | Additional CSS classes |
+| `hideLabelFromVision` | boolean | `false` | Visually hides the label |
+| `__nextHasNoMarginBottom` | boolean | `false` | Removes bottom margin (new design system opt-in) |
+
+## Common Use Cases
+
+1. **Post/page selectors**: Search and link to other posts by title
+2. **Taxonomy pickers**: Choose categories, tags, or custom terms
+3. **Country / timezone dropdowns**: Long static lists that need filtering
+4. **Font family selection**: Filter from a large list of fonts
+5. **Author selectors**: Choose from site users
+
+## Accessibility
+
+- Renders as a combobox `role="combobox"` with `aria-expanded` state
+- The dropdown list is `role="listbox"` with `role="option"` items
+- Keyboard: type to filter, arrow keys to navigate, Enter to select, Escape to close
+- Selected value is announced by screen readers on change
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `onFilterValueChange` for all filtering — do not filter options in `onChange`
+- Use `isLoading` prop during async fetches to provide visual feedback
+- For fewer than ~10 static options, use `SelectControl` instead
+- Store the option `value` (not `label`) in block attributes

@@ -1,0 +1,322 @@
+---
+title: InspectorControls Component
+component: InspectorControls
+package: '@wordpress/block-editor'
+category: Block Editor Infrastructure
+description: Container for block settings that appear in the editor sidebar; the primary location for all block configuration controls
+---
+
+# InspectorControls Component
+
+`InspectorControls` renders its children into the **Settings sidebar** (the right-hand panel) in the block editor. It is the required wrapper for any controls you want to surface in the block inspector. Nearly every non-trivial block uses it.
+
+## Installation
+
+This component is included in the `@wordpress/block-editor` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { InspectorControls } from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"title": {
+			"type": "string",
+			"default": ""
+		},
+		"showBorder": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title, showBorder } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+					<TextControl
+						label={ __( 'Title', 'your-text-domain' ) }
+						value={ title }
+						onChange={ ( value ) => setAttributes( { title: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Show Border', 'your-text-domain' ) }
+						checked={ showBorder }
+						onChange={ ( value ) => setAttributes( { showBorder: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<p style={ { border: showBorder ? '1px solid currentColor' : 'none' } }>
+					{ title || __( 'Add a title...', 'your-text-domain' ) }
+				</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Multiple Panels
+
+Use multiple `PanelBody` components inside one `InspectorControls` to organize settings into collapsible sections.
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	PanelBody,
+	TextControl,
+	ToggleControl,
+	RangeControl,
+	SelectControl,
+} from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { heading, showDate, fontSize, alignment } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Content', 'your-text-domain' ) }
+					initialOpen={ true }
+				>
+					<TextControl
+						label={ __( 'Heading', 'your-text-domain' ) }
+						value={ heading }
+						onChange={ ( value ) => setAttributes( { heading: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Show Date', 'your-text-domain' ) }
+						checked={ showDate }
+						onChange={ ( value ) => setAttributes( { showDate: value } ) }
+					/>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Typography', 'your-text-domain' ) }
+					initialOpen={ false }
+				>
+					<RangeControl
+						label={ __( 'Font Size', 'your-text-domain' ) }
+						value={ fontSize }
+						onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+						min={ 12 }
+						max={ 72 }
+					/>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Layout', 'your-text-domain' ) }
+					initialOpen={ false }
+				>
+					<SelectControl
+						label={ __( 'Alignment', 'your-text-domain' ) }
+						value={ alignment }
+						options={ [
+							{ label: __( 'Left', 'your-text-domain' ), value: 'left' },
+							{ label: __( 'Center', 'your-text-domain' ), value: 'center' },
+							{ label: __( 'Right', 'your-text-domain' ), value: 'right' },
+						] }
+						onChange={ ( value ) => setAttributes( { alignment: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { textAlign: alignment, fontSize: `${ fontSize }px` } }>
+				{ heading && <h2>{ heading }</h2> }
+				{ showDate && <p>{ new Date().toLocaleDateString() }</p> }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for multiple panels
+
+```json
+{
+	"attributes": {
+		"heading": { "type": "string", "default": "" },
+		"showDate": { "type": "boolean", "default": false },
+		"fontSize": { "type": "number", "default": 16 },
+		"alignment": { "type": "string", "default": "left" }
+	}
+}
+```
+
+## InspectorControls.Fill Slots
+
+`InspectorControls` supports named slots for placing controls in specific sections of the sidebar.
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, TextControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { customClass } = attributes;
+
+	return (
+		<>
+			{ /* Default slot: main Settings tab */ }
+			<InspectorControls>
+				<PanelBody title={ __( 'General', 'your-text-domain' ) }>
+					<TextControl
+						label={ __( 'Custom CSS Class', 'your-text-domain' ) }
+						value={ customClass }
+						onChange={ ( value ) => setAttributes( { customClass: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			{ /* Advanced tab */ }
+			<InspectorControls group="advanced">
+				<TextControl
+					label={ __( 'HTML Anchor', 'your-text-domain' ) }
+					value={ attributes.anchor || '' }
+					onChange={ ( value ) => setAttributes( { anchor: value } ) }
+					help={ __( 'Enter an ID to link to this block.', 'your-text-domain' ) }
+				/>
+			</InspectorControls>
+
+			<div { ...blockProps } className={ customClass }>
+				{ __( 'Block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## With Color Settings
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, PanelColorSettings } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { backgroundColor, textColor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelColorSettings
+					title={ __( 'Color Settings', 'your-text-domain' ) }
+					colorSettings={ [
+						{
+							value: backgroundColor,
+							onChange: ( value ) => setAttributes( { backgroundColor: value } ),
+							label: __( 'Background Color', 'your-text-domain' ),
+						},
+						{
+							value: textColor,
+							onChange: ( value ) => setAttributes( { textColor: value } ),
+							label: __( 'Text Color', 'your-text-domain' ),
+						},
+					] }
+				/>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ { backgroundColor, color: textColor, padding: '20px' } }
+			>
+				{ __( 'Styled block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for color settings
+
+```json
+{
+	"attributes": {
+		"backgroundColor": { "type": "string", "default": "" },
+		"textColor": { "type": "string", "default": "" }
+	}
+}
+```
+
+## save.js
+
+`InspectorControls` only renders in the editor. It produces no front-end output. The `save.js` simply renders the stored attribute values:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { title, showBorder } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<p style={ { border: showBorder ? '1px solid currentColor' : 'none' } }>
+				{ title }
+			</p>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | node | - | Control components to render in the sidebar |
+| `group` | string | `'default'` | Sidebar slot: `'default'`, `'advanced'`, `'border'`, `'color'`, `'dimensions'`, `'typography'` |
+| `resetAllFilter` | function | - | Callback used by the "Reset all" button in the `group` toolbar |
+
+## Available Groups
+
+| Group | Location in Sidebar |
+|-------|---------------------|
+| `'default'` | Settings tab (main area) |
+| `'advanced'` | Advanced tab |
+| `'border'` | Border section in Styles tab |
+| `'color'` | Color section in Styles tab |
+| `'dimensions'` | Dimensions section in Styles tab |
+| `'typography'` | Typography section in Styles tab |
+
+## Common Use Cases
+
+1. **All block settings**: Every block with sidebar controls uses `InspectorControls`
+2. **Tabbed settings**: Use `group` prop to place controls in the correct sidebar tab
+3. **Progressive disclosure**: Use multiple `PanelBody` with `initialOpen={ false }` for secondary settings
+4. **Advanced options**: Use `group="advanced"` for CSS class, HTML anchor, and rarely-changed options
+
+## Accessibility
+
+- Keyboard navigable sidebar controls are handled automatically by the block editor shell
+- Each `PanelBody` provides its own expand/collapse keyboard interaction
+- Controls inside `InspectorControls` receive proper focus management from the editor
+
+## WordPress Standards
+
+- Import from `@wordpress/block-editor` (not `@wordpress/components`)
+- Always wrap controls in `PanelBody` for visual organization
+- Use `@wordpress/i18n` for all translatable strings
+- Use fragment `<>...</>` to return both `InspectorControls` and the block's edit content
+- `InspectorControls` never appears in `save.js`

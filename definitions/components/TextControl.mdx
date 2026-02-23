@@ -1,0 +1,400 @@
+---
+title: TextControl Component
+component: TextControl
+package: '@wordpress/components'
+category: Form Controls
+description: A text input field component for collecting user text input in WordPress blocks
+---
+
+# TextControl Component
+
+The `TextControl` component provides a labeled text input field with support for various input types and validation.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { TextControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"textValue": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { TextControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { textValue } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<TextControl
+				label={ __( 'Enter your text', 'your-text-domain' ) }
+				value={ textValue }
+				onChange={ ( value ) => setAttributes( { textValue: value } ) }
+			/>
+		</div>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { textValue } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ textValue && <p>{ textValue }</p> }
+		</div>
+	);
+}
+```
+
+## With Help Text
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { TextControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { username } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<TextControl
+				label={ __( 'Username', 'your-text-domain' ) }
+				value={ username }
+				onChange={ ( value ) => setAttributes( { username: value } ) }
+				help={ __( 'Enter your preferred username', 'your-text-domain' ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for help text example
+
+```json
+{
+	"attributes": {
+		"username": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## With Placeholder
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { TextControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { email } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<TextControl
+				label={ __( 'Email Address', 'your-text-domain' ) }
+				value={ email }
+				onChange={ ( value ) => setAttributes( { email: value } ) }
+				placeholder={ __( 'name@example.com', 'your-text-domain' ) }
+				type="email"
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for placeholder example
+
+```json
+{
+	"attributes": {
+		"email": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Multiple TextControls
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { TextControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { firstName, lastName, phone } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<TextControl
+				label={ __( 'First Name', 'your-text-domain' ) }
+				value={ firstName }
+				onChange={ ( value ) => setAttributes( { firstName: value } ) }
+			/>
+			<TextControl
+				label={ __( 'Last Name', 'your-text-domain' ) }
+				value={ lastName }
+				onChange={ ( value ) => setAttributes( { lastName: value } ) }
+			/>
+			<TextControl
+				label={ __( 'Phone Number', 'your-text-domain' ) }
+				value={ phone }
+				onChange={ ( value ) => setAttributes( { phone: value } ) }
+				type="tel"
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for multiple controls
+
+```json
+{
+	"attributes": {
+		"firstName": {
+			"type": "string",
+			"default": ""
+		},
+		"lastName": {
+			"type": "string",
+			"default": ""
+		},
+		"phone": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## With Input Type (Number)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { TextControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { age } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<TextControl
+				label={ __( 'Age', 'your-text-domain' ) }
+				value={ age }
+				onChange={ ( value ) => setAttributes( { age: value } ) }
+				type="number"
+				min="0"
+				max="120"
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for number input
+
+```json
+{
+	"attributes": {
+		"age": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Password Input
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { TextControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { password } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<TextControl
+				label={ __( 'Password', 'your-text-domain' ) }
+				value={ password }
+				onChange={ ( value ) => setAttributes( { password: value } ) }
+				type="password"
+				help={ __( 'Enter a secure password', 'your-text-domain' ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for password
+
+```json
+{
+	"attributes": {
+		"password": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## With InspectorControls (Sidebar)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { TextControl } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { heading, subheading } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Text Settings', 'your-text-domain' ) }>
+					<TextControl
+						label={ __( 'Heading', 'your-text-domain' ) }
+						value={ heading }
+						onChange={ ( value ) => setAttributes( { heading: value } ) }
+					/>
+					<TextControl
+						label={ __( 'Subheading', 'your-text-domain' ) }
+						value={ subheading }
+						onChange={ ( value ) => setAttributes( { subheading: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<h2>{ heading || __( 'Add heading...', 'your-text-domain' ) }</h2>
+				<p>{ subheading || __( 'Add subheading...', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for sidebar controls
+
+```json
+{
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"default": ""
+		},
+		"subheading": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+### save.js for sidebar example
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { heading, subheading } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ heading && <h2>{ heading }</h2> }
+			{ subheading && <p>{ subheading }</p> }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Label text for the input field |
+| `value` | string | - | Current value of the input |
+| `onChange` | function | - | Callback when value changes |
+| `help` | string | - | Help text displayed below the input |
+| `placeholder` | string | - | Placeholder text when input is empty |
+| `type` | string | `'text'` | HTML input type: `'text'`, `'email'`, `'tel'`, `'number'`, `'password'`, `'url'` |
+| `disabled` | boolean | `false` | Disable the input |
+| `className` | string | - | Additional CSS classes |
+| `min` | number | - | Minimum value (for type="number") |
+| `max` | number | - | Maximum value (for type="number") |
+| `step` | number | - | Step value (for type="number") |
+| `autoComplete` | string | - | HTML autocomplete attribute |
+
+## Common Use Cases
+
+1. **Simple Text Input**: Collect names, titles, or short text
+2. **Email Collection**: Use `type="email"` for email addresses
+3. **Phone Numbers**: Use `type="tel"` for phone inputs
+4. **Numeric Values**: Use `type="number"` for numbers
+5. **Block Settings**: Add to InspectorControls for sidebar settings
+
+## Best Practices
+
+- Always provide a descriptive `label`
+- Use `help` text for additional context
+- Set appropriate `type` for semantic HTML
+- Use `placeholder` for examples, not instructions
+- Store values in block attributes with proper defaults
+
+## Accessibility
+
+- Labels are automatically associated with inputs
+- Help text is linked via `aria-describedby`
+- Supports keyboard navigation
+- Works with screen readers
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for translatable text
+- Define attributes in `block.json`
+- Save attribute values in `save.js`

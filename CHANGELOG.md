@@ -48,9 +48,12 @@ All notable changes to this project will be documented in this file.
     - `HelpTextDemo` — checkbox with `help` prop for lazy-load setting (key: `demo-checkbox-lazy-load`)
   - Registered in `MDXProvider`, barrel export, route `/docs/checkbox-control`, sidebar nav
 
+### Changed
+- Renamed GitHub Copilot agent file from `my-agent.agent.md` to `MDX-Gutendocs-creator.md` to match the agent's `name` field
+
 ---
 
-## [1.5.0] - 2026-02-19
+## [1.8.0] - 2026-02-19
 
 ### Added
 
@@ -69,10 +72,63 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.7.2] - 2026-02-19
+
+### Fixed
+- Missing imports across components and doc pages
+
+---
+
+## [1.7.1] - 2026-02-19
+
+### Fixed
+- `RangeControl` slider touch targets for mobile accessibility — improved hit area and pointer handling to prevent accidental mis-taps on small screens
+
+---
+
+## [1.7.0] - 2026-02-19
+
+### Added
+- `DateTimePicker` component — date and time picker mirroring `@wordpress/components`
+  - Props: `label`, `value`, `onChange`, `currentDate` (WordPress block attribute alias), `is12Hour`, `help`, `disabled`, `className`, `dateOnly`, `timeOnly`
+  - Supports date-only, time-only, or combined date + time modes
+  - ISO 8601 string interface for full WordPress block attribute compatibility
+- `date-time-picker.mdx` — three interactive persistent demos:
+  - `BasicDemo` — full date + time picker (key: `demo-datetime-basic`)
+  - `DateOnlyDemo` — date-only mode (key: `demo-datetime-date-only`)
+  - `TimeOnlyDemo` — time-only mode (key: `demo-datetime-time-only`)
+- Registered in `MDXProvider`, barrel export, route `/docs/date-time-picker`, sidebar nav, and `docs.css`
+
+---
+
+## [1.6.0] - 2026-02-19
+
+### Added
+- `CodeBlock` — upgraded with full syntax highlighting via `prism-react-renderer` using the Night Owl theme
+- `CodeTabs` component — tabbed multi-language code viewer
+  - Props: `tabs` — array of `{ label, language, code }` objects
+  - Renders a tab bar for switching between code snippets; active tab highlighted
+- Both components registered globally in `MDXProvider`
+
+---
+
+## [1.5.0] - 2026-02-19
+
+### Added
+- `TextControl` component — single-line text input mirroring `@wordpress/components`
+  - Props: `label`, `value`, `onChange`, `help`, `placeholder`, `type`, `disabled`, `className`, `autoComplete`
+  - Controlled component; supports all standard HTML input types
+- `text-control.mdx` — three interactive persistent demos:
+  - `BasicDemo` — plain text input (key: `demo-text-basic`)
+  - `EmailDemo` — email type input (key: `demo-text-email`)
+  - `HeadingDemo` — dual inputs driving a live heading/subheading preview (keys: `demo-text-heading`, `demo-text-subheading`)
+- Registered in `MDXProvider`, barrel export, route `/docs/text-control`, sidebar nav, and `docs.css`
+
+---
+
 ## [1.4.0] - 2026-02-19
 
 ### Added
-
 - `RangeControl` component — numeric slider mirroring `@wordpress/components`
   - Props: `label`, `value`, `onChange`, `min`, `max`, `step`, `help`, `disabled`, `withInputField`, `className`
   - Paired numeric input field, min/max labels, keyboard accessible, focus-visible ring

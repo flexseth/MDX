@@ -1,0 +1,299 @@
+---
+title: ColorPicker Component
+component: ColorPicker
+package: '@wordpress/components'
+category: Color Controls
+description: A free-form color input with hex, RGB, and HSL input modes plus an opacity slider; use when users need to enter any arbitrary color beyond predefined swatches
+---
+
+# ColorPicker Component
+
+`ColorPicker` renders a full-featured color picker with a spectrum canvas, opacity slider, and hex/RGB/HSL input fields. Use it when users need to specify any arbitrary color. For predefined theme color palettes, use `ColorPalette` instead.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { ColorPicker } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"customColor": {
+			"type": "string",
+			"default": "#000000"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ColorPicker } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { customColor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Color', 'your-text-domain' ) }>
+					<ColorPicker
+						color={ customColor }
+						onChange={ ( value ) => setAttributes( { customColor: value } ) }
+						enableAlpha
+						defaultValue="#000000"
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { color: customColor } }>
+				{ __( 'Colored text content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## ColorPicker in a Dropdown (Compact Pattern)
+
+The `ColorPicker` is large; wrapping it in a `Dropdown` keeps the sidebar compact:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ColorPicker, Dropdown, Button } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { borderColor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Border', 'your-text-domain' ) }>
+					<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+						<span>{ __( 'Border color', 'your-text-domain' ) }</span>
+						<Dropdown
+							popoverProps={ { placement: 'bottom-start' } }
+							renderToggle={ ( { isOpen, onToggle } ) => (
+								<Button
+									onClick={ onToggle }
+									aria-expanded={ isOpen }
+									style={ { padding: '2px' } }
+								>
+									<span
+										style={ {
+											display: 'block',
+											width: '24px',
+											height: '24px',
+											borderRadius: '4px',
+											backgroundColor: borderColor || '#ccc',
+											border: '1px solid rgba(0,0,0,0.2)',
+										} }
+									/>
+								</Button>
+							) }
+							renderContent={ () => (
+								<ColorPicker
+									color={ borderColor }
+									onChange={ ( value ) => setAttributes( { borderColor: value } ) }
+									enableAlpha
+								/>
+							) }
+						/>
+					</div>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ { border: `2px solid ${ borderColor || 'transparent' }`, padding: '16px' } }
+			>
+				{ __( 'Bordered block', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for dropdown
+
+```json
+{
+	"attributes": {
+		"borderColor": { "type": "string", "default": "" }
+	}
+}
+```
+
+## Multiple Color Pickers
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ColorPicker, __experimentalDivider as Divider } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { backgroundColor, textColor, accentColor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Colors', 'your-text-domain' ) }>
+					<p>{ __( 'Background', 'your-text-domain' ) }</p>
+					<ColorPicker
+						color={ backgroundColor }
+						onChange={ ( value ) => setAttributes( { backgroundColor: value } ) }
+					/>
+					<Divider />
+					<p>{ __( 'Text', 'your-text-domain' ) }</p>
+					<ColorPicker
+						color={ textColor }
+						onChange={ ( value ) => setAttributes( { textColor: value } ) }
+					/>
+					<Divider />
+					<p>{ __( 'Accent', 'your-text-domain' ) }</p>
+					<ColorPicker
+						color={ accentColor }
+						onChange={ ( value ) => setAttributes( { accentColor: value } ) }
+						enableAlpha
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ { backgroundColor, color: textColor, borderTop: `4px solid ${ accentColor }`, padding: '20px' } }
+			>
+				{ __( 'Fully styled content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for multiple colors
+
+```json
+{
+	"attributes": {
+		"backgroundColor": { "type": "string", "default": "#ffffff" },
+		"textColor": { "type": "string", "default": "#000000" },
+		"accentColor": { "type": "string", "default": "#0073aa" }
+	}
+}
+```
+
+## ColorPicker with Reset
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, ColorPicker, Button } from '@wordpress/components';
+
+const DEFAULT_COLOR = '#0073aa';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { highlightColor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Highlight', 'your-text-domain' ) }>
+					<ColorPicker
+						color={ highlightColor }
+						onChange={ ( value ) => setAttributes( { highlightColor: value } ) }
+						enableAlpha
+						defaultValue={ DEFAULT_COLOR }
+					/>
+					{ highlightColor && highlightColor !== DEFAULT_COLOR && (
+						<Button
+							variant="link"
+							isDestructive
+							onClick={ () => setAttributes( { highlightColor: DEFAULT_COLOR } ) }
+						>
+							{ __( 'Reset to default', 'your-text-domain' ) }
+						</Button>
+					) }
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ { borderLeft: `4px solid ${ highlightColor }`, paddingLeft: '12px' } }
+			>
+				{ __( 'Highlighted block', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { customColor } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { color: customColor } }>
+			{ /* Block content */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `color` | string | - | Current color value (hex, rgb, rgba, hsl) |
+| `onChange` | function | - | Callback receiving the new color string |
+| `enableAlpha` | boolean | `false` | Shows the opacity/alpha slider |
+| `defaultValue` | string | - | Color value to reset to when cleared |
+| `copyFormat` | string | `'hex'` | Format for clipboard copy: `'hex'`, `'rgb'`, `'hsl'` |
+| `className` | string | - | Additional CSS classes |
+
+## ColorPalette vs ColorPicker
+
+| Feature | `ColorPalette` | `ColorPicker` |
+|---------|---------------|--------------|
+| Input type | Predefined swatches | Any arbitrary color |
+| Opacity support | No (swatches only) | Yes (`enableAlpha`) |
+| Theme color integration | Yes (reads theme.json) | No |
+| UI size | Compact | Large |
+| Best for | Brand colors, theme colors | Custom/arbitrary colors |
+
+## Common Use Cases
+
+1. **Custom background colors**: Let users choose any background beyond theme palette
+2. **Text color overrides**: Fine-grained color control for text elements
+3. **Gradient stops**: Individual stop colors in a gradient builder
+4. **Border/shadow colors**: Custom stroke and shadow color input
+5. **Chart colors**: Data visualization color assignments
+
+## Accessibility
+
+- `ColorPicker` includes inputs for hex, RGB, and HSL values so colorblind users can enter precise values directly
+- The color spectrum canvas has keyboard navigation support
+- Enable `enableAlpha` only when transparency is meaningfully useful — it adds cognitive complexity
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Prefer `ColorPalette` or `PanelColorSettings` for standard WordPress brand/theme colors
+- Use `enableAlpha` only when your block genuinely supports RGBA colors in its CSS output
+- Store colors as CSS-compatible strings (hex or `rgba()`)
+- For the full WordPress color workflow (palette + custom picker), use `ColorGradientSettingsDropdown` from `@wordpress/block-editor`

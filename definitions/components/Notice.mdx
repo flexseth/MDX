@@ -1,0 +1,307 @@
+---
+title: Notice Component
+component: Notice
+package: '@wordpress/components'
+category: Feedback
+description: Informational, success, warning, and error messages; supports dismissible alerts and custom actions inside the block editor
+---
+
+# Notice Component
+
+`Notice` displays contextual status messages in the block editor UI. Use it to communicate validation errors, successful operations, warnings about block settings, or informational guidance. It supports four severity levels and optional dismiss functionality.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Notice } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Notice } from '@wordpress/components';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<Notice status="info" isDismissible={ false }>
+				{ __( 'Select an image to get started.', 'your-text-domain' ) }
+			</Notice>
+		</div>
+	);
+}
+```
+
+## All Status Variants
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Notice } from '@wordpress/components';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<Notice status="info" isDismissible={ false }>
+				{ __( 'Info: This block displays the latest posts.', 'your-text-domain' ) }
+			</Notice>
+
+			<Notice status="success" isDismissible={ false }>
+				{ __( 'Success: Settings saved successfully.', 'your-text-domain' ) }
+			</Notice>
+
+			<Notice status="warning" isDismissible={ false }>
+				{ __( 'Warning: No posts found for the selected category.', 'your-text-domain' ) }
+			</Notice>
+
+			<Notice status="error" isDismissible={ false }>
+				{ __( 'Error: Failed to load data. Please try again.', 'your-text-domain' ) }
+			</Notice>
+		</div>
+	);
+}
+```
+
+## Dismissible Notice with State
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, Notice, Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { content } = attributes;
+	const [ isDismissed, setIsDismissed ] = useState( false );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+					{ ! content && ! isDismissed && (
+						<Notice
+							status="warning"
+							onRemove={ () => setIsDismissed( true ) }
+						>
+							{ __( 'Please add some content to this block.', 'your-text-domain' ) }
+						</Notice>
+					) }
+					<Button
+						variant="secondary"
+						onClick={ () => setAttributes( { content: 'Sample content' } ) }
+					>
+						{ __( 'Add Sample Content', 'your-text-domain' ) }
+					</Button>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ content || <p>{ __( 'Empty block', 'your-text-domain' ) }</p> }
+			</div>
+		</>
+	);
+}
+```
+
+## API Fetch Error Handling
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Notice, Spinner, Button } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit( { attributes } ) {
+	const blockProps = useBlockProps();
+	const [ posts, setPosts ] = useState( [] );
+	const [ isLoading, setIsLoading ] = useState( true );
+	const [ error, setError ] = useState( null );
+
+	const fetchPosts = () => {
+		setIsLoading( true );
+		setError( null );
+
+		apiFetch( { path: '/wp/v2/posts?per_page=5' } )
+			.then( ( data ) => {
+				setPosts( data );
+				setIsLoading( false );
+			} )
+			.catch( ( err ) => {
+				setError( err.message || __( 'Failed to load posts.', 'your-text-domain' ) );
+				setIsLoading( false );
+			} );
+	};
+
+	useEffect( () => {
+		fetchPosts();
+	}, [] );
+
+	return (
+		<div { ...blockProps }>
+			{ isLoading && <Spinner /> }
+
+			{ error && (
+				<Notice status="error" isDismissible={ false }>
+					<p>{ error }</p>
+					<Button variant="link" onClick={ fetchPosts }>
+						{ __( 'Try again', 'your-text-domain' ) }
+					</Button>
+				</Notice>
+			) }
+
+			{ ! isLoading && ! error && posts.length === 0 && (
+				<Notice status="warning" isDismissible={ false }>
+					{ __( 'No posts found.', 'your-text-domain' ) }
+				</Notice>
+			) }
+
+			{ ! isLoading && ! error && posts.length > 0 && (
+				<ul>
+					{ posts.map( ( post ) => (
+						<li key={ post.id }>{ post.title.rendered }</li>
+					) ) }
+				</ul>
+			) }
+		</div>
+	);
+}
+```
+
+## Notice with Actions
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Notice } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageUrl } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ ! imageUrl && (
+				<Notice
+					status="info"
+					isDismissible={ false }
+					actions={ [
+						{
+							label: __( 'Learn more', 'your-text-domain' ),
+							url: 'https://developer.wordpress.org/block-editor/',
+						},
+						{
+							label: __( 'Use default image', 'your-text-domain' ),
+							onClick: () =>
+								setAttributes( { imageUrl: '/wp-content/uploads/default.jpg' } ),
+						},
+					] }
+				>
+					{ __( 'No image selected. Choose an image or use the default.', 'your-text-domain' ) }
+				</Notice>
+			) }
+			{ imageUrl && <img src={ imageUrl } alt="" /> }
+		</div>
+	);
+}
+```
+
+## Inline Validation Notice in Sidebar
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, TextControl, Notice } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { apiKey } = attributes;
+	const isInvalidKey = apiKey.length > 0 && apiKey.length < 20;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'API Settings', 'your-text-domain' ) }>
+					<TextControl
+						label={ __( 'API Key', 'your-text-domain' ) }
+						value={ apiKey }
+						type="password"
+						onChange={ ( value ) => setAttributes( { apiKey: value } ) }
+					/>
+					{ isInvalidKey && (
+						<Notice status="error" isDismissible={ false }>
+							{ __( 'API key must be at least 20 characters.', 'your-text-domain' ) }
+						</Notice>
+					) }
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>{ __( 'Content block', 'your-text-domain' ) }</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`Notice` is editor-only and does not render on the front end:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { content } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ content && <p>{ content }</p> }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `status` | string | `'info'` | Severity: `'info'`, `'success'`, `'warning'`, `'error'` |
+| `children` | node | - | Notice message content |
+| `isDismissible` | boolean | `true` | Shows the close (×) button |
+| `onRemove` | function | - | Callback when the notice is dismissed |
+| `actions` | array | `[]` | Array of `{ label, url, onClick }` action objects |
+| `className` | string | - | Additional CSS classes |
+| `politeness` | string | `'assertive'` | ARIA live region politeness: `'assertive'` or `'polite'` |
+| `spokenMessage` | string | - | Override message read by screen readers |
+
+## Common Use Cases
+
+1. **Empty state guidance**: Tell users what to do when a block has no content configured
+2. **API/fetch errors**: Display error messages with retry actions
+3. **Validation feedback**: Highlight invalid settings inline in the sidebar
+4. **Success confirmation**: Confirm after save or data submission
+5. **Deprecation warnings**: Alert when a block feature is being phased out
+
+## Accessibility
+
+- Renders as `role="alert"` (assertive) or `role="status"` (polite) based on `politeness`
+- Dismiss button has an accessible label ("Dismiss notice")
+- `spokenMessage` overrides the spoken text for screen readers when needed
+- Color is not the only indicator — each status uses both color and icon
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `isDismissible={ false }` for persistent validation messages the user cannot ignore
+- Use `isDismissible={ true }` (default) for informational banners users can close
+- Do not use `Notice` for front-end user-facing messages — it is editor-only
+- For block-level notices in the post editor notification area, use `@wordpress/notices` store dispatch

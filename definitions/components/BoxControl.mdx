@@ -1,0 +1,313 @@
+---
+title: BoxControl Component
+component: BoxControl
+package: '@wordpress/components'
+category: Spacing Controls
+description: A four-sided padding/margin control with linked and individual side inputs plus unit switching; the standard WordPress spacing control
+---
+
+# BoxControl Component
+
+`BoxControl` renders a padding or margin control that can target all four sides simultaneously (linked mode) or each side individually. It includes unit switching and a "reset" button. Use it whenever a block needs per-side spacing control — it matches the pattern used by core WordPress blocks.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { __experimentalBoxControl as BoxControl } from '@wordpress/components';
+```
+
+> **Note:** `BoxControl` is exported under the `__experimental` prefix. The API is stable for practical use but the prefix indicates it may have breaking changes in future releases.
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"padding": {
+			"type": "object",
+			"default": {
+				"top": "0px",
+				"right": "0px",
+				"bottom": "0px",
+				"left": "0px"
+			}
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, __experimentalBoxControl as BoxControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { padding } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Spacing', 'your-text-domain' ) }>
+					<BoxControl
+						label={ __( 'Padding', 'your-text-domain' ) }
+						values={ padding }
+						onChange={ ( value ) => setAttributes( { padding: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ {
+					paddingTop: padding.top,
+					paddingRight: padding.right,
+					paddingBottom: padding.bottom,
+					paddingLeft: padding.left,
+				} }
+			>
+				{ __( 'Block content with custom padding', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Padding and Margin Together
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, __experimentalBoxControl as BoxControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { padding, margin } = attributes;
+
+	const paddingStyle = {
+		paddingTop: padding?.top,
+		paddingRight: padding?.right,
+		paddingBottom: padding?.bottom,
+		paddingLeft: padding?.left,
+	};
+
+	const marginStyle = {
+		marginTop: margin?.top,
+		marginRight: margin?.right,
+		marginBottom: margin?.bottom,
+		marginLeft: margin?.left,
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Spacing', 'your-text-domain' ) }>
+					<BoxControl
+						label={ __( 'Padding', 'your-text-domain' ) }
+						values={ padding }
+						onChange={ ( value ) => setAttributes( { padding: value } ) }
+					/>
+					<BoxControl
+						label={ __( 'Margin', 'your-text-domain' ) }
+						values={ margin }
+						onChange={ ( value ) => setAttributes( { margin: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { ...paddingStyle, ...marginStyle } }>
+				{ __( 'Block with padding and margin control', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for padding and margin
+
+```json
+{
+	"attributes": {
+		"padding": {
+			"type": "object",
+			"default": { "top": "0px", "right": "0px", "bottom": "0px", "left": "0px" }
+		},
+		"margin": {
+			"type": "object",
+			"default": { "top": "0px", "right": "0px", "bottom": "0px", "left": "0px" }
+		}
+	}
+}
+```
+
+## Custom Units
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, __experimentalBoxControl as BoxControl } from '@wordpress/components';
+
+const SPACING_UNITS = [
+	{ value: 'px', label: 'px', default: 0 },
+	{ value: 'em', label: 'em', default: 0 },
+	{ value: 'rem', label: 'rem', default: 0 },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { padding } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Spacing', 'your-text-domain' ) }>
+					<BoxControl
+						label={ __( 'Padding', 'your-text-domain' ) }
+						values={ padding }
+						units={ SPACING_UNITS }
+						onChange={ ( value ) => setAttributes( { padding: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ { paddingTop: padding.top, paddingRight: padding.right, paddingBottom: padding.bottom, paddingLeft: padding.left } }
+			>
+				{ __( 'Content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## BoxControl with Sides Label Override
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, __experimentalBoxControl as BoxControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { borderWidth } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Border', 'your-text-domain' ) }>
+					<BoxControl
+						label={ __( 'Border width', 'your-text-domain' ) }
+						values={ borderWidth }
+						units={ [ { value: 'px', label: 'px', default: 0 } ] }
+						onChange={ ( value ) => setAttributes( { borderWidth: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ {
+					borderStyle: 'solid',
+					borderTopWidth: borderWidth.top,
+					borderRightWidth: borderWidth.right,
+					borderBottomWidth: borderWidth.bottom,
+					borderLeftWidth: borderWidth.left,
+				} }
+			>
+				{ __( 'Bordered content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for border width
+
+```json
+{
+	"attributes": {
+		"borderWidth": {
+			"type": "object",
+			"default": { "top": "0px", "right": "0px", "bottom": "0px", "left": "0px" }
+		}
+	}
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { padding } = attributes;
+
+	return (
+		<div
+			{ ...blockProps }
+			style={ {
+				paddingTop: padding?.top,
+				paddingRight: padding?.right,
+				paddingBottom: padding?.bottom,
+				paddingLeft: padding?.left,
+			} }
+		>
+			{ /* Block content */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Label displayed above the control |
+| `values` | object | - | Object with `top`, `right`, `bottom`, `left` string values |
+| `onChange` | function | - | Callback receiving the updated values object |
+| `units` | array | Default CSS units | Array of `{ value, label, default }` unit objects |
+| `allowReset` | boolean | `true` | Shows a "Reset" button to clear all values |
+| `resetValues` | object | All `0px` | Values to reset to when reset is clicked |
+| `sides` | array | All sides | Restrict which sides are shown: `['top', 'right', 'bottom', 'left']` |
+| `splitOnAxis` | boolean | `false` | Shows horizontal/vertical pairs instead of four sides |
+| `className` | string | - | Additional CSS classes |
+
+## Values Object Shape
+
+```javascript
+{
+	top:    '16px',
+	right:  '24px',
+	bottom: '16px',
+	left:   '24px',
+}
+```
+
+When linked mode is active, all four sides share the same value. When unlinked, each side is set independently.
+
+## Common Use Cases
+
+1. **Block padding**: Inner spacing around block content
+2. **Block margin**: Outer spacing between the block and surrounding content
+3. **Border width**: Per-side border thickness control
+4. **Border radius**: Per-corner rounding (use with CSS `borderTopLeftRadius`, etc.)
+5. **Inset / offset**: Positioning offsets for absolutely positioned elements
+
+## Accessibility
+
+- Linked/unlinked toggle has an accessible label
+- Each side input is labeled (`Top`, `Right`, `Bottom`, `Left`)
+- Unit selector has an accessible label
+- Reset button has an accessible label
+
+## WordPress Standards
+
+- Import as `__experimentalBoxControl` from `@wordpress/components`
+- Store values as objects with `top`, `right`, `bottom`, `left` string properties
+- Apply values to CSS `style` prop by mapping each side to the appropriate CSS property
+- For blocks using `block.json` `supports.spacing`, the built-in spacing controls provide `BoxControl` automatically — no manual implementation needed
+- Use `allowReset={ true }` (default) so users can revert to the theme's spacing

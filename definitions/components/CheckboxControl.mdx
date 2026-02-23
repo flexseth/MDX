@@ -1,0 +1,342 @@
+---
+title: CheckboxControl Component
+component: CheckboxControl
+package: '@wordpress/components'
+category: Form Controls
+description: A checkbox input for boolean and multi-select settings; supports indeterminate state for parent/child checkbox hierarchies
+---
+
+# CheckboxControl Component
+
+`CheckboxControl` renders a labeled checkbox input. Use it for independent boolean options that can be turned on or off without affecting each other. For mutually exclusive options use `RadioControl`; for a single on/off setting use `ToggleControl`.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { CheckboxControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"showTitle": {
+			"type": "boolean",
+			"default": true
+		},
+		"showExcerpt": {
+			"type": "boolean",
+			"default": false
+		},
+		"showDate": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, CheckboxControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { showTitle } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Display Options', 'your-text-domain' ) }>
+					<CheckboxControl
+						label={ __( 'Show title', 'your-text-domain' ) }
+						checked={ showTitle }
+						onChange={ ( value ) => setAttributes( { showTitle: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ showTitle && <h2>{ __( 'Block Title', 'your-text-domain' ) }</h2> }
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Multiple Checkboxes (Feature Flags)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, CheckboxControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { showTitle, showExcerpt, showDate, showAuthor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Display Options', 'your-text-domain' ) }>
+					<CheckboxControl
+						label={ __( 'Show title', 'your-text-domain' ) }
+						checked={ showTitle }
+						onChange={ ( value ) => setAttributes( { showTitle: value } ) }
+					/>
+					<CheckboxControl
+						label={ __( 'Show excerpt', 'your-text-domain' ) }
+						checked={ showExcerpt }
+						onChange={ ( value ) => setAttributes( { showExcerpt: value } ) }
+					/>
+					<CheckboxControl
+						label={ __( 'Show date', 'your-text-domain' ) }
+						checked={ showDate }
+						onChange={ ( value ) => setAttributes( { showDate: value } ) }
+					/>
+					<CheckboxControl
+						label={ __( 'Show author', 'your-text-domain' ) }
+						checked={ showAuthor }
+						onChange={ ( value ) => setAttributes( { showAuthor: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ showTitle && <h2>{ __( 'Post Title', 'your-text-domain' ) }</h2> }
+				{ showAuthor && <p className="author">{ __( 'By Author Name', 'your-text-domain' ) }</p> }
+				{ showDate && <time>{ new Date().toLocaleDateString() }</time> }
+				{ showExcerpt && <p className="excerpt">{ __( 'Post excerpt…', 'your-text-domain' ) }</p> }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for feature flags
+
+```json
+{
+	"attributes": {
+		"showTitle": { "type": "boolean", "default": true },
+		"showExcerpt": { "type": "boolean", "default": false },
+		"showDate": { "type": "boolean", "default": false },
+		"showAuthor": { "type": "boolean", "default": false }
+	}
+}
+```
+
+## Checkbox with Help Text
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, CheckboxControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { lazyLoad } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Performance', 'your-text-domain' ) }>
+					<CheckboxControl
+						label={ __( 'Lazy load images', 'your-text-domain' ) }
+						help={ __( 'Images will load only when they enter the viewport.', 'your-text-domain' ) }
+						checked={ lazyLoad }
+						onChange={ ( value ) => setAttributes( { lazyLoad: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ __( 'Content block', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Checkbox Group with Array Attribute
+
+When the selection is a set of values (not separate booleans), store them as an array:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, CheckboxControl } from '@wordpress/components';
+
+const SOCIAL_PLATFORMS = [
+	{ value: 'twitter', label: __( 'Twitter / X', 'your-text-domain' ) },
+	{ value: 'linkedin', label: __( 'LinkedIn', 'your-text-domain' ) },
+	{ value: 'facebook', label: __( 'Facebook', 'your-text-domain' ) },
+	{ value: 'instagram', label: __( 'Instagram', 'your-text-domain' ) },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { selectedPlatforms } = attributes;
+
+	const togglePlatform = ( platform, isChecked ) => {
+		const updated = isChecked
+			? [ ...selectedPlatforms, platform ]
+			: selectedPlatforms.filter( ( p ) => p !== platform );
+		setAttributes( { selectedPlatforms: updated } );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Social Platforms', 'your-text-domain' ) }>
+					{ SOCIAL_PLATFORMS.map( ( { value, label } ) => (
+						<CheckboxControl
+							key={ value }
+							label={ label }
+							checked={ selectedPlatforms.includes( value ) }
+							onChange={ ( isChecked ) => togglePlatform( value, isChecked ) }
+						/>
+					) ) }
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<ul>
+					{ selectedPlatforms.map( ( platform ) => (
+						<li key={ platform }>{ platform }</li>
+					) ) }
+				</ul>
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for array
+
+```json
+{
+	"attributes": {
+		"selectedPlatforms": {
+			"type": "array",
+			"default": []
+		}
+	}
+}
+```
+
+## Indeterminate State (Parent / Child Checkboxes)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, CheckboxControl } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ checkboxes, setCheckboxes ] = useState( {
+		item1: false,
+		item2: false,
+		item3: false,
+	} );
+
+	const allChecked = Object.values( checkboxes ).every( Boolean );
+	const noneChecked = Object.values( checkboxes ).every( ( v ) => ! v );
+	const isIndeterminate = ! allChecked && ! noneChecked;
+
+	const handleParentChange = ( checked ) => {
+		setCheckboxes( { item1: checked, item2: checked, item3: checked } );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Item Selection', 'your-text-domain' ) }>
+					<CheckboxControl
+						label={ __( 'Select all', 'your-text-domain' ) }
+						checked={ allChecked }
+						indeterminate={ isIndeterminate }
+						onChange={ handleParentChange }
+					/>
+					<div style={ { paddingLeft: '24px' } }>
+						{ Object.keys( checkboxes ).map( ( key ) => (
+							<CheckboxControl
+								key={ key }
+								label={ __( `Item ${ key.slice( -1 ) }`, 'your-text-domain' ) }
+								checked={ checkboxes[ key ] }
+								onChange={ ( checked ) =>
+									setCheckboxes( ( prev ) => ( { ...prev, [ key ]: checked } ) )
+								}
+							/>
+						) ) }
+					</div>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>{ __( 'Content', 'your-text-domain' ) }</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`CheckboxControl` is a sidebar/editor control. Its stored boolean values apply to front-end rendering:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { showTitle, showExcerpt, showDate } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ showTitle && <h2 className="block-title">{ /* title content */ }</h2> }
+			{ showExcerpt && <p className="block-excerpt">{ /* excerpt content */ }</p> }
+			{ showDate && <time className="block-date">{ /* date content */ }</time> }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Visible label text (required) |
+| `checked` | boolean | `false` | Whether the checkbox is checked |
+| `onChange` | function | - | Callback receiving the new boolean value |
+| `help` | string\|node | - | Descriptive help text below the checkbox |
+| `indeterminate` | boolean | `false` | Shows the "mixed" state for parent checkboxes |
+| `disabled` | boolean | `false` | Disables the checkbox |
+| `className` | string | - | Additional CSS classes |
+| `id` | string | - | HTML id attribute; auto-generated if omitted |
+
+## Common Use Cases
+
+1. **Display toggles**: Show/hide block elements (title, date, author, excerpt)
+2. **Feature flags**: Enable/disable independent block features
+3. **Multi-select lists**: Choose from a list where multiple items can be selected
+4. **Permission sets**: Choose which user roles can see content
+5. **Filter groups**: Select multiple taxonomy terms or categories
+
+## Accessibility
+
+- The `label` prop renders as a `<label>` associated with the checkbox via `htmlFor`
+- `help` text is associated via `aria-describedby`
+- The `indeterminate` state sets `aria-checked="mixed"` automatically
+- Keyboard interaction: Space bar toggles the checkbox
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for all label and help text strings
+- For a single on/off setting, prefer `ToggleControl` (more visually distinct)
+- For mutually exclusive options, use `RadioControl`
+- Store independent boolean values as separate attributes; store multi-select as an array attribute

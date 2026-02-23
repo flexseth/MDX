@@ -1,0 +1,304 @@
+---
+title: Modal Component
+component: Modal
+package: '@wordpress/components'
+category: Overlay
+description: A dialog overlay for confirmations, detailed settings, and in-block forms; traps focus and manages keyboard interactions automatically
+---
+
+# Modal Component
+
+`Modal` renders a dialog overlay that traps focus until closed. Use it for confirmation dialogs (delete, overwrite), detailed settings that don't fit in the sidebar, and any interaction that requires the user's full attention before proceeding.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Modal, Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Modal, Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+
+	return (
+		<div { ...blockProps }>
+			<Button variant="secondary" onClick={ () => setIsOpen( true ) }>
+				{ __( 'Open settings', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Modal
+					title={ __( 'Block Settings', 'your-text-domain' ) }
+					onRequestClose={ () => setIsOpen( false ) }
+				>
+					<p>{ __( 'Configure your block settings here.', 'your-text-domain' ) }</p>
+					<Button variant="primary" onClick={ () => setIsOpen( false ) }>
+						{ __( 'Done', 'your-text-domain' ) }
+					</Button>
+				</Modal>
+			) }
+		</div>
+	);
+}
+```
+
+## Confirmation Dialog (Destructive Action)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Modal, Button } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const [ showConfirm, setShowConfirm ] = useState( false );
+
+	const handleClearContent = () => {
+		setAttributes( { items: [] } );
+		setShowConfirm( false );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<ul>
+				{ attributes.items.map( ( item, index ) => (
+					<li key={ index }>{ item }</li>
+				) ) }
+			</ul>
+
+			{ attributes.items.length > 0 && (
+				<Button
+					variant="secondary"
+					isDestructive
+					onClick={ () => setShowConfirm( true ) }
+				>
+					{ __( 'Clear all items', 'your-text-domain' ) }
+				</Button>
+			) }
+
+			{ showConfirm && (
+				<Modal
+					title={ __( 'Clear all items?', 'your-text-domain' ) }
+					onRequestClose={ () => setShowConfirm( false ) }
+					size="small"
+				>
+					<p>
+						{ __( 'This will remove all items from the list. This action cannot be undone.', 'your-text-domain' ) }
+					</p>
+					<div style={ { display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '16px' } }>
+						<Button variant="tertiary" onClick={ () => setShowConfirm( false ) }>
+							{ __( 'Cancel', 'your-text-domain' ) }
+						</Button>
+						<Button variant="primary" isDestructive onClick={ handleClearContent }>
+							{ __( 'Clear all', 'your-text-domain' ) }
+						</Button>
+					</div>
+				</Modal>
+			) }
+		</div>
+	);
+}
+```
+
+## Form Modal (Settings with Apply)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Modal, Button, TextControl, SelectControl } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+	// Local draft state so changes only apply on "Save"
+	const [ draft, setDraft ] = useState( {
+		apiEndpoint: attributes.apiEndpoint || '',
+		cacheTime: attributes.cacheTime || '300',
+	} );
+
+	const handleOpen = () => {
+		setDraft( {
+			apiEndpoint: attributes.apiEndpoint || '',
+			cacheTime: attributes.cacheTime || '300',
+		} );
+		setIsOpen( true );
+	};
+
+	const handleSave = () => {
+		setAttributes( draft );
+		setIsOpen( false );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<Button variant="secondary" onClick={ handleOpen }>
+				{ __( 'Advanced Settings', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Modal
+					title={ __( 'Advanced Settings', 'your-text-domain' ) }
+					onRequestClose={ () => setIsOpen( false ) }
+				>
+					<TextControl
+						label={ __( 'API Endpoint', 'your-text-domain' ) }
+						value={ draft.apiEndpoint }
+						onChange={ ( value ) => setDraft( ( prev ) => ( { ...prev, apiEndpoint: value } ) ) }
+					/>
+					<SelectControl
+						label={ __( 'Cache Duration', 'your-text-domain' ) }
+						value={ draft.cacheTime }
+						options={ [
+							{ label: __( '1 minute', 'your-text-domain' ), value: '60' },
+							{ label: __( '5 minutes', 'your-text-domain' ), value: '300' },
+							{ label: __( '1 hour', 'your-text-domain' ), value: '3600' },
+							{ label: __( 'No cache', 'your-text-domain' ), value: '0' },
+						] }
+						onChange={ ( value ) => setDraft( ( prev ) => ( { ...prev, cacheTime: value } ) ) }
+					/>
+					<div style={ { display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '24px' } }>
+						<Button variant="tertiary" onClick={ () => setIsOpen( false ) }>
+							{ __( 'Cancel', 'your-text-domain' ) }
+						</Button>
+						<Button variant="primary" onClick={ handleSave }>
+							{ __( 'Save settings', 'your-text-domain' ) }
+						</Button>
+					</div>
+				</Modal>
+			) }
+		</div>
+	);
+}
+```
+
+### block.json for form modal
+
+```json
+{
+	"attributes": {
+		"apiEndpoint": { "type": "string", "default": "" },
+		"cacheTime": { "type": "string", "default": "300" }
+	}
+}
+```
+
+## Modal Opened from Toolbar
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import { ToolbarButton, Modal, TextareaControl, Button } from '@wordpress/components';
+import { cog } from '@wordpress/icons';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+
+	return (
+		<>
+			<BlockControls>
+				<ToolbarButton
+					icon={ cog }
+					label={ __( 'Configure', 'your-text-domain' ) }
+					onClick={ () => setIsOpen( true ) }
+				/>
+			</BlockControls>
+
+			{ isOpen && (
+				<Modal
+					title={ __( 'Configure Block', 'your-text-domain' ) }
+					onRequestClose={ () => setIsOpen( false ) }
+				>
+					<TextareaControl
+						label={ __( 'Custom configuration', 'your-text-domain' ) }
+						value={ attributes.config || '' }
+						rows={ 6 }
+						onChange={ ( value ) => setAttributes( { config: value } ) }
+					/>
+					<Button variant="primary" onClick={ () => setIsOpen( false ) }>
+						{ __( 'Done', 'your-text-domain' ) }
+					</Button>
+				</Modal>
+			) }
+
+			<div { ...blockProps }>
+				{ __( 'Configured block', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`Modal` is editor-only and does not render on the front end:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+
+	return (
+		<div { ...blockProps }>
+			{ /* Front-end output using values configured via modal */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `title` | string | - | Dialog title displayed in the header (required) |
+| `onRequestClose` | function | - | Callback when the modal is dismissed (close button, Escape key, or overlay click) |
+| `children` | node | - | Modal body content |
+| `size` | string | `'medium'` | Width: `'small'`, `'medium'`, `'large'`, `'fill'` |
+| `className` | string | - | Additional CSS classes |
+| `isDismissible` | boolean | `true` | Shows the close (×) button in the header |
+| `shouldCloseOnClickOutside` | boolean | `true` | Closes modal when clicking the backdrop |
+| `shouldCloseOnEsc` | boolean | `true` | Closes modal on Escape key |
+| `icon` | Component | - | Icon displayed in the header |
+| `isFullScreen` | boolean | `false` | Makes the modal fill the entire screen |
+| `headerActions` | node | - | Extra elements rendered in the header |
+
+## Common Use Cases
+
+1. **Confirmation dialogs**: Ask before destructive actions (clear, delete, overwrite)
+2. **Advanced settings forms**: Settings too complex for the sidebar
+3. **Item editors**: Edit individual list items inline
+4. **Preview modals**: Show a larger preview of embedded content
+5. **Onboarding steps**: Guide users through initial block configuration
+
+## Accessibility
+
+- Manages focus automatically: moves focus into the modal on open, returns to the trigger on close
+- Traps Tab/Shift+Tab navigation within the open modal
+- Escape key closes the modal (disable with `shouldCloseOnEsc={ false }` only if necessary)
+- `title` prop renders as an `<h1>` associated with `aria-labelledby`
+- `role="dialog"` and `aria-modal="true"` are set automatically
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Always provide `title` — it is required for accessibility
+- Use draft state pattern to avoid live-updating attributes mid-edit in form modals
+- Render `Modal` conditionally with `{ isOpen && <Modal ...> }` rather than using a `show` prop
+- For simple step-by-step flows, use `Guide` instead

@@ -1,0 +1,272 @@
+---
+title: Tooltip Component
+component: Tooltip
+package: '@wordpress/components'
+category: Overlay
+description: A hover/focus tooltip for adding contextual help text to icon buttons, controls, and any element needing brief explanatory text
+---
+
+# Tooltip Component
+
+`Tooltip` wraps a child element and displays a small popover with descriptive text when the user hovers or focuses the wrapped element. Use it for icon-only buttons, keyboard shortcut hints, and any control whose purpose isn't immediately obvious from its visual appearance.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Tooltip, Button } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import { Tooltip, Button, ToolbarGroup } from '@wordpress/components';
+import { info } from '@wordpress/icons';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<Tooltip text={ __( 'This block displays dynamic content from your site.', 'your-text-domain' ) }>
+				<Button icon={ info } label={ __( 'About this block', 'your-text-domain' ) } />
+			</Tooltip>
+		</div>
+	);
+}
+```
+
+## Keyboard Shortcut Tooltip
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import { Tooltip, ToolbarButton, ToolbarGroup } from '@wordpress/components';
+import { formatBold, formatItalic } from '@wordpress/icons';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<>
+			<BlockControls>
+				<ToolbarGroup>
+					<Tooltip
+						text={ __( 'Bold', 'your-text-domain' ) }
+						shortcut="Ctrl+B"
+					>
+						<ToolbarButton
+							icon={ formatBold }
+							label={ __( 'Bold', 'your-text-domain' ) }
+						/>
+					</Tooltip>
+					<Tooltip
+						text={ __( 'Italic', 'your-text-domain' ) }
+						shortcut="Ctrl+I"
+					>
+						<ToolbarButton
+							icon={ formatItalic }
+							label={ __( 'Italic', 'your-text-domain' ) }
+						/>
+					</Tooltip>
+				</ToolbarGroup>
+			</BlockControls>
+			<div { ...blockProps }>
+				{ __( 'Content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Tooltip on a Control Label
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, RangeControl, Tooltip } from '@wordpress/components';
+import { help } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { columns } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout', 'your-text-domain' ) }>
+					<div style={ { display: 'flex', alignItems: 'center', gap: '4px' } }>
+						<span>{ __( 'Columns', 'your-text-domain' ) }</span>
+						<Tooltip
+							text={ __( 'Sets the number of columns in the grid layout.', 'your-text-domain' ) }
+						>
+							<span
+								style={ { cursor: 'help', color: '#757575' } }
+								tabIndex={ 0 }
+								role="img"
+								aria-label={ __( 'Help', 'your-text-domain' ) }
+							>
+								?
+							</span>
+						</Tooltip>
+					</div>
+					<RangeControl
+						value={ columns }
+						onChange={ ( value ) => setAttributes( { columns: value } ) }
+						min={ 1 }
+						max={ 6 }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ { display: 'grid', gridTemplateColumns: `repeat( ${ columns }, 1fr )` } }
+			>
+				{ __( 'Grid content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Tooltip Delay and Position
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Tooltip, Button } from '@wordpress/components';
+import { star, starFilled } from '@wordpress/icons';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isFavorite, setIsFavorite ] = useState( false );
+
+	return (
+		<div { ...blockProps }>
+			<Tooltip
+				text={
+					isFavorite
+						? __( 'Remove from favorites', 'your-text-domain' )
+						: __( 'Add to favorites', 'your-text-domain' )
+				}
+				delay={ 300 }
+				placement="bottom"
+			>
+				<Button
+					icon={ isFavorite ? starFilled : star }
+					label={ isFavorite
+						? __( 'Remove from favorites', 'your-text-domain' )
+						: __( 'Add to favorites', 'your-text-domain' )
+					}
+					onClick={ () => setIsFavorite( ( prev ) => ! prev ) }
+				/>
+			</Tooltip>
+		</div>
+	);
+}
+```
+
+## Multiple Icon Buttons with Tooltips
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, Tooltip, Button } from '@wordpress/components';
+import { alignLeft, alignCenter, alignRight, alignJustify } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { textAlign } = attributes;
+
+	const alignOptions = [
+		{ icon: alignLeft, label: __( 'Align left', 'your-text-domain' ), value: 'left' },
+		{ icon: alignCenter, label: __( 'Align center', 'your-text-domain' ), value: 'center' },
+		{ icon: alignRight, label: __( 'Align right', 'your-text-domain' ), value: 'right' },
+		{ icon: alignJustify, label: __( 'Justify', 'your-text-domain' ), value: 'justify' },
+	];
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Alignment', 'your-text-domain' ) }>
+					<div style={ { display: 'flex', gap: '4px' } }>
+						{ alignOptions.map( ( { icon, label, value } ) => (
+							<Tooltip key={ value } text={ label }>
+								<Button
+									icon={ icon }
+									label={ label }
+									isPressed={ textAlign === value }
+									onClick={ () => setAttributes( { textAlign: value } ) }
+								/>
+							</Tooltip>
+						) ) }
+					</div>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { textAlign } }>
+				{ __( 'Aligned text content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`Tooltip` is editor-only and produces no front-end output:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { textAlign } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { textAlign } }>
+			{ /* Block content */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `text` | string\|node | - | Tooltip content text (required) |
+| `children` | node | - | The element the tooltip is attached to (required) |
+| `delay` | number | `700` | Delay in ms before the tooltip appears |
+| `placement` | string | `'bottom'` | Position: `'top'`, `'bottom'`, `'left'`, `'right'`, `'top-start'`, etc. |
+| `shortcut` | string\|object | - | Keyboard shortcut displayed in the tooltip (e.g. `'Ctrl+B'`) |
+| `className` | string | - | Additional CSS classes on the tooltip element |
+| `hideOnClick` | boolean | `true` | Hides the tooltip when its target is clicked |
+
+## Common Use Cases
+
+1. **Icon-only buttons**: Any button with only an icon must have a tooltip (and `label`)
+2. **Keyboard shortcuts**: Display `Ctrl+S` hints alongside buttons
+3. **Help icons**: `?` or `info` icons next to settings with complex behavior
+4. **Truncated text**: Show full text for visually-truncated labels
+5. **Disabled controls**: Explain why a control is currently unavailable
+
+## Accessibility
+
+- The tooltip content is associated via `aria-describedby` on the wrapped element
+- Tooltip appears on both hover and keyboard focus
+- `Tooltip` does NOT provide the accessible name — always set `label` or `aria-label` on buttons separately
+- Do not use `Tooltip` as the sole source of critical information — it is supplemental
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Always use `Tooltip` with icon-only `Button` components in addition to (not instead of) the `label` prop
+- For `ToolbarButton`, the built-in `showTooltip` prop is preferred over wrapping in `Tooltip`
+- Use `shortcut` prop to display keyboard shortcuts — do not concatenate them into the `text` string manually
+- `Tooltip` is editor-only; never place it in `save.js`

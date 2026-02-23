@@ -1,0 +1,326 @@
+---
+title: Spinner Component
+component: Spinner
+package: '@wordpress/components'
+category: Feedback
+description: An animated loading indicator for async operations; pairs with apiFetch patterns and conditional rendering
+---
+
+# Spinner Component
+
+`Spinner` renders a small animated loading indicator. Use it whenever an asynchronous operation is in progress — fetching posts, saving data, loading images — so users know the UI is working and not frozen.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Spinner } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Spinner } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isLoading, setIsLoading ] = useState( true );
+	const [ data, setData ] = useState( null );
+
+	useEffect( () => {
+		apiFetch( { path: '/wp/v2/posts?per_page=3' } )
+			.then( ( posts ) => {
+				setData( posts );
+				setIsLoading( false );
+			} )
+			.catch( () => setIsLoading( false ) );
+	}, [] );
+
+	return (
+		<div { ...blockProps }>
+			{ isLoading ? (
+				<Spinner />
+			) : (
+				<ul>
+					{ data && data.map( ( post ) => (
+						<li key={ post.id }>{ post.title.rendered }</li>
+					) ) }
+				</ul>
+			) }
+		</div>
+	);
+}
+```
+
+## Spinner with Loading Message
+
+Pair the spinner with visible text for clarity:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Spinner } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit( { attributes } ) {
+	const blockProps = useBlockProps();
+	const [ isLoading, setIsLoading ] = useState( true );
+	const [ posts, setPosts ] = useState( [] );
+
+	useEffect( () => {
+		apiFetch( { path: `/wp/v2/posts?categories=${ attributes.categoryId }&per_page=5` } )
+			.then( ( result ) => {
+				setPosts( result );
+				setIsLoading( false );
+			} )
+			.catch( () => setIsLoading( false ) );
+	}, [ attributes.categoryId ] );
+
+	if ( isLoading ) {
+		return (
+			<div { ...blockProps }>
+				<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+					<Spinner />
+					<span>{ __( 'Loading posts…', 'your-text-domain' ) }</span>
+				</div>
+			</div>
+		);
+	}
+
+	return (
+		<div { ...blockProps }>
+			{ posts.length === 0
+				? <p>{ __( 'No posts found.', 'your-text-domain' ) }</p>
+				: <ul>{ posts.map( ( p ) => <li key={ p.id }>{ p.title.rendered }</li> ) }</ul>
+			}
+		</div>
+	);
+}
+```
+
+## Spinner in Sidebar Controls
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, SelectControl, Spinner } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { selectedCategory } = attributes;
+	const [ categories, setCategories ] = useState( [] );
+	const [ isLoading, setIsLoading ] = useState( true );
+
+	useEffect( () => {
+		apiFetch( { path: '/wp/v2/categories?per_page=50&_fields=id,name' } )
+			.then( ( data ) => {
+				setCategories( [
+					{ label: __( 'All categories', 'your-text-domain' ), value: '' },
+					...data.map( ( cat ) => ( { label: cat.name, value: String( cat.id ) } ) ),
+				] );
+				setIsLoading( false );
+			} )
+			.catch( () => setIsLoading( false ) );
+	}, [] );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Filter', 'your-text-domain' ) }>
+					{ isLoading ? (
+						<div style={ { padding: '8px 0' } }>
+							<Spinner />
+						</div>
+					) : (
+						<SelectControl
+							label={ __( 'Category', 'your-text-domain' ) }
+							value={ selectedCategory }
+							options={ categories }
+							onChange={ ( value ) => setAttributes( { selectedCategory: value } ) }
+						/>
+					) }
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ __( 'Posts block', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Save Action with Loading State on Button
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Button, Spinner } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit( { attributes } ) {
+	const blockProps = useBlockProps();
+	const [ isSaving, setIsSaving ] = useState( false );
+	const [ saveStatus, setSaveStatus ] = useState( null );
+
+	const handleSave = () => {
+		setIsSaving( true );
+		setSaveStatus( null );
+
+		apiFetch( {
+			path: '/wp/v2/custom-endpoint',
+			method: 'POST',
+			data: { value: attributes.value },
+		} )
+			.then( () => {
+				setSaveStatus( 'success' );
+				setIsSaving( false );
+			} )
+			.catch( () => {
+				setSaveStatus( 'error' );
+				setIsSaving( false );
+			} );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<div style={ { display: 'flex', alignItems: 'center', gap: '12px' } }>
+				<Button
+					variant="primary"
+					onClick={ handleSave }
+					disabled={ isSaving }
+				>
+					{ __( 'Save to server', 'your-text-domain' ) }
+				</Button>
+
+				{ isSaving && <Spinner /> }
+
+				{ saveStatus === 'success' && (
+					<span style={ { color: 'green' } }>
+						{ __( 'Saved!', 'your-text-domain' ) }
+					</span>
+				) }
+
+				{ saveStatus === 'error' && (
+					<span style={ { color: 'red' } }>
+						{ __( 'Save failed.', 'your-text-domain' ) }
+					</span>
+				) }
+			</div>
+		</div>
+	);
+}
+```
+
+## Full-Block Loading Overlay
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Spinner } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit( { attributes } ) {
+	const blockProps = useBlockProps();
+	const [ isLoading, setIsLoading ] = useState( false );
+	const [ result, setResult ] = useState( null );
+
+	useEffect( () => {
+		if ( ! attributes.postId ) return;
+
+		setIsLoading( true );
+		apiFetch( { path: `/wp/v2/posts/${ attributes.postId }` } )
+			.then( ( post ) => {
+				setResult( post );
+				setIsLoading( false );
+			} )
+			.catch( () => setIsLoading( false ) );
+	}, [ attributes.postId ] );
+
+	return (
+		<div { ...blockProps } style={ { position: 'relative', minHeight: '100px' } }>
+			{ isLoading && (
+				<div
+					style={ {
+						position: 'absolute',
+						inset: 0,
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						background: 'rgba(255, 255, 255, 0.8)',
+						zIndex: 1,
+					} }
+				>
+					<Spinner />
+				</div>
+			) }
+			<div style={ { opacity: isLoading ? 0.3 : 1 } }>
+				{ result
+					? <h2>{ result.title.rendered }</h2>
+					: <p>{ __( 'Select a post in the settings.', 'your-text-domain' ) }</p>
+				}
+			</div>
+		</div>
+	);
+}
+```
+
+## save.js
+
+`Spinner` is editor-only and does not render on the front end:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+
+	return (
+		<div { ...blockProps }>
+			{ /* Front-end content rendered from stored attributes */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | string | - | Additional CSS classes |
+
+> **Note:** `Spinner` has no required props and very few configurable ones. Its size and appearance are controlled by CSS variables from the WordPress design system. Do not override its dimensions manually.
+
+## Common Use Cases
+
+1. **apiFetch loading state**: Show while fetching posts, terms, or custom data
+2. **Sidebar controls**: Replace a `SelectControl` while its options load
+3. **Save/submit actions**: Indicate a button action is processing
+4. **Image processing**: Show while an image is uploading or being processed
+5. **Initial block render**: Show while the block loads its initial data
+
+## Accessibility
+
+- Renders with `role="presentation"` — the spinner itself is decorative
+- Pair with a visually hidden or visible loading message for screen reader users
+- Example pattern: `<><Spinner /><span className="screen-reader-text">{ __( 'Loading…' ) }</span></>`
+- Disable interactive controls (buttons, inputs) while loading to prevent duplicate actions
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Always control visibility with a state variable (`isLoading`, `isFetching`, etc.)
+- Never render `Spinner` unconditionally — always toggle it on/off
+- For button loading states, prefer the `Button` component's `isBusy` prop over a standalone spinner
+- Clear the loading state in both the success and error paths of `apiFetch`
