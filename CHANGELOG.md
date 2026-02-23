@@ -7,6 +7,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- `ComboboxControl` component — searchable autocomplete dropdown mirroring `@wordpress/components`
+  - Props: `label`, `value`, `options`, `onChange`, `onFilterValueChange`, `help`, `isLoading`, `messages`, `className`
+  - Full keyboard navigation: arrow keys, Enter to select, Escape to close
+  - Built-in × clear button, chevron indicator, "no results" and loading states
+  - Filtering is parent-controlled via `onFilterValueChange` — supports both static and async (REST API) option lists
+  - `combobox-control.mdx` — three interactive persistent demos:
+    - `CountriesDemo` — 16-country list with client-side filtering (key: `demo-combobox-country`)
+    - `FontFamilyDemo` — font picker with live preview paragraph (key: `demo-combobox-font`)
+    - `NoResultsDemo` — custom empty state message (key: `demo-combobox-noresults`)
+  - Includes ComboboxControl vs SelectControl comparison table
+  - Registered in `MDXProvider`, barrel export, route `/docs/combobox-control`, sidebar nav, and `docs.css`
 - `ColorPicker` component — free-form color picker mirroring `@wordpress/components`
   - Props: `color`, `onChange`, `enableAlpha`, `defaultValue`, `copyFormat`, `className`
   - Spectrum proxy via native `<input type="color">` overlaid on a large preview swatch

@@ -12,3 +12,4 @@ export { default as TextControl } from './TextControl';
 export { default as DateTimePicker } from './DateTimePicker';
 export { default as ColorPalette } from './ColorPalette';
 export { default as ColorPicker } from './ColorPicker';
+export { default as ComboboxControl } from './ComboboxControl';
