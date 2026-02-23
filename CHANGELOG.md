@@ -6,6 +6,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- `CheckboxControl` component — labeled checkbox mirroring `@wordpress/components`
+  - Props: `label`, `checked`, `onChange`, `help`, `indeterminate`, `disabled`, `className`, `id`
+  - `indeterminate` state applied via DOM ref (cannot be set as a JSX attribute); sets `aria-checked="mixed"` automatically
+  - `checkbox-control.mdx` — three interactive persistent demos:
+    - `BasicDemo` — single checkbox reveals a live title preview (key: `demo-checkbox-show-title`)
+    - `MultipleDemo` — three checkboxes drive a simulated post card with title, date, and excerpt (keys: `demo-checkbox-show-title-multi`, `demo-checkbox-show-excerpt`, `demo-checkbox-show-date`)
+    - `HelpTextDemo` — checkbox with `help` prop for lazy-load setting (key: `demo-checkbox-lazy-load`)
+  - Registered in `MDXProvider`, barrel export, route `/docs/checkbox-control`, sidebar nav
+
 ---
 
 ## [1.5.0] - 2026-02-19

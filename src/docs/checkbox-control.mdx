@@ -1,0 +1,259 @@
+import CheckboxControl from '../components/CheckboxControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [checked, setChecked] = useLocalStorage('demo-checkbox-show-title', false);
+  return (
+    <div>
+      <CheckboxControl
+        label="Show Title"
+        checked={checked}
+        onChange={setChecked}
+      />
+      { checked && (
+        <div style={{ marginTop: '0.75rem', padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.375rem' }}>
+          <h3 style={{ margin: 0 }}>Block Title</h3>
+        </div>
+      ) }
+    </div>
+  );
+};
+
+export const MultipleDemo = () => {
+  const [showTitle, setShowTitle] = useLocalStorage('demo-checkbox-show-title-multi', true);
+  const [showExcerpt, setShowExcerpt] = useLocalStorage('demo-checkbox-show-excerpt', false);
+  const [showDate, setShowDate] = useLocalStorage('demo-checkbox-show-date', false);
+  return (
+    <div>
+      <CheckboxControl
+        label="Show title"
+        checked={showTitle}
+        onChange={setShowTitle}
+      />
+      <CheckboxControl
+        label="Show excerpt"
+        checked={showExcerpt}
+        onChange={setShowExcerpt}
+      />
+      <CheckboxControl
+        label="Show date"
+        checked={showDate}
+        onChange={setShowDate}
+      />
+      <div style={{ marginTop: '0.75rem', padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.375rem' }}>
+        { showTitle && <h3 style={{ margin: '0 0 0.25rem' }}>Post Title</h3> }
+        { showDate && <time style={{ display: 'block', fontSize: '0.8125rem', color: '#64748b', marginBottom: '0.5rem' }}>{ new Date().toLocaleDateString() }</time> }
+        { showExcerpt && <p style={{ margin: 0, color: '#475569' }}>A short excerpt from the post content, shown when the option is enabled.</p> }
+        { !showTitle && !showExcerpt && !showDate && (
+          <p style={{ margin: 0, color: '#94a3b8', fontStyle: 'italic' }}>Enable one or more options above to see a preview.</p>
+        ) }
+      </div>
+    </div>
+  );
+};
+
+export const HelpTextDemo = () => {
+  const [lazyLoad, setLazyLoad] = useLocalStorage('demo-checkbox-lazy-load', false);
+  return (
+    <CheckboxControl
+      label="Lazy load images"
+      help="Images will load only when they enter the viewport, improving initial page performance."
+      checked={lazyLoad}
+      onChange={setLazyLoad}
+    />
+  );
+};
+
+# CheckboxControl
+
+A labeled checkbox input for boolean and multi-select settings. Mirrors the WordPress [`CheckboxControl`](https://developer.wordpress.org/block-editor/reference-guides/components/checkbox-control/) from `@wordpress/components`.
+
+Use `CheckboxControl` for independent boolean options. For a single on/off setting prefer `ToggleControl`; for mutually exclusive options use `RadioControl`.
+
+## Basic Usage
+
+<BasicDemo />
+
+```jsx
+<CheckboxControl
+  label="Show Title"
+  checked={showTitle}
+  onChange={(value) => setAttributes({ showTitle: value })}
+/>
+```
+
+## Multiple Checkboxes
+
+Toggle each option independently to build a live post card preview.
+
+<MultipleDemo />
+
+```jsx
+<CheckboxControl
+  label="Show title"
+  checked={showTitle}
+  onChange={(value) => setAttributes({ showTitle: value })}
+/>
+<CheckboxControl
+  label="Show excerpt"
+  checked={showExcerpt}
+  onChange={(value) => setAttributes({ showExcerpt: value })}
+/>
+<CheckboxControl
+  label="Show date"
+  checked={showDate}
+  onChange={(value) => setAttributes({ showDate: value })}
+/>
+```
+
+## With Help Text
+
+<HelpTextDemo />
+
+```jsx
+<CheckboxControl
+  label="Lazy load images"
+  help="Images will load only when they enter the viewport."
+  checked={lazyLoad}
+  onChange={(value) => setAttributes({ lazyLoad: value })}
+/>
+```
+
+## Disabled State
+
+<CheckboxControl
+  label="Premium Feature"
+  checked={false}
+  help="Available on paid plans only."
+  disabled
+  onChange={() => {}}
+/>
+
+```jsx
+<CheckboxControl
+  label="Premium Feature"
+  checked={isPremiumEnabled}
+  help="Available on paid plans only."
+  disabled
+  onChange={(value) => setAttributes({ isPremiumEnabled: value })}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { CheckboxControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { showTitle, showExcerpt, showDate } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Display Options', 'your-text-domain' ) }>
+          <CheckboxControl
+            label={ __( 'Show title', 'your-text-domain' ) }
+            checked={ showTitle }
+            onChange={ ( value ) => setAttributes( { showTitle: value } ) }
+          />
+          <CheckboxControl
+            label={ __( 'Show excerpt', 'your-text-domain' ) }
+            checked={ showExcerpt }
+            onChange={ ( value ) => setAttributes( { showExcerpt: value } ) }
+          />
+          <CheckboxControl
+            label={ __( 'Show date', 'your-text-domain' ) }
+            checked={ showDate }
+            onChange={ ( value ) => setAttributes( { showDate: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps }>
+        { showTitle && <h2>{ __( 'Post Title', 'your-text-domain' ) }</h2> }
+        { showDate && <time>{ new Date().toLocaleDateString() }</time> }
+        { showExcerpt && <p>{ __( 'Post excerpt…', 'your-text-domain' ) }</p> }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "showTitle":   { "type": "boolean", "default": true },
+    "showExcerpt": { "type": "boolean", "default": false },
+    "showDate":    { "type": "boolean", "default": false }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'Visible label text rendered next to the checkbox.'
+  },
+  {
+    name: 'checked',
+    type: 'boolean',
+    default: 'false',
+    required: true,
+    description: 'Controlled checked state of the checkbox.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired with the new boolean value when the checkbox changes.'
+  },
+  {
+    name: 'help',
+    type: 'string | ReactNode',
+    default: '',
+    required: false,
+    description: 'Descriptive help text displayed below the checkbox.'
+  },
+  {
+    name: 'indeterminate',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Shows the mixed/indeterminate state. Used for parent checkboxes in a group. Sets aria-checked="mixed" automatically.'
+  },
+  {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Disables the checkbox when true.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper element.'
+  },
+  {
+    name: 'id',
+    type: 'string',
+    default: '',
+    required: false,
+    description: 'HTML id attribute. Auto-generated from the label if omitted.'
+  }
+]} />
+
+## WordPress Mapping
+
+In WordPress, `CheckboxControl` is imported from `@wordpress/components`. Each instance maps to a separate boolean attribute in `block.json`. Place inside `InspectorControls` + `PanelBody` for sidebar settings. For multi-select scenarios where values form a set, store them in an array attribute and derive `checked` with `selectedValues.includes(value)`. Use `indeterminate` for parent/child checkbox hierarchies — WordPress sets this property via a DOM ref internally, exactly as this component does.
