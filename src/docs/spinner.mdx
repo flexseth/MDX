@@ -1,0 +1,137 @@
+import Spinner from '../components/Spinner';
+
+# Spinner
+
+An animated loading indicator for async operations. Mirrors the WordPress [`Spinner`](https://developer.wordpress.org/block-editor/reference-guides/components/spinner/) from `@wordpress/components`.
+
+## Basic Usage
+
+Render a standalone spinner to represent a loading state.
+
+<Spinner />
+
+```jsx
+{ isLoading && <Spinner /> }
+```
+
+## With Loading Message
+
+Pair the spinner with a visible text label for greater clarity. The `Spinner` itself is decorative (`role="presentation"`), so the accompanying text carries the accessible meaning.
+
+<div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+  <Spinner />
+  <span style={{ fontSize: '0.9375rem', color: '#64748b' }}>Loading posts…</span>
+</div>
+
+```jsx
+{ isLoading && (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <Spinner />
+    <span>{ __( 'Loading posts…', 'your-text-domain' ) }</span>
+  </div>
+) }
+```
+
+## Loading Overlay Pattern
+
+Position a spinner over partially visible content using absolute positioning.
+
+<div style={{ position: 'relative', minHeight: '80px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.375rem', padding: '1rem' }}>
+  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.8)', borderRadius: '0.375rem' }}>
+    <Spinner />
+  </div>
+  <p style={{ opacity: 0.3, margin: 0, fontSize: '0.875rem' }}>Block content loading…</p>
+</div>
+
+```jsx
+<div style={{ position: 'relative', minHeight: '100px' }}>
+  { isLoading && (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255, 255, 255, 0.8)',
+        zIndex: 1,
+      }}
+    >
+      <Spinner />
+    </div>
+  ) }
+  <div style={{ opacity: isLoading ? 0.3 : 1 }}>
+    { content }
+  </div>
+</div>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Spinner } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+
+export default function Edit() {
+  const blockProps = useBlockProps();
+  const [ isLoading, setIsLoading ] = useState( true );
+  const [ posts, setPosts ] = useState( [] );
+
+  useEffect( () => {
+    apiFetch( { path: '/wp/v2/posts?per_page=3' } )
+      .then( ( data ) => {
+        setPosts( data );
+        setIsLoading( false );
+      } )
+      .catch( () => setIsLoading( false ) );
+  }, [] );
+
+  return (
+    <div { ...blockProps }>
+      { isLoading ? (
+        <div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+          <Spinner />
+          <span>{ __( 'Loading posts…', 'your-text-domain' ) }</span>
+        </div>
+      ) : (
+        <ul>
+          { posts.map( ( post ) => (
+            <li key={ post.id }>{ post.title.rendered }</li>
+          ) ) }
+        </ul>
+      ) }
+    </div>
+  );
+}
+```
+
+## block.json Attributes
+
+`Spinner` is a UI indicator only — it carries no block attribute of its own. It is driven by a local state variable and does not persist to `block.json`.
+
+```json
+{
+  "attributes": {}
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the spinner wrapper div.'
+  }
+]} />
+
+## WordPress Mapping
+
+`Spinner` is imported directly from `@wordpress/components`. It has no required props and is purely a visual indicator. Always gate its rendering with a boolean state variable (`isLoading`, `isFetching`, `isSaving`) — never render it unconditionally.
+
+The component is editor-only and should not appear in `save.js`. Clear the loading state in both the success and error branches of any `apiFetch` call to avoid a permanently spinning UI. For button-specific loading, prefer the `Button` component's built-in `isBusy` prop rather than placing a standalone `Spinner` next to a button.

@@ -1,67 +1,81 @@
 import Spacer from '../components/Spacer';
-import TextControl from '../components/TextControl';
 import RangeControl from '../components/RangeControl';
 import Button from '../components/Button';
 import Flex, { FlexItem } from '../components/Flex';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export const VerticalSpacingDemo = () => {
-  const [title, setTitle] = useLocalStorage('demo-spacer-title', '');
-  const [columns, setColumns] = useLocalStorage('demo-spacer-columns', 3);
+  const [spacing, setSpacing] = useLocalStorage('demo-spacer-vertical', 3);
+  const blockStyle = { padding: '1rem', background: '#e2e8f0', borderRadius: '0.25rem', textAlign: 'center', fontSize: '0.875rem', color: '#475569' };
   return (
     <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.375rem' }}>
-      <TextControl
-        label="Title"
-        value={title}
-        onChange={setTitle}
-        placeholder="Enter title..."
-      />
-      <Spacer marginY={3} />
       <RangeControl
-        label="Columns"
-        value={columns}
-        onChange={setColumns}
-        min={1}
-        max={6}
+        label="Vertical spacing (grid units)"
+        value={spacing}
+        onChange={setSpacing}
+        min={0}
+        max={10}
       />
+      <div style={{ marginTop: '1rem' }}>
+        <div style={blockStyle}>Element A</div>
+        <Spacer marginY={spacing} />
+        <div style={blockStyle}>Element B</div>
+      </div>
     </div>
   );
 };
 
 export const HorizontalSpacingDemo = () => {
+  const [spacing, setSpacing] = useLocalStorage('demo-spacer-horizontal', 2);
   return (
     <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.375rem' }}>
-      <Flex>
-        <FlexItem>
-          <Button variant="secondary">Cancel</Button>
-        </FlexItem>
-        <Spacer marginX={2} />
-        <FlexItem>
-          <Button variant="primary">Apply</Button>
-        </FlexItem>
-      </Flex>
+      <RangeControl
+        label="Horizontal spacing (grid units)"
+        value={spacing}
+        onChange={setSpacing}
+        min={0}
+        max={10}
+      />
+      <div style={{ marginTop: '1rem' }}>
+        <Flex>
+          <FlexItem>
+            <Button variant="secondary">Cancel</Button>
+          </FlexItem>
+          <Spacer marginX={spacing} />
+          <FlexItem>
+            <Button variant="primary">Apply</Button>
+          </FlexItem>
+        </Flex>
+      </div>
     </div>
   );
 };
 
 export const DirectionalSpacingDemo = () => {
-  const [label, setLabel] = useLocalStorage('demo-spacer-label', '');
-  const [sublabel, setSublabel] = useLocalStorage('demo-spacer-sublabel', '');
+  const [topSpacing, setTopSpacing] = useLocalStorage('demo-spacer-top', 2);
+  const [bottomSpacing, setBottomSpacing] = useLocalStorage('demo-spacer-bottom', 5);
+  const blockStyle = { padding: '1rem', background: '#e2e8f0', borderRadius: '0.25rem', textAlign: 'center', fontSize: '0.875rem', color: '#475569' };
   return (
     <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.375rem' }}>
-      <TextControl
-        label="Main Label"
-        value={label}
-        onChange={setLabel}
-        placeholder="Main label..."
+      <RangeControl
+        label="Top spacing (grid units)"
+        value={topSpacing}
+        onChange={setTopSpacing}
+        min={0}
+        max={10}
       />
-      <Spacer marginBottom={5} marginTop={2} />
-      <TextControl
-        label="Sublabel"
-        value={sublabel}
-        onChange={setSublabel}
-        placeholder="Sublabel..."
+      <RangeControl
+        label="Bottom spacing (grid units)"
+        value={bottomSpacing}
+        onChange={setBottomSpacing}
+        min={0}
+        max={10}
       />
+      <div style={{ marginTop: '1rem' }}>
+        <div style={blockStyle}>Above</div>
+        <Spacer marginTop={topSpacing} marginBottom={bottomSpacing} />
+        <div style={blockStyle}>Below</div>
+      </div>
     </div>
   );
 };
@@ -75,21 +89,11 @@ A flexible spacing utility that adds controlled vertical or horizontal gap betwe
 <VerticalSpacingDemo />
 
 ```jsx
-<TextControl
-  label="Title"
-  value={title}
-  onChange={(value) => setAttributes({ title: value })}
-/>
-
-<Spacer marginY={3} />
-
-<RangeControl
-  label="Columns"
-  value={columns}
-  onChange={(value) => setAttributes({ columns: value })}
-  min={1}
-  max={6}
-/>
+<div>
+  <p>Element A</p>
+  <Spacer marginY={3} />
+  <p>Element B</p>
+</div>
 ```
 
 ## Horizontal Spacing
@@ -113,19 +117,11 @@ A flexible spacing utility that adds controlled vertical or horizontal gap betwe
 <DirectionalSpacingDemo />
 
 ```jsx
-<TextControl
-  label="Main Label"
-  value={label}
-  onChange={(value) => setAttributes({ label: value })}
-/>
-
-<Spacer marginBottom={5} marginTop={2} />
-
-<TextControl
-  label="Sublabel"
-  value={sublabel}
-  onChange={(value) => setAttributes({ sublabel: value })}
-/>
+<div>
+  <p>Above</p>
+  <Spacer marginTop={2} marginBottom={5} />
+  <p>Below</p>
+</div>
 ```
 
 ## WordPress Usage (edit.js)

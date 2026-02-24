@@ -1,0 +1,230 @@
+import TextareaControl from '../components/TextareaControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+export const CustomCSSDemo = () => {
+  const [css, setCSS] = useLocalStorage('demo-textarea-custom-css', '');
+  return (
+    <div>
+      <TextareaControl
+        label="Custom CSS"
+        value={css}
+        placeholder=".my-block { color: red; }"
+        help="Add custom CSS styles for this block."
+        onChange={setCSS}
+      />
+      { css && (
+        <p style={{ marginTop: '0.5rem', fontSize: '0.8125rem', color: '#64748b' }}>
+          {css.length} character{css.length !== 1 ? 's' : ''} entered.
+        </p>
+      ) }
+    </div>
+  );
+};
+export const DescriptionDemo = () => {
+  const [description, setDescription] = useLocalStorage('demo-textarea-description', '');
+  const MAX = 160;
+  const count = description.length;
+  const isOver = count > MAX;
+  return (
+    <div>
+      <TextareaControl
+        label="Meta Description"
+        value={description}
+        rows={3}
+        placeholder="Write a short description for search engines…"
+        help={
+          <span style={{ color: isOver ? '#ef4444' : '#64748b' }}>
+            {count} / {MAX} characters{isOver ? ' — over limit' : ''}
+          </span>
+        }
+        onChange={setDescription}
+      />
+    </div>
+  );
+};
+
+# TextareaControl
+
+A multi-line text input for longer content such as descriptions, custom CSS, and excerpts. Mirrors the WordPress [`TextareaControl`](https://developer.wordpress.org/block-editor/reference-guides/components/textarea-control/) from `@wordpress/components`.
+
+## Basic Usage
+
+<CustomCSSDemo />
+
+```jsx
+<TextareaControl
+  label="Custom CSS"
+  value={customCSS}
+  placeholder=".my-block { color: red; }"
+  help="Add custom CSS styles for this block."
+  onChange={(value) => setAttributes({ customCSS: value })}
+/>
+```
+
+## With Character Count
+
+A common pattern for SEO meta description fields — display a live character count and change its color when the limit is exceeded.
+
+<DescriptionDemo />
+
+```jsx
+const MAX = 160;
+const count = metaDescription.length;
+const isOver = count > MAX;
+
+<TextareaControl
+  label="Meta Description"
+  value={metaDescription}
+  rows={3}
+  help={
+    <span style={{ color: isOver ? '#ef4444' : 'inherit' }}>
+      {count} / {MAX} characters
+    </span>
+  }
+  onChange={(value) => setAttributes({ metaDescription: value })}
+/>
+```
+
+## Disabled State
+
+<TextareaControl
+  label="Read-only Notes"
+  value="This content cannot be edited."
+  rows={3}
+  help="Editing is disabled for this field."
+  disabled
+  onChange={() => {}}
+/>
+
+```jsx
+<TextareaControl
+  label="Read-only Notes"
+  value={notes}
+  rows={3}
+  disabled={!canEdit}
+  onChange={(value) => setAttributes({ notes: value })}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { TextareaControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { description } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Content', 'your-text-domain' ) }>
+          <TextareaControl
+            label={ __( 'Description', 'your-text-domain' ) }
+            value={ description }
+            rows={ 4 }
+            placeholder={ __( 'Enter a description…', 'your-text-domain' ) }
+            help={ __( 'Displayed below the block heading.', 'your-text-domain' ) }
+            onChange={ ( value ) => setAttributes( { description: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps }>
+        { description && <p>{ description }</p> }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "description": { "type": "string", "default": "" }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: "''",
+    required: true,
+    description: 'Visible label rendered as a <label> element associated with the textarea.'
+  },
+  {
+    name: 'value',
+    type: 'string',
+    default: "''",
+    required: true,
+    description: 'Controlled value of the textarea.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired with the updated string value whenever the textarea content changes.'
+  },
+  {
+    name: 'rows',
+    type: 'number',
+    default: '4',
+    required: false,
+    description: 'Number of visible text rows. Passed directly to the textarea HTML attribute.'
+  },
+  {
+    name: 'placeholder',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Placeholder text displayed when the textarea is empty.'
+  },
+  {
+    name: 'help',
+    type: 'string | ReactNode',
+    default: "''",
+    required: false,
+    description: 'Help text or JSX displayed below the textarea. Linked via aria-describedby.'
+  },
+  {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Disables the textarea and prevents onChange from firing.'
+  },
+  {
+    name: 'hideLabelFromVision',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Visually hides the label while keeping it accessible to screen readers.'
+  },
+  {
+    name: 'id',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'HTML id attribute for the textarea. Auto-generated from label if omitted.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper div.'
+  }
+]} />
+
+## WordPress Mapping
+
+`TextareaControl` is imported from `@wordpress/components` and is the standard choice whenever a block attribute needs multi-line plain-text input. It belongs in `InspectorControls` with a `PanelBody` for sidebar placement, or it can be placed directly in the block canvas for inline editing.
+
+For **rich text** (bold, links, headings) inside the canvas, use `RichText` from `@wordpress/block-editor` instead. For single-line text, use `TextControl`. Sanitize textarea values server-side with `sanitize_textarea_field()` in PHP before saving to the database.

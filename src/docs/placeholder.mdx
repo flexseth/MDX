@@ -1,0 +1,223 @@
+import Placeholder from '../components/Placeholder';
+import Button from '../components/Button';
+export const BasicPlaceholderDemo = () => {
+  return (
+    <Placeholder
+      icon={
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <path d="M21 15l-5-5L5 21" />
+        </svg>
+      }
+      label="Image Block"
+      instructions="Upload an image or choose one from your media library."
+    />
+  );
+};
+export const WithActionsDemo = () => {
+  return (
+    <Placeholder
+      icon={
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none" />
+        </svg>
+      }
+      label="Video Block"
+      instructions="Select a video file to embed, or paste a URL from YouTube or Vimeo."
+    >
+      <Button variant="primary">Upload Video</Button>
+      <Button variant="secondary">Insert from URL</Button>
+    </Placeholder>
+  );
+};
+export const ColumnLayoutDemo = () => {
+  return (
+    <Placeholder
+      icon={
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+          <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+        </svg>
+      }
+      label="Embed Block"
+      instructions="Enter a URL to embed content from YouTube, Twitter, Spotify, and more."
+      isColumnLayout
+    >
+      <Button variant="primary">Embed</Button>
+      <Button variant="secondary">Learn More</Button>
+    </Placeholder>
+  );
+};
+
+# Placeholder
+
+An empty-state UI container for blocks that have not been configured yet. Shows an icon, label, instructions, and action buttons in a bordered region. Mirrors the WordPress [`Placeholder`](https://developer.wordpress.org/block-editor/reference-guides/components/placeholder/) from `@wordpress/components`.
+
+## Basic Usage
+
+A minimal placeholder with an icon, label, and instructions — no action buttons.
+
+<BasicPlaceholderDemo />
+
+```jsx
+<Placeholder
+  icon={imageIcon}
+  label="Image Block"
+  instructions="Upload an image or choose one from your media library."
+/>
+```
+
+## With Action Buttons
+
+Pass `children` to render action buttons in the placeholder's fieldset area.
+
+<WithActionsDemo />
+
+```jsx
+<Placeholder
+  icon={videoIcon}
+  label="Video Block"
+  instructions="Select a video file to embed, or paste a URL from YouTube or Vimeo."
+>
+  <Button variant="primary">Upload Video</Button>
+  <Button variant="secondary">Insert from URL</Button>
+</Placeholder>
+```
+
+## Column Layout
+
+Use `isColumnLayout` to stack children vertically — useful when the placeholder holds a form or multiple stacked inputs.
+
+<ColumnLayoutDemo />
+
+```jsx
+<Placeholder
+  icon={linkIcon}
+  label="Embed Block"
+  instructions="Enter a URL to embed content from YouTube, Twitter, Spotify, and more."
+  isColumnLayout
+>
+  <Button variant="primary">Embed</Button>
+  <Button variant="secondary">Learn More</Button>
+</Placeholder>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Placeholder, Button } from '@wordpress/components';
+import { image } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { imageUrl, imageAlt } = attributes;
+
+  const onSelectImage = ( media ) => {
+    setAttributes( { imageUrl: media.url, imageAlt: media.alt } );
+  };
+
+  if ( imageUrl ) {
+    return (
+      <div { ...blockProps }>
+        <img src={ imageUrl } alt={ imageAlt } style={ { width: '100%' } } />
+        <Button
+          variant="link"
+          onClick={ () => setAttributes( { imageUrl: '', imageAlt: '' } ) }
+        >
+          { __( 'Remove image', 'your-text-domain' ) }
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div { ...blockProps }>
+      <Placeholder
+        icon={ image }
+        label={ __( 'Image Block', 'your-text-domain' ) }
+        instructions={ __( 'Upload an image or choose one from your media library.', 'your-text-domain' ) }
+      >
+        <MediaUploadCheck>
+          <MediaUpload
+            onSelect={ onSelectImage }
+            allowedTypes={ [ 'image' ] }
+            render={ ( { open } ) => (
+              <Button variant="primary" onClick={ open }>
+                { __( 'Select Image', 'your-text-domain' ) }
+              </Button>
+            ) }
+          />
+        </MediaUploadCheck>
+      </Placeholder>
+    </div>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "imageUrl": { "type": "string", "default": "" },
+    "imageAlt": { "type": "string", "default": "" }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Block name or placeholder title displayed prominently in the header.'
+  },
+  {
+    name: 'instructions',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Brief guidance text shown below the label to explain what the user should do.'
+  },
+  {
+    name: 'icon',
+    type: 'node',
+    default: '',
+    required: false,
+    description: 'Icon node (SVG or @wordpress/icons component) displayed to the left of the label.'
+  },
+  {
+    name: 'isColumnLayout',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Stacks children vertically (column) instead of in a horizontal row.'
+  },
+  {
+    name: 'children',
+    type: 'node',
+    default: '',
+    required: false,
+    description: 'Action buttons, form inputs, or other interactive elements placed in the fieldset area.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the root element.'
+  }
+]} />
+
+## WordPress Mapping
+
+`Placeholder` is imported from `@wordpress/components` and is purely editor-side — never place it in `save.js`. The standard pattern is to conditionally return `<Placeholder>` when the block's required attribute is empty, then return the real block content once that attribute is set. Core blocks such as Image, Video, Cover, and all Embed variants follow this exact pattern.
+
+The real WordPress `Placeholder` also accepts a `preview` prop to render a side-by-side content preview, and a `withIllustration` variant for larger empty states. Pass `isColumnLayout` whenever placing a form (text input + submit button) inside the placeholder, as rows of inputs look better stacked vertically. Use icons from `@wordpress/icons` for visual consistency with the rest of the editor.

@@ -1,0 +1,346 @@
+# BlockControls
+
+A slot component that renders its children into the block toolbar — the floating bar that appears above a selected block. Mirrors the WordPress [`BlockControls`](https://developer.wordpress.org/block-editor/reference-guides/components/block-controls/) from `@wordpress/block-editor`.
+
+> **Note:** This component requires the WordPress block editor environment and cannot be rendered outside of a WordPress block. The examples below show correct usage in `edit.js`.
+
+## Basic Usage
+
+```jsx
+import { BlockControls } from '@wordpress/block-editor';
+import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { alignLeft, alignCenter, alignRight } from '@wordpress/icons';
+
+// Inside your Edit component's return:
+<BlockControls>
+  <ToolbarGroup>
+    <ToolbarButton
+      icon={ alignLeft }
+      label={ __( 'Align left', 'your-text-domain' ) }
+      isActive={ alignment === 'left' }
+      onClick={ () => setAttributes( { alignment: 'left' } ) }
+    />
+    <ToolbarButton
+      icon={ alignCenter }
+      label={ __( 'Align center', 'your-text-domain' ) }
+      isActive={ alignment === 'center' }
+      onClick={ () => setAttributes( { alignment: 'center' } ) }
+    />
+    <ToolbarButton
+      icon={ alignRight }
+      label={ __( 'Align right', 'your-text-domain' ) }
+      isActive={ alignment === 'right' }
+      onClick={ () => setAttributes( { alignment: 'right' } ) }
+    />
+  </ToolbarGroup>
+</BlockControls>
+```
+
+## Common Patterns
+
+### AlignmentControl shorthand
+
+For standard text alignment, WordPress provides the `AlignmentControl` component as a built-in shortcut that avoids writing three separate `ToolbarButton` components manually.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls, AlignmentControl } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { textAlign } = attributes;
+
+  return (
+    <>
+      <BlockControls>
+        <AlignmentControl
+          value={ textAlign }
+          onChange={ ( value ) => setAttributes( { textAlign: value } ) }
+        />
+      </BlockControls>
+      <div { ...blockProps } style={ { textAlign } }>
+        { __( 'Aligned content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+### Custom toolbar actions
+
+Use multiple `ToolbarGroup` components inside one `BlockControls` to create visually separated groups of buttons. Each group renders with a divider between it and adjacent groups.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { update, trash } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+
+  const handleRefresh = () => {
+    setAttributes( { lastUpdated: Date.now() } );
+  };
+
+  return (
+    <>
+      <BlockControls>
+        <ToolbarGroup>
+          <ToolbarButton
+            icon={ update }
+            label={ __( 'Refresh data', 'your-text-domain' ) }
+            onClick={ handleRefresh }
+          />
+        </ToolbarGroup>
+        <ToolbarGroup>
+          <ToolbarButton
+            icon={ trash }
+            label={ __( 'Clear content', 'your-text-domain' ) }
+            isDestructive
+            onClick={ () => setAttributes( { content: '' } ) }
+          />
+        </ToolbarGroup>
+      </BlockControls>
+      <div { ...blockProps }>
+        { __( 'Block content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+### BlockControls with MediaReplaceFlow
+
+When a block has a selected image, surface a Replace button in the toolbar so users can swap media without leaving the editor canvas.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls, MediaReplaceFlow } from '@wordpress/block-editor';
+import { ToolbarGroup } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { imageUrl, imageId, imageAlt } = attributes;
+
+  const onSelectImage = ( media ) => {
+    setAttributes( {
+      imageId: media.id,
+      imageUrl: media.url,
+      imageAlt: media.alt,
+    } );
+  };
+
+  return (
+    <>
+      { imageUrl && (
+        <BlockControls>
+          <ToolbarGroup>
+            <MediaReplaceFlow
+              mediaId={ imageId }
+              mediaURL={ imageUrl }
+              allowedTypes={ [ 'image' ] }
+              accept="image/*"
+              onSelect={ onSelectImage }
+              name={ __( 'Replace', 'your-text-domain' ) }
+            />
+          </ToolbarGroup>
+        </BlockControls>
+      ) }
+      <div { ...blockProps }>
+        { imageUrl
+          ? <img src={ imageUrl } alt={ imageAlt } style={ { width: '100%' } } />
+          : <p>{ __( 'No image selected.', 'your-text-domain' ) }</p>
+        }
+      </div>
+    </>
+  );
+}
+```
+
+## WordPress Usage (edit.js)
+
+A realistic block combining `BlockControls` for alignment and a link toggle with `InspectorControls` for a deeper setting — the most common real-world pattern.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import {
+  useBlockProps,
+  BlockControls,
+  InspectorControls,
+  AlignmentControl,
+} from '@wordpress/block-editor';
+import { PanelBody, ToggleControl, ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { link } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { textAlign, showCaption, openInNewTab } = attributes;
+
+  return (
+    <>
+      <BlockControls>
+        <AlignmentControl
+          value={ textAlign }
+          onChange={ ( value ) => setAttributes( { textAlign: value } ) }
+        />
+        <ToolbarGroup>
+          <ToolbarButton
+            icon={ link }
+            label={ __( 'Open in new tab', 'your-text-domain' ) }
+            isActive={ openInNewTab }
+            onClick={ () => setAttributes( { openInNewTab: ! openInNewTab } ) }
+          />
+        </ToolbarGroup>
+      </BlockControls>
+
+      <InspectorControls>
+        <PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+          <ToggleControl
+            label={ __( 'Show caption', 'your-text-domain' ) }
+            checked={ showCaption }
+            onChange={ ( value ) => setAttributes( { showCaption: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps } style={ { textAlign } }>
+        { __( 'Block content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "textAlign": {
+      "type": "string",
+      "default": ""
+    },
+    "showCaption": {
+      "type": "boolean",
+      "default": false
+    },
+    "openInNewTab": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
+```
+
+## save.js
+
+`BlockControls` only exists in the editor. It has no `save.js` equivalent — the attribute values it writes (like `textAlign`) are applied directly to the saved HTML.
+
+```jsx
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+  const blockProps = useBlockProps.save();
+  const { textAlign } = attributes;
+
+  return (
+    <div { ...blockProps } style={ { textAlign } }>
+      { /* Saved block content */ }
+    </div>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'children',
+    type: 'ReactNode',
+    default: '',
+    required: true,
+    description: 'ToolbarGroup and ToolbarButton components to render in the block toolbar.'
+  },
+  {
+    name: 'group',
+    type: 'string',
+    default: "'default'",
+    required: false,
+    description: "Toolbar slot group. Options: 'default', 'block', 'inline', 'other'. Controls where in the toolbar the children are inserted."
+  }
+]} />
+
+### ToolbarGroup props
+
+<PropsTable props={[
+  {
+    name: 'children',
+    type: 'ReactNode',
+    default: '',
+    required: true,
+    description: 'ToolbarButton components. Renders with a visual divider between adjacent ToolbarGroup siblings.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the group wrapper.'
+  }
+]} />
+
+### ToolbarButton props
+
+<PropsTable props={[
+  {
+    name: 'icon',
+    type: 'ReactNode',
+    default: '',
+    required: true,
+    description: 'Icon component from @wordpress/icons. Do not use emoji or custom SVGs.'
+  },
+  {
+    name: 'label',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'Accessible tooltip text. Required for screen reader and keyboard users.'
+  },
+  {
+    name: 'onClick',
+    type: 'function',
+    default: '',
+    required: false,
+    description: 'Click handler fired when the button is pressed.'
+  },
+  {
+    name: 'isActive',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Highlights the button when true and communicates aria-pressed state to assistive technology.'
+  },
+  {
+    name: 'isDestructive',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Applies destructive (red) styling to communicate a potentially harmful action.'
+  },
+  {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Prevents interaction and visually dims the button.'
+  }
+]} />
+
+## WordPress Mapping
+
+`BlockControls` is imported from `@wordpress/block-editor` — not `@wordpress/components`. It is a Slot/Fill component: the `BlockControls` you render in `edit.js` fills into the toolbar Slot managed by the block editor shell. Any number of `BlockControls` in the same `edit.js` are merged into the same toolbar area.
+
+Use `BlockControls` for quick-access, context-sensitive actions that relate directly to the block's canvas content: alignment, media replacement, view mode switching, and formatting toggles. Reserve `InspectorControls` (the sidebar) for detailed settings that don't need to be immediately at hand while editing content.
+
+`BlockControls` must not appear in `save.js`. Only the attribute values it writes — stored in `block.json` — carry over to the front end. Always use icons from `@wordpress/icons` for `ToolbarButton`; the icon prop accepts any React node but the WordPress design system standardises on this icon library.

@@ -1,0 +1,271 @@
+import FocalPointPicker from '../components/FocalPointPicker';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [x, setX] = useLocalStorage('demo-focal-point-x', 0.5);
+  const [y, setY] = useLocalStorage('demo-focal-point-y', 0.5);
+  return (
+    <div>
+      <FocalPointPicker
+        url="https://picsum.photos/400/300"
+        value={{ x, y }}
+        onChange={({ x: newX, y: newY }) => {
+          setX(newX);
+          setY(newY);
+        }}
+        width={320}
+        height={200}
+      />
+      <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#64748b', fontFamily: 'var(--font-mono, monospace)' }}>
+        x: <strong style={{ color: '#1e293b' }}>{x}</strong>
+        &ensp;y: <strong style={{ color: '#1e293b' }}>{y}</strong>
+        &ensp;→&ensp;background-position:&ensp;
+        <strong style={{ color: '#1e293b' }}>{Math.round(x * 100)}% {Math.round(y * 100)}%</strong>
+      </div>
+    </div>
+  );
+};
+
+export const BackgroundPreviewDemo = () => {
+  const [x, setX] = useLocalStorage('demo-focal-point-preview-x', 0.5);
+  const [y, setY] = useLocalStorage('demo-focal-point-preview-y', 0.5);
+  const bgPosition = `${Math.round(x * 100)}% ${Math.round(y * 100)}%`;
+  return (
+    <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+      <div>
+        <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '0.5rem' }}>Drag the crosshair</p>
+        <FocalPointPicker
+          url="https://picsum.photos/seed/wp/400/300"
+          value={{ x, y }}
+          onChange={({ x: newX, y: newY }) => {
+            setX(newX);
+            setY(newY);
+          }}
+          width={240}
+          height={160}
+        />
+      </div>
+      <div>
+        <p style={{ fontSize: '0.8125rem', color: '#64748b', marginBottom: '0.5rem' }}>Live background preview</p>
+        <div
+          style={{
+            width: 240,
+            height: 160,
+            backgroundImage: 'url(https://picsum.photos/seed/wp/400/300)',
+            backgroundSize: 'cover',
+            backgroundPosition: bgPosition,
+            borderRadius: '0.375rem',
+            border: '1px solid #e2e8f0',
+            transition: 'background-position 0.1s ease',
+          }}
+        />
+        <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.375rem' }}>
+          background-position: {bgPosition}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+# FocalPointPicker
+
+A draggable crosshair over an image preview to set a CSS focal point. Mirrors the WordPress [`FocalPointPicker`](https://developer.wordpress.org/block-editor/reference-guides/components/focal-point-picker/) from `@wordpress/components`.
+
+## Basic Usage
+
+Click or drag anywhere on the image to move the focal point. The values are normalized to a 0–1 range where `{ x: 0, y: 0 }` is top-left and `{ x: 1, y: 1 }` is bottom-right. Keyboard arrow keys also move the crosshair.
+
+<BasicDemo />
+
+```jsx
+<FocalPointPicker
+  url={backgroundUrl}
+  value={focalPoint}
+  onChange={(value) => setAttributes({ focalPoint: value })}
+/>
+```
+
+## With Live Background Preview
+
+The focal point maps directly to a CSS `background-position` percentage. This demo shows the picker alongside a live preview so you can see the result immediately.
+
+<BackgroundPreviewDemo />
+
+```jsx
+const bgPosition = `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`;
+
+<FocalPointPicker
+  url={imageUrl}
+  value={focalPoint}
+  onChange={(value) => setAttributes({ focalPoint: value })}
+/>
+
+<div
+  style={{
+    backgroundImage: `url(${ imageUrl })`,
+    backgroundSize: 'cover',
+    backgroundPosition: bgPosition,
+  }}
+/>
+```
+
+## Disabled / No Image State
+
+When no image URL has been selected yet, render the `FocalPointPicker` only after an image is chosen. Pair it with `MediaUpload` in real WordPress usage.
+
+```jsx
+{ backgroundUrl && (
+  <FocalPointPicker
+    url={backgroundUrl}
+    value={focalPoint}
+    onChange={(value) => setAttributes({ focalPoint: value })}
+  />
+) }
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { FocalPointPicker, PanelBody, Button } from '@wordpress/components';
+import { useBlockProps, InspectorControls, MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { backgroundUrl, focalPoint } = attributes;
+
+  const bgPosition = `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Background Image', 'your-text-domain' ) }>
+          <MediaUploadCheck>
+            <MediaUpload
+              onSelect={ ( media ) =>
+                setAttributes( {
+                  backgroundUrl: media.url,
+                  focalPoint: { x: 0.5, y: 0.5 },
+                } )
+              }
+              allowedTypes={ [ 'image' ] }
+              value={ backgroundUrl }
+              render={ ( { open } ) => (
+                <Button variant="secondary" onClick={ open }>
+                  { backgroundUrl
+                    ? __( 'Replace image', 'your-text-domain' )
+                    : __( 'Select image', 'your-text-domain' ) }
+                </Button>
+              ) }
+            />
+          </MediaUploadCheck>
+
+          { backgroundUrl && (
+            <FocalPointPicker
+              label={ __( 'Focal point', 'your-text-domain' ) }
+              url={ backgroundUrl }
+              value={ focalPoint }
+              onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
+            />
+          ) }
+        </PanelBody>
+      </InspectorControls>
+
+      <div
+        { ...blockProps }
+        style={ {
+          backgroundImage: backgroundUrl ? `url(${ backgroundUrl })` : 'none',
+          backgroundPosition: bgPosition,
+          backgroundSize: 'cover',
+          minHeight: '300px',
+        } }
+      >
+        { ! backgroundUrl && (
+          <p>{ __( 'Select a background image in the settings panel.', 'your-text-domain' ) }</p>
+        ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "backgroundUrl": { "type": "string", "default": "" },
+    "focalPoint": {
+      "type": "object",
+      "default": { "x": 0.5, "y": 0.5 }
+    }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'url',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'URL of the image displayed as the draggable preview.'
+  },
+  {
+    name: 'value',
+    type: 'object',
+    default: '{ x: 0.5, y: 0.5 }',
+    required: false,
+    description: 'Current focal point as { x, y } where each axis ranges from 0 (start) to 1 (end). Controlled.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired with the new { x, y } object whenever the focal point changes.'
+  },
+  {
+    name: 'width',
+    type: 'number',
+    default: '200',
+    required: false,
+    description: 'Width of the image picker container in pixels.'
+  },
+  {
+    name: 'height',
+    type: 'number',
+    default: '150',
+    required: false,
+    description: 'Height of the image picker container in pixels.'
+  },
+  {
+    name: 'label',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Label rendered above the image picker.'
+  },
+  {
+    name: 'help',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Help text displayed below the image picker.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the outer wrapper.'
+  }
+]} />
+
+## WordPress Mapping
+
+`FocalPointPicker` is imported from `@wordpress/components` and placed inside `InspectorControls` — always conditionally rendered after a background image has been selected (typically via `MediaUpload`). Store the focal point as a `type: "object"` attribute in `block.json` with `"default": { "x": 0.5, "y": 0.5 }` so the center of the image is the initial focus.
+
+Convert the 0–1 values to CSS percentages by multiplying by 100 when rendering: `background-position: ${focalPoint.x * 100}% ${focalPoint.y * 100}%` for background images, or `object-position` for `<img>` elements with `object-fit: cover`. Always reset `focalPoint` back to `{ x: 0.5, y: 0.5 }` when a new image is selected so the user starts from a sensible default.

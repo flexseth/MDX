@@ -1,0 +1,218 @@
+import PanelBody from '../components/PanelBody';
+import TextControl from '../components/TextControl';
+import ToggleControl from '../components/ToggleControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+export const BasicPanelDemo = () => {
+  const [title, setTitle] = useLocalStorage('demo-panel-body-title', '');
+  return (
+    <PanelBody title="Content Settings" initialOpen={true}>
+      <TextControl
+        label="Block Title"
+        value={title}
+        placeholder="Enter a title…"
+        onChange={setTitle}
+      />
+    </PanelBody>
+  );
+};
+export const CollapsedPanelDemo = () => {
+  const [heading, setHeading] = useLocalStorage('demo-panel-body-heading', '');
+  const [showDate, setShowDate] = useLocalStorage('demo-panel-body-show-date', false);
+  return (
+    <div>
+      <PanelBody title="Content Settings" initialOpen={true}>
+        <TextControl
+          label="Heading"
+          value={heading}
+          placeholder="Enter heading text…"
+          onChange={setHeading}
+        />
+        <ToggleControl
+          label="Show Date"
+          checked={showDate}
+          help="Display today's date below the heading."
+          onChange={setShowDate}
+        />
+      </PanelBody>
+      <PanelBody title="Typography Settings" initialOpen={false}>
+        <p style={{ color: '#64748b', fontSize: '0.875rem', margin: 0 }}>
+          Font size, weight, and line-height controls would appear here.
+        </p>
+      </PanelBody>
+    </div>
+  );
+};
+
+# PanelBody
+
+A collapsible section with a clickable title header used to group related settings in the block inspector sidebar. Mirrors the WordPress [`PanelBody`](https://developer.wordpress.org/block-editor/reference-guides/components/panel/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BasicPanelDemo />
+
+```jsx
+<PanelBody title="Content Settings" initialOpen={true}>
+  <TextControl
+    label="Block Title"
+    value={title}
+    onChange={(value) => setAttributes({ title: value })}
+  />
+</PanelBody>
+```
+
+## Multiple Panels
+
+Stack multiple `PanelBody` instances inside `InspectorControls`. The second panel starts collapsed — click its header to expand it.
+
+<CollapsedPanelDemo />
+
+```jsx
+<PanelBody title="Content Settings" initialOpen={true}>
+  <TextControl
+    label="Heading"
+    value={heading}
+    onChange={(value) => setAttributes({ heading: value })}
+  />
+  <ToggleControl
+    label="Show Date"
+    checked={showDate}
+    onChange={(value) => setAttributes({ showDate: value })}
+  />
+</PanelBody>
+
+<PanelBody title="Typography Settings" initialOpen={false}>
+  {/* Typography controls */}
+</PanelBody>
+```
+
+## Disabled State
+
+`PanelBody` does not have a `disabled` prop — the panel is always collapsible. To disable inner controls, pass `disabled` to each child control individually.
+
+<PanelBody title="Premium Settings" initialOpen={true}>
+  <TextControl
+    label="Custom CSS Class"
+    value=""
+    disabled
+    onChange={() => {}}
+    help="Available on premium plans only."
+  />
+</PanelBody>
+
+```jsx
+<PanelBody title="Premium Settings" initialOpen={true}>
+  <TextControl
+    label="Custom CSS Class"
+    value={customClass}
+    disabled={!isPremium}
+    onChange={(value) => setAttributes({ customClass: value })}
+    help="Available on premium plans only."
+  />
+</PanelBody>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { PanelBody, TextControl, ToggleControl, RangeControl } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { heading, showDate, fontSize } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody
+          title={ __( 'Content Settings', 'your-text-domain' ) }
+          initialOpen={ true }
+        >
+          <TextControl
+            label={ __( 'Heading', 'your-text-domain' ) }
+            value={ heading }
+            onChange={ ( value ) => setAttributes( { heading: value } ) }
+          />
+          <ToggleControl
+            label={ __( 'Show Date', 'your-text-domain' ) }
+            checked={ showDate }
+            onChange={ ( value ) => setAttributes( { showDate: value } ) }
+          />
+        </PanelBody>
+
+        <PanelBody
+          title={ __( 'Typography', 'your-text-domain' ) }
+          initialOpen={ false }
+        >
+          <RangeControl
+            label={ __( 'Font Size', 'your-text-domain' ) }
+            value={ fontSize }
+            onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+            min={ 12 }
+            max={ 72 }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps }>
+        <h2 style={ { fontSize: `${ fontSize }px` } }>
+          { heading || __( 'Add heading…', 'your-text-domain' ) }
+        </h2>
+        { showDate && <p>{ new Date().toLocaleDateString() }</p> }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "heading": { "type": "string", "default": "" },
+    "showDate": { "type": "boolean", "default": false },
+    "fontSize": { "type": "number", "default": 24 }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'title',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Panel header text displayed in the clickable toggle button.'
+  },
+  {
+    name: 'initialOpen',
+    type: 'boolean',
+    default: 'true',
+    required: false,
+    description: 'Whether the panel body starts open on mount.'
+  },
+  {
+    name: 'children',
+    type: 'node',
+    default: '',
+    required: false,
+    description: 'Panel body content — controls, inputs, and any JSX.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the root element.'
+  }
+]} />
+
+## WordPress Mapping
+
+In WordPress, `PanelBody` is imported from `@wordpress/components` and almost always rendered inside `InspectorControls` from `@wordpress/block-editor`. The real WordPress component also accepts `icon` (a component from `@wordpress/icons` shown next to the title), `opened` (controlled open state), and `onToggle` (callback for controlled mode). The replica here uses uncontrolled internal state for simplicity, which covers the typical `initialOpen` pattern used in the vast majority of blocks.
+
+Stack multiple `PanelBody` components to build a sidebar with progressive disclosure: start the most important panel with `initialOpen={true}` and all secondary panels with `initialOpen={false}`. Avoid nesting `PanelBody` inside another `PanelBody` — the WordPress sidebar design system expects them to be siblings.

@@ -1,5 +1,5 @@
 import { MDXProvider } from '@mdx-js/react';
-import { Alert, BaseControl, BoxControl, Button, ButtonGroup, Card, CheckboxControl, CodeBlock, CodeTabs, ColorPalette, ColorPicker, ComboboxControl, CustomSelectControl, DateTimePicker, DropdownMenu, Flex, FlexItem, FlexBlock, NumberControl, Popover, PropsTable, RangeControl, SearchControl, SelectControl, Snackbar, Spacer, Tabs, TextControl, ToggleControl, ToggleGroupControl, ToggleGroupControlOption, ToggleGroupControlOptionIcon, ToolsPanel, ToolsPanelItem } from '../components';
+import { Alert, BaseControl, BoxControl, Button, ButtonGroup, Card, CheckboxControl, CodeBlock, CodeTabs, ColorPalette, ColorPicker, ComboboxControl, CustomSelectControl, DateTimePicker, Dropdown, DropdownMenu, Flex, FlexItem, FlexBlock, FocalPointPicker, FontSizePicker, FormTokenField, Modal, Notice, NumberControl, PanelBody, Placeholder, Popover, PropsTable, RadioControl, RangeControl, SearchControl, SelectControl, Snackbar, Spacer, Spinner, TabPanel, Tabs, TextareaControl, TextControl, ToggleControl, ToggleGroupControl, ToggleGroupControlOption, ToggleGroupControlOptionIcon, ToolsPanel, ToolsPanelItem, Tooltip, UnitControl } from '../components';
 
 /**
  * Maps standard markdown elements and custom components
@@ -44,19 +44,31 @@ const components = {
 	ComboboxControl,
 	CustomSelectControl,
 	DateTimePicker,
+	Dropdown,
 	DropdownMenu,
 	Flex,
 	FlexItem,
 	FlexBlock,
+	FocalPointPicker,
+	FontSizePicker,
+	FormTokenField,
+	Modal,
+	Notice,
 	NumberControl,
+	PanelBody,
+	Placeholder,
 	Popover,
 	PropsTable,
+	RadioControl,
 	RangeControl,
 	SearchControl,
 	SelectControl,
 	Snackbar,
 	Spacer,
+	Spinner,
+	TabPanel,
 	Tabs,
+	TextareaControl,
 	TextControl,
 	ToggleControl,
 	ToggleGroupControl,
@@ -64,6 +76,8 @@ const components = {
 	ToggleGroupControlOptionIcon,
 	ToolsPanel,
 	ToolsPanelItem,
+	Tooltip,
+	UnitControl,
 };
 
 /**

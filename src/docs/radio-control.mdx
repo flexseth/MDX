@@ -1,0 +1,233 @@
+import RadioControl from '../components/RadioControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+export const DisplayStyleDemo = () => {
+  const [style, setStyle] = useLocalStorage('demo-radio-display-style', 'list');
+  return (
+    <div>
+      <RadioControl
+        label="Display Style"
+        selected={style}
+        options={[
+          { label: 'List', value: 'list' },
+          { label: 'Grid', value: 'grid' },
+          { label: 'Carousel', value: 'carousel' },
+        ]}
+        onChange={setStyle}
+      />
+      <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#64748b' }}>
+        Selected: <strong>{style}</strong>
+      </p>
+    </div>
+  );
+};
+export const LayoutModeDemo = () => {
+  const [layout, setLayout] = useLocalStorage('demo-radio-layout', 'stacked');
+  const previewStyles = {
+    stacked: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
+    side: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' },
+    full: { display: 'block' },
+  };
+  return (
+    <div>
+      <RadioControl
+        label="Image Layout"
+        help="Choose how the image is positioned relative to the text."
+        selected={layout}
+        options={[
+          { label: 'Stacked (image above text)', value: 'stacked' },
+          { label: 'Side by side', value: 'side' },
+          { label: 'Full width', value: 'full' },
+        ]}
+        onChange={setLayout}
+      />
+      <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '0.375rem', border: '1px solid #e2e8f0' }}>
+        <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.5rem' }}>Preview layout: <strong>{layout}</strong></p>
+        <div style={previewStyles[layout]}>
+          <div style={{ background: '#cbd5e1', borderRadius: '0.25rem', padding: '0.5rem', textAlign: 'center', fontSize: '0.8125rem', color: '#475569' }}>[Image]</div>
+          <div style={{ background: '#e2e8f0', borderRadius: '0.25rem', padding: '0.5rem', textAlign: 'center', fontSize: '0.8125rem', color: '#475569' }}>[Text]</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+# RadioControl
+
+A radio button group for selecting one option from a mutually exclusive set. Mirrors the WordPress [`RadioControl`](https://developer.wordpress.org/block-editor/reference-guides/components/radio-control/) from `@wordpress/components`.
+
+## Basic Usage
+
+<DisplayStyleDemo />
+
+```jsx
+<RadioControl
+  label="Display Style"
+  selected={displayStyle}
+  options={[
+    { label: 'List', value: 'list' },
+    { label: 'Grid', value: 'grid' },
+    { label: 'Carousel', value: 'carousel' },
+  ]}
+  onChange={(value) => setAttributes({ displayStyle: value })}
+/>
+```
+
+## With Help Text and Live Preview
+
+Select a layout mode to see the content arrangement update in real time.
+
+<LayoutModeDemo />
+
+```jsx
+<RadioControl
+  label="Image Layout"
+  help="Choose how the image is positioned relative to the text."
+  selected={layout}
+  options={[
+    { label: 'Stacked (image above text)', value: 'stacked' },
+    { label: 'Side by side', value: 'side' },
+    { label: 'Full width', value: 'full' },
+  ]}
+  onChange={(value) => setAttributes({ layout: value })}
+/>
+```
+
+## Disabled State
+
+<RadioControl
+  label="Button Size"
+  selected="medium"
+  disabled
+  options={[
+    { label: 'Small', value: 'small' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Large', value: 'large' },
+  ]}
+  onChange={() => {}}
+/>
+
+```jsx
+<RadioControl
+  label="Button Size"
+  selected={buttonSize}
+  disabled={!canEdit}
+  options={[
+    { label: 'Small', value: 'small' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Large', value: 'large' },
+  ]}
+  onChange={(value) => setAttributes({ buttonSize: value })}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { RadioControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { displayStyle } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Display', 'your-text-domain' ) }>
+          <RadioControl
+            label={ __( 'Display style', 'your-text-domain' ) }
+            selected={ displayStyle }
+            options={ [
+              { label: __( 'List', 'your-text-domain' ), value: 'list' },
+              { label: __( 'Grid', 'your-text-domain' ), value: 'grid' },
+              { label: __( 'Carousel', 'your-text-domain' ), value: 'carousel' },
+            ] }
+            onChange={ ( value ) => setAttributes( { displayStyle: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps } className={ `display-${ displayStyle }` }>
+        { __( 'Block content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "displayStyle": { "type": "string", "default": "list" }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: "''",
+    required: true,
+    description: 'Group label displayed above the radio buttons. Renders as a fieldset legend.'
+  },
+  {
+    name: 'selected',
+    type: 'string',
+    default: "''",
+    required: true,
+    description: 'The value of the currently selected option.'
+  },
+  {
+    name: 'options',
+    type: 'array',
+    default: '[]',
+    required: true,
+    description: 'Array of { label, value } objects. Each object renders one radio input.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback receiving the newly selected value string when a radio button is clicked.'
+  },
+  {
+    name: 'help',
+    type: 'string | ReactNode',
+    default: "''",
+    required: false,
+    description: 'Descriptive text displayed below the radio group.'
+  },
+  {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Disables all radio buttons in the group when true.'
+  },
+  {
+    name: 'hideLabelFromVision',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Visually hides the group legend while keeping it accessible to screen readers.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the fieldset wrapper.'
+  }
+]} />
+
+## WordPress Mapping
+
+`RadioControl` is imported from `@wordpress/components` and is most commonly placed inside a `PanelBody` within `InspectorControls` to expose a mutually exclusive choice in the block sidebar. Use it when the user must pick exactly one option from a short list (2–6 items) — for longer lists use `SelectControl` instead.
+
+Store the selected value as a `string` attribute in `block.json` even when options represent numbers. The `onChange` callback receives the raw value string, which can be passed directly to `setAttributes`. Apply the attribute to the block markup as a class suffix or inline style in `edit.js` and `save.js`.

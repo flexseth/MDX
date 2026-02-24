@@ -1,0 +1,288 @@
+import TabPanel from '../components/TabPanel';
+import TextControl from '../components/TextControl';
+import ToggleControl from '../components/ToggleControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+export const BasicTabsDemo = () => {
+  const [activeTab, setActiveTab] = useLocalStorage('demo-tab-panel-active', 'general');
+  const [siteTitle, setSiteTitle] = useLocalStorage('demo-tab-panel-site-title', '');
+  const [showComments, setShowComments] = useLocalStorage('demo-tab-panel-show-comments', true);
+  const [apiKey, setApiKey] = useLocalStorage('demo-tab-panel-api-key', '');
+  const tabs = [
+    { name: 'general', title: 'General' },
+    { name: 'advanced', title: 'Advanced' },
+    { name: 'help', title: 'Help' },
+  ];
+  return (
+    <TabPanel
+      tabs={tabs}
+      initialTabName={activeTab}
+      onSelect={setActiveTab}
+    >
+      {(tab) => (
+        <div style={{ padding: '1rem 0' }}>
+          {tab.name === 'general' && (
+            <div>
+              <TextControl
+                label="Site Title"
+                value={siteTitle}
+                placeholder="My WordPress Site"
+                onChange={setSiteTitle}
+              />
+              <ToggleControl
+                label="Show Comments"
+                checked={showComments}
+                help="Allow visitors to comment on posts."
+                onChange={setShowComments}
+              />
+            </div>
+          )}
+          {tab.name === 'advanced' && (
+            <div>
+              <TextControl
+                label="API Key"
+                value={apiKey}
+                placeholder="Enter your API key…"
+                onChange={setApiKey}
+                help="Used to authenticate requests to the external service."
+              />
+            </div>
+          )}
+          {tab.name === 'help' && (
+            <div style={{ color: '#64748b', fontSize: '0.9375rem', lineHeight: 1.7 }}>
+              <p style={{ marginBottom: '0.5rem' }}>
+                <strong>General</strong> — Configure the core block settings.
+              </p>
+              <p style={{ marginBottom: '0.5rem' }}>
+                <strong>Advanced</strong> — Connect to external services using an API key.
+              </p>
+              <p>
+                Visit the WordPress developer docs for more information on block attributes.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </TabPanel>
+  );
+};
+export const LivePreviewTabsDemo = () => {
+  const [previewTab, setPreviewTab] = useLocalStorage('demo-tab-panel-preview-tab', 'desktop');
+  const tabs = [
+    { name: 'desktop', title: 'Desktop' },
+    { name: 'tablet', title: 'Tablet' },
+    { name: 'mobile', title: 'Mobile' },
+  ];
+  const widths = { desktop: '100%', tablet: '768px', mobile: '375px' };
+  const activeWidth = widths[previewTab] || '100%';
+  return (
+    <TabPanel
+      tabs={tabs}
+      initialTabName={previewTab}
+      onSelect={setPreviewTab}
+    >
+      {(tab) => (
+        <div style={{ padding: '1rem 0' }}>
+          <div
+            style={{
+              width: activeWidth,
+              maxWidth: '100%',
+              margin: '0 auto',
+              border: '2px dashed #e2e8f0',
+              borderRadius: '0.5rem',
+              padding: '1.25rem',
+              textAlign: 'center',
+              color: '#64748b',
+              fontSize: '0.875rem',
+              transition: 'width 0.3s ease',
+            }}
+          >
+            Preview at <strong>{tab.title}</strong> width ({activeWidth})
+          </div>
+        </div>
+      )}
+    </TabPanel>
+  );
+};
+
+# TabPanel
+
+A tab switcher with a render-prop API for organizing settings into labeled sections. Mirrors the WordPress [`TabPanel`](https://developer.wordpress.org/block-editor/reference-guides/components/tab-panel/) from `@wordpress/components`.
+
+## Basic Usage
+
+Switch between General, Advanced, and Help tabs. The active tab persists across page reloads.
+
+<BasicTabsDemo />
+
+```jsx
+const tabs = [
+  { name: 'general', title: 'General' },
+  { name: 'advanced', title: 'Advanced' },
+  { name: 'help', title: 'Help' },
+];
+
+<TabPanel
+  tabs={tabs}
+  onSelect={(tabName) => console.log(tabName)}
+>
+  {(tab) => (
+    <div>
+      {tab.name === 'general' && <TextControl label="Site Title" ... />}
+      {tab.name === 'advanced' && <TextControl label="API Key" ... />}
+      {tab.name === 'help' && <p>Help content here.</p>}
+    </div>
+  )}
+</TabPanel>
+```
+
+## Responsive Preview Tabs
+
+`TabPanel` is also useful for switching between viewport preview sizes. The active tab drives the UI directly through the render prop.
+
+<LivePreviewTabsDemo />
+
+```jsx
+const tabs = [
+  { name: 'desktop', title: 'Desktop' },
+  { name: 'tablet', title: 'Tablet' },
+  { name: 'mobile', title: 'Mobile' },
+];
+
+<TabPanel tabs={tabs} onSelect={setPreviewTab}>
+  {(tab) => (
+    <div style={{ width: widths[tab.name], maxWidth: '100%' }}>
+      Preview at {tab.title} width
+    </div>
+  )}
+</TabPanel>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { TabPanel, PanelBody, TextControl, RangeControl, ToggleControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { title, fontSize, showBorder } = attributes;
+
+  const tabs = [
+    { name: 'general', title: __( 'General', 'your-text-domain' ) },
+    { name: 'style',   title: __( 'Style',   'your-text-domain' ) },
+  ];
+
+  return (
+    <>
+      <InspectorControls>
+        <TabPanel tabs={ tabs }>
+          { ( tab ) => (
+            <>
+              { tab.name === 'general' && (
+                <PanelBody>
+                  <TextControl
+                    label={ __( 'Title', 'your-text-domain' ) }
+                    value={ title }
+                    onChange={ ( value ) => setAttributes( { title: value } ) }
+                  />
+                </PanelBody>
+              ) }
+              { tab.name === 'style' && (
+                <PanelBody>
+                  <RangeControl
+                    label={ __( 'Font Size', 'your-text-domain' ) }
+                    value={ fontSize }
+                    onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+                    min={ 12 }
+                    max={ 72 }
+                  />
+                  <ToggleControl
+                    label={ __( 'Show Border', 'your-text-domain' ) }
+                    checked={ showBorder }
+                    onChange={ ( value ) => setAttributes( { showBorder: value } ) }
+                  />
+                </PanelBody>
+              ) }
+            </>
+          ) }
+        </TabPanel>
+      </InspectorControls>
+      <div
+        { ...blockProps }
+        style={ {
+          fontSize: `${ fontSize }px`,
+          border: showBorder ? '1px solid currentColor' : 'none',
+        } }
+      >
+        <h2>{ title }</h2>
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "title": { "type": "string", "default": "" },
+    "fontSize": { "type": "number", "default": 16 },
+    "showBorder": { "type": "boolean", "default": false }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'tabs',
+    type: 'Array<{ name: string, title: string, className?: string }>',
+    default: '[]',
+    required: true,
+    description: 'Array of tab descriptor objects. Each object must have a unique name and a visible title.'
+  },
+  {
+    name: 'children',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Render prop called with the active tab object. Return the JSX to display for that tab.'
+  },
+  {
+    name: 'initialTabName',
+    type: 'string',
+    default: 'first tab name',
+    required: false,
+    description: 'Name of the tab to activate on mount. Defaults to the first tab in the array.'
+  },
+  {
+    name: 'onSelect',
+    type: 'function',
+    default: '',
+    required: false,
+    description: 'Callback fired with the newly selected tab name when the user switches tabs.'
+  },
+  {
+    name: 'activeClass',
+    type: 'string',
+    default: "'is-active'",
+    required: false,
+    description: 'CSS class applied to the currently active tab button.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the root element.'
+  }
+]} />
+
+## WordPress Mapping
+
+`TabPanel` is imported from `@wordpress/components`. The WordPress version uses the same render-prop / `children` pattern, where `children` is a function receiving the active tab object. This makes it straightforward to conditionally render different sets of controls per tab.
+
+The most common usage in block development is splitting `InspectorControls` into General, Style, and Advanced tabs. Wrap the content of each tab in a `PanelBody` (without a title, since the tab heading already provides the section name) for consistent sidebar spacing and padding. Keep tab names short — the sidebar is narrow and long labels will overflow. Do not use more than four tabs in a single `TabPanel`; prefer nested `PanelBody` panels for secondary groupings. `TabPanel` is editor-only and must never appear in `save.js`.

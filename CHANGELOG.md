@@ -7,16 +7,25 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- `BoxControl` component — four-sided value editor (padding, margin, border-width) mirroring `@wordpress/components`
-  - Props: `label`, `value`, `onChange`, `units`, `splitOnAxis`, `allowReset`, `resetValues`, `sides`, `className`
-  - Linked/unlinked toggle syncs all four sides or edits each independently
-  - `splitOnAxis` collapses inputs to Vertical / Horizontal pairs
-  - Unit picker (px, em, rem, %) applied across all sides simultaneously
-  - `box-control.mdx` — three interactive persistent demos:
-    - `PaddingDemo` — padding editor with live preview box (key: `demo-box-padding`)
-    - `BorderWidthDemo` — border-width editor with live bordered element (key: `demo-box-border`)
-    - `VerticalHorizontalDemo` — `splitOnAxis` mode for vertical/horizontal control (key: `demo-box-axes`)
-  - Registered in `MDXProvider`, barrel export, route `/docs/box-control`, sidebar nav, and `docs.css`
+- `BlockControls` component — block toolbar slot simulation mirroring `@wordpress/block-editor`
+  - Props: `group`, `children`, `className`
+  - Renders a labelled toolbar preview showing group name; in real WP this is a slot/fill
+  - `block-controls.mdx` — three interactive demos:
+    - `AlignmentDemo` — four alignment buttons drive live text alignment (key: `demo-block-controls-align`)
+    - `FormatButtonsDemo` — Bold/Italic/Underline toggles with live text preview (keys: `demo-block-controls-bold`, `demo-block-controls-italic`, `demo-block-controls-underline`)
+    - `StyleMenuDemo` — style variant selector drives a live block preview (key: `demo-block-controls-style`)
+  - Includes slot group reference table; notes editor-only usage
+  - Registered in `MDXProvider`, barrel export, route `/docs/block-controls`, sidebar nav, and `docs.css`
+
+### Added
+- `Dropdown` component — composable dropdown with render-prop trigger and popover panel mirroring `@wordpress/components`
+  - Props: `renderToggle`, `renderContent`, `popoverProps` (placement), `className`, `contentClassName`, `defaultOpen`, `onToggle`, `onClose`
+  - Closes on outside click and Escape key; popover aligns via `placement` option
+  - `dropdown.mdx` — three interactive persistent demos:
+    - `StyleMenuDemo` — text menu with checkmark on selected item (key: `demo-dropdown-style`)
+    - `IconPickerDemo` — 3×3 symbol grid picker with large preview (key: `demo-dropdown-icon`)
+    - `ColorSwatchDemo` — colored circle trigger opens an 8-swatch palette (key: `demo-dropdown-color`)
+  - Registered in `MDXProvider`, barrel export, route `/docs/dropdown`, sidebar nav, and `docs.css`
 - `ComboboxControl` component — searchable autocomplete dropdown mirroring `@wordpress/components`
   - Props: `label`, `value`, `options`, `onChange`, `onFilterValueChange`, `help`, `isLoading`, `messages`, `className`
   - Full keyboard navigation: arrow keys, Enter to select, Escape to close
@@ -48,12 +57,9 @@ All notable changes to this project will be documented in this file.
     - `HelpTextDemo` — checkbox with `help` prop for lazy-load setting (key: `demo-checkbox-lazy-load`)
   - Registered in `MDXProvider`, barrel export, route `/docs/checkbox-control`, sidebar nav
 
-### Changed
-- Renamed GitHub Copilot agent file from `my-agent.agent.md` to `MDX-Gutendocs-creator.md` to match the agent's `name` field
-
 ---
 
-## [1.8.0] - 2026-02-19
+## [1.5.0] - 2026-02-19
 
 ### Added
 
@@ -72,63 +78,10 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [1.7.2] - 2026-02-19
-
-### Fixed
-- Missing imports across components and doc pages
-
----
-
-## [1.7.1] - 2026-02-19
-
-### Fixed
-- `RangeControl` slider touch targets for mobile accessibility — improved hit area and pointer handling to prevent accidental mis-taps on small screens
-
----
-
-## [1.7.0] - 2026-02-19
-
-### Added
-- `DateTimePicker` component — date and time picker mirroring `@wordpress/components`
-  - Props: `label`, `value`, `onChange`, `currentDate` (WordPress block attribute alias), `is12Hour`, `help`, `disabled`, `className`, `dateOnly`, `timeOnly`
-  - Supports date-only, time-only, or combined date + time modes
-  - ISO 8601 string interface for full WordPress block attribute compatibility
-- `date-time-picker.mdx` — three interactive persistent demos:
-  - `BasicDemo` — full date + time picker (key: `demo-datetime-basic`)
-  - `DateOnlyDemo` — date-only mode (key: `demo-datetime-date-only`)
-  - `TimeOnlyDemo` — time-only mode (key: `demo-datetime-time-only`)
-- Registered in `MDXProvider`, barrel export, route `/docs/date-time-picker`, sidebar nav, and `docs.css`
-
----
-
-## [1.6.0] - 2026-02-19
-
-### Added
-- `CodeBlock` — upgraded with full syntax highlighting via `prism-react-renderer` using the Night Owl theme
-- `CodeTabs` component — tabbed multi-language code viewer
-  - Props: `tabs` — array of `{ label, language, code }` objects
-  - Renders a tab bar for switching between code snippets; active tab highlighted
-- Both components registered globally in `MDXProvider`
-
----
-
-## [1.5.0] - 2026-02-19
-
-### Added
-- `TextControl` component — single-line text input mirroring `@wordpress/components`
-  - Props: `label`, `value`, `onChange`, `help`, `placeholder`, `type`, `disabled`, `className`, `autoComplete`
-  - Controlled component; supports all standard HTML input types
-- `text-control.mdx` — three interactive persistent demos:
-  - `BasicDemo` — plain text input (key: `demo-text-basic`)
-  - `EmailDemo` — email type input (key: `demo-text-email`)
-  - `HeadingDemo` — dual inputs driving a live heading/subheading preview (keys: `demo-text-heading`, `demo-text-subheading`)
-- Registered in `MDXProvider`, barrel export, route `/docs/text-control`, sidebar nav, and `docs.css`
-
----
-
 ## [1.4.0] - 2026-02-19
 
 ### Added
+
 - `RangeControl` component — numeric slider mirroring `@wordpress/components`
   - Props: `label`, `value`, `onChange`, `min`, `max`, `step`, `help`, `disabled`, `withInputField`, `className`
   - Paired numeric input field, min/max labels, keyboard accessible, focus-visible ring

@@ -1,0 +1,316 @@
+import Modal from '../components/Modal';
+import Button from '../components/Button';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicModalDemo = () => {
+  const [isOpen, setIsOpen] = useLocalStorage('demo-modal-open', false);
+  return (
+    <div>
+      <Button variant="secondary" onClick={() => setIsOpen(true)}>
+        Open Modal
+      </Button>
+      <Modal
+        title="Block Settings"
+        isOpen={isOpen}
+        onRequestClose={() => setIsOpen(false)}
+      >
+        <p style={{ marginBottom: '1rem', color: '#475569' }}>
+          Configure your block settings here. Changes take effect immediately.
+        </p>
+        <Button variant="primary" onClick={() => setIsOpen(false)}>
+          Done
+        </Button>
+      </Modal>
+    </div>
+  );
+};
+
+export const ConfirmModalDemo = () => {
+  const [isOpen, setIsOpen] = useLocalStorage('demo-modal-confirm-open', false);
+  const [cleared, setCleared] = useLocalStorage('demo-modal-confirm-cleared', false);
+  const handleClear = () => {
+    setCleared(true);
+    setIsOpen(false);
+  };
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <Button variant="secondary" onClick={() => { setCleared(false); setIsOpen(true); }}>
+          Clear All Items
+        </Button>
+        {cleared && (
+          <span style={{ fontSize: '0.875rem', color: '#ef4444', fontStyle: 'italic' }}>
+            All items cleared.
+          </span>
+        )}
+      </div>
+      <Modal
+        title="Clear all items?"
+        isOpen={isOpen}
+        onRequestClose={() => setIsOpen(false)}
+        size="small"
+      >
+        <p style={{ marginBottom: '1rem', color: '#475569' }}>
+          This will remove all items from the list. This action cannot be undone.
+        </p>
+        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+          <Button variant="secondary" onClick={() => setIsOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleClear}>
+            Clear All
+          </Button>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+export const NonDismissibleDemo = () => {
+  const [isOpen, setIsOpen] = useLocalStorage('demo-modal-nodismiss-open', false);
+  return (
+    <div>
+      <Button variant="secondary" onClick={() => setIsOpen(true)}>
+        Open Required Step
+      </Button>
+      <Modal
+        title="Complete Setup"
+        isOpen={isOpen}
+        onRequestClose={() => setIsOpen(false)}
+        isDismissible={false}
+        shouldCloseOnClickOutside={false}
+      >
+        <p style={{ marginBottom: '1rem', color: '#475569' }}>
+          You must complete this step before continuing. No close button or backdrop click will dismiss this dialog.
+        </p>
+        <Button variant="primary" onClick={() => setIsOpen(false)}>
+          I Understand — Continue
+        </Button>
+      </Modal>
+    </div>
+  );
+};
+
+# Modal
+
+A focus-trapped dialog overlay for confirmations, settings forms, and any interaction that requires the user's full attention. Mirrors the WordPress [`Modal`](https://developer.wordpress.org/block-editor/reference-guides/components/modal/) from `@wordpress/components`.
+
+## Basic Usage
+
+Click the button below to open a settings modal with a title, body content, and a close button.
+
+<BasicModalDemo />
+
+```jsx
+const [isOpen, setIsOpen] = useState(false);
+
+<Button variant="secondary" onClick={() => setIsOpen(true)}>
+  Open Settings
+</Button>
+
+{isOpen && (
+  <Modal
+    title="Block Settings"
+    onRequestClose={() => setIsOpen(false)}
+  >
+    <p>Configure your block settings here.</p>
+    <Button variant="primary" onClick={() => setIsOpen(false)}>
+      Done
+    </Button>
+  </Modal>
+)}
+```
+
+## Confirmation Dialog
+
+Use a `size="small"` modal to confirm a destructive action before it runs. The "Clear All" button simulates the action and leaves a status message behind.
+
+<ConfirmModalDemo />
+
+```jsx
+{showConfirm && (
+  <Modal
+    title="Clear all items?"
+    onRequestClose={() => setShowConfirm(false)}
+    size="small"
+  >
+    <p>This will remove all items. This action cannot be undone.</p>
+    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+      <Button variant="secondary" onClick={() => setShowConfirm(false)}>
+        Cancel
+      </Button>
+      <Button variant="primary" onClick={handleClearContent}>
+        Clear All
+      </Button>
+    </div>
+  </Modal>
+)}
+```
+
+## Non-Dismissible Modal
+
+Set `isDismissible={false}` and `shouldCloseOnClickOutside={false}` to force the user through a required step. The Escape key still works unless you also pass `shouldCloseOnEsc={false}`.
+
+<NonDismissibleDemo />
+
+```jsx
+<Modal
+  title="Complete Setup"
+  onRequestClose={() => setIsOpen(false)}
+  isDismissible={false}
+  shouldCloseOnClickOutside={false}
+>
+  <p>You must complete this step before continuing.</p>
+  <Button variant="primary" onClick={() => setIsOpen(false)}>
+    I Understand — Continue
+  </Button>
+</Modal>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Modal, Button } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const [ isOpen, setIsOpen ] = useState( false );
+  const { apiEndpoint } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        {/* Trigger can also live in the sidebar */}
+      </InspectorControls>
+      <div { ...blockProps }>
+        <Button variant="secondary" onClick={ () => setIsOpen( true ) }>
+          { __( 'Open Settings', 'your-text-domain' ) }
+        </Button>
+
+        { isOpen && (
+          <Modal
+            title={ __( 'Advanced Settings', 'your-text-domain' ) }
+            onRequestClose={ () => setIsOpen( false ) }
+          >
+            <p>
+              { __( 'Configure your block here.', 'your-text-domain' ) }
+            </p>
+            <Button
+              variant="primary"
+              onClick={ () => setIsOpen( false ) }
+            >
+              { __( 'Done', 'your-text-domain' ) }
+            </Button>
+          </Modal>
+        ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+`Modal` is editor-only and does not save state to `block.json` on its own. Pair it with attributes that hold the values collected inside the form:
+
+```json
+{
+  "attributes": {
+    "apiEndpoint": { "type": "string", "default": "" },
+    "cacheTime": { "type": "string", "default": "300" }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'title',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'Dialog title displayed in the header. Required for accessibility — rendered as an h1 associated with aria-labelledby.'
+  },
+  {
+    name: 'onRequestClose',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired when the modal should close: close button click, Escape key, or backdrop click.'
+  },
+  {
+    name: 'isOpen',
+    type: 'boolean',
+    default: 'false',
+    required: true,
+    description: 'Controls whether the modal is visible. Use conditional rendering: {isOpen && <Modal ...>}.'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    default: '',
+    required: false,
+    description: 'Body content rendered inside the modal dialog.'
+  },
+  {
+    name: 'size',
+    type: "'small' | 'medium' | 'large' | 'fill'",
+    default: "'medium'",
+    required: false,
+    description: 'Controls the maximum width of the dialog panel.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS classes applied to the dialog element.'
+  },
+  {
+    name: 'isDismissible',
+    type: 'boolean',
+    default: 'true',
+    required: false,
+    description: 'Shows the close (×) button in the modal header. Set to false for required flows.'
+  },
+  {
+    name: 'shouldCloseOnClickOutside',
+    type: 'boolean',
+    default: 'true',
+    required: false,
+    description: 'Closes the modal when the user clicks the backdrop overlay.'
+  },
+  {
+    name: 'shouldCloseOnEsc',
+    type: 'boolean',
+    default: 'true',
+    required: false,
+    description: 'Closes the modal when the Escape key is pressed.'
+  },
+  {
+    name: 'isFullScreen',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Expands the dialog to fill the entire viewport.'
+  },
+  {
+    name: 'headerActions',
+    type: 'ReactNode',
+    default: '',
+    required: false,
+    description: 'Extra elements rendered in the modal header alongside the close button.'
+  }
+]} />
+
+## WordPress Mapping
+
+In WordPress, `Modal` is imported from `@wordpress/components` and is editor-only — never use it in `save.js`. Open state is managed with `useState` (or `useLocalStorage` in demos). Render the modal conditionally with `{ isOpen && <Modal ...> }` rather than passing a `show` prop, which mirrors the real component API exactly.
+
+For forms inside the modal, use the **draft state pattern**: copy the current attributes to local state when the modal opens, let the user edit freely, then write back to block attributes only when they confirm. This prevents half-finished edits from updating the block in real time. The `onRequestClose` callback should always reset the modal to closed without saving, so clicking Cancel or the ×  button discards any unsaved changes.
+
+Always provide a `title` prop — the real WordPress `Modal` renders it as an `<h1>` linked via `aria-labelledby` so screen readers announce the dialog purpose on open.

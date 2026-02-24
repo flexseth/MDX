@@ -1,0 +1,487 @@
+# MediaUpload
+
+A render-prop component that opens the WordPress Media Library modal for selecting images, videos, audio, and other files. Mirrors the WordPress [`MediaUpload`](https://developer.wordpress.org/block-editor/reference-guides/components/media-upload/) from `@wordpress/block-editor`.
+
+> **Note:** This component requires the WordPress block editor environment and cannot be rendered outside of a WordPress block. The examples below show correct usage in `edit.js`.
+
+## Basic Usage
+
+```jsx
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+
+// Always wrap MediaUpload in MediaUploadCheck to gate on upload permissions.
+<MediaUploadCheck>
+  <MediaUpload
+    onSelect={ ( media ) => setAttributes( { imageUrl: media.url, imageId: media.id } ) }
+    allowedTypes={ [ 'image' ] }
+    value={ imageId }
+    render={ ( { open } ) => (
+      <Button variant="primary" onClick={ open }>
+        { __( 'Upload Image', 'your-text-domain' ) }
+      </Button>
+    ) }
+  />
+</MediaUploadCheck>
+```
+
+## Common Patterns
+
+### Image picker with preview and replace/remove actions
+
+The most common pattern: show an upload button when no image is selected, and show the image preview with Replace and Remove buttons when one is.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck, useBlockProps } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { imageId, imageUrl, imageAlt } = attributes;
+
+  const onSelectImage = ( media ) => {
+    setAttributes( {
+      imageId: media.id,
+      imageUrl: media.url,
+      imageAlt: media.alt,
+    } );
+  };
+
+  const onRemoveImage = () => {
+    setAttributes( {
+      imageId: 0,
+      imageUrl: '',
+      imageAlt: '',
+    } );
+  };
+
+  return (
+    <div { ...blockProps }>
+      <MediaUploadCheck>
+        <MediaUpload
+          onSelect={ onSelectImage }
+          allowedTypes={ [ 'image' ] }
+          value={ imageId }
+          render={ ( { open } ) => (
+            <>
+              { ! imageUrl ? (
+                <Button variant="primary" onClick={ open }>
+                  { __( 'Upload Image', 'your-text-domain' ) }
+                </Button>
+              ) : (
+                <div>
+                  <img src={ imageUrl } alt={ imageAlt } style={ { width: '100%', display: 'block' } } />
+                  <Button variant="secondary" onClick={ open }>
+                    { __( 'Replace Image', 'your-text-domain' ) }
+                  </Button>
+                  <Button isDestructive onClick={ onRemoveImage }>
+                    { __( 'Remove Image', 'your-text-domain' ) }
+                  </Button>
+                </div>
+              ) }
+            </>
+          ) }
+        />
+      </MediaUploadCheck>
+    </div>
+  );
+}
+```
+
+### Multiple images (gallery)
+
+Pass `multiple` and `gallery` props to enable multi-select mode in the Media Library. The `onSelect` callback receives an array of media objects instead of a single object.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck, useBlockProps } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { images } = attributes;
+
+  const onSelectImages = ( media ) => {
+    const selectedImages = media.map( ( image ) => ( {
+      id: image.id,
+      url: image.url,
+      alt: image.alt,
+    } ) );
+    setAttributes( { images: selectedImages } );
+  };
+
+  return (
+    <div { ...blockProps }>
+      <MediaUploadCheck>
+        <MediaUpload
+          onSelect={ onSelectImages }
+          allowedTypes={ [ 'image' ] }
+          multiple
+          gallery
+          value={ images.map( ( img ) => img.id ) }
+          render={ ( { open } ) => (
+            <>
+              { images.length === 0 ? (
+                <Button variant="primary" onClick={ open }>
+                  { __( 'Add Images', 'your-text-domain' ) }
+                </Button>
+              ) : (
+                <div>
+                  <div
+                    style={ {
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: '8px',
+                      marginBottom: '8px',
+                    } }
+                  >
+                    { images.map( ( image ) => (
+                      <img
+                        key={ image.id }
+                        src={ image.url }
+                        alt={ image.alt }
+                        style={ { width: '100%', height: '80px', objectFit: 'cover' } }
+                      />
+                    ) ) }
+                  </div>
+                  <Button variant="secondary" onClick={ open }>
+                    { __( 'Edit Gallery', 'your-text-domain' ) }
+                  </Button>
+                </div>
+              ) }
+            </>
+          ) }
+        />
+      </MediaUploadCheck>
+    </div>
+  );
+}
+```
+
+### Video upload
+
+Swap `allowedTypes` to `[ 'video' ]` and render a `<video>` element in the preview. The same render-prop pattern applies across all media types.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck, useBlockProps } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { videoId, videoUrl } = attributes;
+
+  const onSelectVideo = ( media ) => {
+    setAttributes( {
+      videoId: media.id,
+      videoUrl: media.url,
+    } );
+  };
+
+  return (
+    <div { ...blockProps }>
+      <MediaUploadCheck>
+        <MediaUpload
+          onSelect={ onSelectVideo }
+          allowedTypes={ [ 'video' ] }
+          value={ videoId }
+          render={ ( { open } ) => (
+            <>
+              { videoUrl && (
+                <video
+                  controls
+                  src={ videoUrl }
+                  style={ { width: '100%', display: 'block', marginBottom: '8px' } }
+                />
+              ) }
+              <Button variant={ videoUrl ? 'secondary' : 'primary' } onClick={ open }>
+                { videoUrl
+                  ? __( 'Replace Video', 'your-text-domain' )
+                  : __( 'Upload Video', 'your-text-domain' )
+                }
+              </Button>
+            </>
+          ) }
+        />
+      </MediaUploadCheck>
+    </div>
+  );
+}
+```
+
+## WordPress Usage (edit.js)
+
+A complete block that places image selection in the sidebar via `InspectorControls` and exposes a Replace button in the block toolbar via `BlockControls` + `MediaReplaceFlow` — the recommended pattern for image blocks.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import {
+  MediaUpload,
+  MediaUploadCheck,
+  useBlockProps,
+  InspectorControls,
+  BlockControls,
+  MediaReplaceFlow,
+} from '@wordpress/block-editor';
+import { PanelBody, Button, ToolbarGroup, SelectControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { imageId, imageUrl, imageAlt, imageSize } = attributes;
+
+  const onSelectImage = ( media ) => {
+    const sizeData = media.sizes?.[ imageSize ] || media.sizes?.full || {};
+    setAttributes( {
+      imageId: media.id,
+      imageUrl: sizeData.url || media.url,
+      imageAlt: media.alt,
+    } );
+  };
+
+  const onRemoveImage = () => {
+    setAttributes( { imageId: 0, imageUrl: '', imageAlt: '' } );
+  };
+
+  return (
+    <>
+      { imageUrl && (
+        <BlockControls>
+          <ToolbarGroup>
+            <MediaReplaceFlow
+              mediaId={ imageId }
+              mediaURL={ imageUrl }
+              allowedTypes={ [ 'image' ] }
+              accept="image/*"
+              onSelect={ onSelectImage }
+              name={ __( 'Replace', 'your-text-domain' ) }
+            />
+          </ToolbarGroup>
+        </BlockControls>
+      ) }
+
+      <InspectorControls>
+        <PanelBody title={ __( 'Image Settings', 'your-text-domain' ) }>
+          <MediaUploadCheck>
+            <MediaUpload
+              onSelect={ onSelectImage }
+              allowedTypes={ [ 'image' ] }
+              value={ imageId }
+              render={ ( { open } ) => (
+                <Button
+                  variant="secondary"
+                  onClick={ open }
+                  style={ { width: '100%', justifyContent: 'center' } }
+                >
+                  { imageUrl
+                    ? __( 'Replace Image', 'your-text-domain' )
+                    : __( 'Select Image', 'your-text-domain' )
+                  }
+                </Button>
+              ) }
+            />
+          </MediaUploadCheck>
+
+          { imageUrl && (
+            <>
+              <SelectControl
+                label={ __( 'Image Size', 'your-text-domain' ) }
+                value={ imageSize }
+                options={ [
+                  { label: __( 'Thumbnail', 'your-text-domain' ), value: 'thumbnail' },
+                  { label: __( 'Medium', 'your-text-domain' ), value: 'medium' },
+                  { label: __( 'Large', 'your-text-domain' ), value: 'large' },
+                  { label: __( 'Full Size', 'your-text-domain' ), value: 'full' },
+                ] }
+                onChange={ ( value ) => setAttributes( { imageSize: value } ) }
+              />
+              <Button
+                isDestructive
+                variant="link"
+                onClick={ onRemoveImage }
+                style={ { marginTop: '8px' } }
+              >
+                { __( 'Remove Image', 'your-text-domain' ) }
+              </Button>
+            </>
+          ) }
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps }>
+        { imageUrl ? (
+          <img src={ imageUrl } alt={ imageAlt } style={ { width: '100%', height: 'auto' } } />
+        ) : (
+          <MediaUploadCheck>
+            <MediaUpload
+              onSelect={ onSelectImage }
+              allowedTypes={ [ 'image' ] }
+              value={ imageId }
+              render={ ( { open } ) => (
+                <div
+                  style={ {
+                    border: '2px dashed #ccc',
+                    padding: '2rem',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                  } }
+                  onClick={ open }
+                  role="button"
+                  tabIndex={ 0 }
+                  onKeyPress={ open }
+                >
+                  <p>{ __( 'Click to select an image', 'your-text-domain' ) }</p>
+                </div>
+              ) }
+            />
+          </MediaUploadCheck>
+        ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+Always store both the media ID and the URL. The ID is used to re-open the media library with the correct item pre-selected; the URL is what gets rendered. Store `alt` for accessibility.
+
+```json
+{
+  "attributes": {
+    "imageId": {
+      "type": "number",
+      "default": 0
+    },
+    "imageUrl": {
+      "type": "string",
+      "default": ""
+    },
+    "imageAlt": {
+      "type": "string",
+      "default": ""
+    },
+    "imageSize": {
+      "type": "string",
+      "default": "full"
+    }
+  }
+}
+```
+
+For a gallery block:
+
+```json
+{
+  "attributes": {
+    "images": {
+      "type": "array",
+      "default": []
+    }
+  }
+}
+```
+
+## save.js
+
+`MediaUpload` only exists in the editor. The `save.js` simply renders the stored URL and alt text as static HTML.
+
+```jsx
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+  const blockProps = useBlockProps.save();
+  const { imageUrl, imageAlt } = attributes;
+
+  return (
+    <div { ...blockProps }>
+      { imageUrl && (
+        <img
+          src={ imageUrl }
+          alt={ imageAlt }
+          style={ { width: '100%', height: 'auto' } }
+        />
+      ) }
+    </div>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'onSelect',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired when the user confirms a selection. Receives a single media object (or array when multiple is true).'
+  },
+  {
+    name: 'render',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Render prop function. Receives { open } — a function that opens the Media Library modal when called. Return the trigger element (usually a Button).'
+  },
+  {
+    name: 'allowedTypes',
+    type: 'string[]',
+    default: '',
+    required: false,
+    description: "Restricts the Media Library to specific MIME type groups. Accepted values: 'image', 'video', 'audio', 'application'. Pass multiple to allow several types."
+  },
+  {
+    name: 'value',
+    type: 'number | number[]',
+    default: '',
+    required: false,
+    description: 'The currently selected media ID (or array of IDs for multiple). Passed to the Media Library so it pre-selects the current media item when opened.'
+  },
+  {
+    name: 'multiple',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Enables multi-file selection. When true, onSelect receives an array of media objects.'
+  },
+  {
+    name: 'gallery',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'When true (requires multiple to also be true), opens the Media Library in gallery mode with a grid layout for batch selection.'
+  }
+]} />
+
+## Media Object Properties
+
+The object received by `onSelect` (or each item in the array when `multiple` is true):
+
+```js
+{
+  id: 123,                   // Attachment ID — store this as imageId
+  url: 'https://...',        // Full-size URL
+  alt: 'Description',        // Alt text from the media library
+  title: 'filename',         // File title
+  caption: 'A caption',      // Caption text
+  type: 'image',             // MIME type group: image | video | audio
+  subtype: 'jpeg',           // Specific MIME subtype: jpeg | png | gif | mp4 | etc.
+  sizes: {                   // Available registered sizes (images only)
+    thumbnail: { url: '...', width: 150, height: 150 },
+    medium:    { url: '...', width: 300, height: 200 },
+    large:     { url: '...', width: 1024, height: 682 },
+    full:      { url: '...', width: 2400, height: 1600 },
+  }
+}
+```
+
+## WordPress Mapping
+
+`MediaUpload` and `MediaUploadCheck` are both imported from `@wordpress/block-editor`. `MediaUploadCheck` renders its children only when the current user has the `upload_files` capability — always wrap `MediaUpload` in it to prevent upload UI from appearing for users without permission.
+
+The `render` prop pattern means `MediaUpload` itself renders nothing visible. You control the trigger completely: a single `Button`, a clickable placeholder `div`, a toolbar icon, or any other element that calls the `open` function on click.
+
+Store the media `id` alongside the `url` in block attributes. Without the `id`, the `value` prop has nothing to pre-select, so re-opening the Media Library will not highlight the currently chosen file. For image blocks, also store `alt` text — leaving it empty means the `img` element will have no `alt` attribute, which fails WCAG accessibility requirements.
+
+When multiple image sizes are registered in WordPress (`thumbnail`, `medium`, `large`, `full`), access them via `media.sizes[sizeName].url` in the `onSelect` callback. This allows blocks to render an appropriately-sized image rather than always serving the full-resolution file.

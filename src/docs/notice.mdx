@@ -1,0 +1,206 @@
+import Notice from '../components/Notice';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+export const StatusDemo = () => {
+  const [status, setStatus] = useLocalStorage('demo-notice-status', 'info');
+  const messages = {
+    info: 'Select an image to get started.',
+    success: 'Settings saved successfully.',
+    warning: 'No posts found for the selected category.',
+    error: 'Failed to load data. Please try again.',
+  };
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        {['info', 'success', 'warning', 'error'].map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatus(s)}
+            style={{
+              padding: '0.3125rem 0.75rem',
+              borderRadius: '0.25rem',
+              border: '1px solid #e2e8f0',
+              background: status === s ? '#1e293b' : '#f8fafc',
+              color: status === s ? '#fff' : '#1e293b',
+              fontSize: '0.8125rem',
+              cursor: 'pointer',
+            }}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+      <Notice status={status} isDismissible={false}>
+        {messages[status]}
+      </Notice>
+    </div>
+  );
+};
+export const DismissibleDemo = () => {
+  const [visible, setVisible] = useLocalStorage('demo-notice-visible', true);
+  return (
+    <div>
+      { visible ? (
+        <Notice status="warning" onRemove={() => setVisible(false)}>
+          Please add some content to this block before publishing.
+        </Notice>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <p style={{ fontSize: '0.875rem', color: '#64748b', margin: 0 }}>Notice dismissed.</p>
+          <button
+            onClick={() => setVisible(true)}
+            style={{ padding: '0.25rem 0.625rem', fontSize: '0.8125rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer' }}
+          >
+            Restore
+          </button>
+        </div>
+      ) }
+    </div>
+  );
+};
+
+# Notice
+
+Contextual status messages for the block editor. Mirrors the WordPress [`Notice`](https://developer.wordpress.org/block-editor/reference-guides/components/notice/) from `@wordpress/components`.
+
+## Basic Usage
+
+Select a status variant to preview the notice appearance.
+
+<StatusDemo />
+
+```jsx
+<Notice status="info" isDismissible={false}>
+  { __( 'Select an image to get started.', 'your-text-domain' ) }
+</Notice>
+```
+
+## Dismissible Notice
+
+Click the dismiss button to remove the notice. The state persists across page reloads — use the Restore button to bring it back.
+
+<DismissibleDemo />
+
+```jsx
+{ ! isDismissed && (
+  <Notice
+    status="warning"
+    onRemove={ () => setIsDismissed( true ) }
+  >
+    { __( 'Please add some content to this block.', 'your-text-domain' ) }
+  </Notice>
+) }
+```
+
+## All Status Variants (Static)
+
+<div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+  <Notice status="info" isDismissible={false}>Info: This block displays the latest posts.</Notice>
+  <Notice status="success" isDismissible={false}>Success: Your settings have been saved.</Notice>
+  <Notice status="warning" isDismissible={false}>Warning: No posts found for the selected category.</Notice>
+  <Notice status="error" isDismissible={false}>Error: Failed to connect. Please try again.</Notice>
+</div>
+
+```jsx
+<Notice status="info" isDismissible={false}>{ __( 'Informational message.', 'your-text-domain' ) }</Notice>
+<Notice status="success" isDismissible={false}>{ __( 'Success message.', 'your-text-domain' ) }</Notice>
+<Notice status="warning" isDismissible={false}>{ __( 'Warning message.', 'your-text-domain' ) }</Notice>
+<Notice status="error" isDismissible={false}>{ __( 'Error message.', 'your-text-domain' ) }</Notice>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { Notice, PanelBody } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { content } = attributes;
+  const [ isDismissed, setIsDismissed ] = useState( false );
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+          { ! content && ! isDismissed && (
+            <Notice
+              status="warning"
+              onRemove={ () => setIsDismissed( true ) }
+            >
+              { __( 'Please add some content to this block.', 'your-text-domain' ) }
+            </Notice>
+          ) }
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps }>
+        { content || <p>{ __( 'Empty block', 'your-text-domain' ) }</p> }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+`Notice` is an editor-only UI component and does not map to a block attribute. It is driven entirely by local editor state and does not appear in `block.json` or `save.js`.
+
+```json
+{
+  "attributes": {}
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'status',
+    type: "'info' | 'success' | 'warning' | 'error'",
+    default: "'info'",
+    required: false,
+    description: 'Severity level that controls the color scheme and icon of the notice.'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    default: '',
+    required: true,
+    description: 'The notice message content. Accepts strings or JSX elements.'
+  },
+  {
+    name: 'isDismissible',
+    type: 'boolean',
+    default: 'true',
+    required: false,
+    description: 'Shows the × dismiss button when true. Set to false for persistent validation messages.'
+  },
+  {
+    name: 'onRemove',
+    type: 'function',
+    default: '',
+    required: false,
+    description: 'Callback fired when the dismiss button is clicked. Use to hide the notice from state.'
+  },
+  {
+    name: 'politeness',
+    type: "'assertive' | 'polite'",
+    default: "'assertive'",
+    required: false,
+    description: 'ARIA live region politeness. Assertive interrupts screen readers immediately; polite waits for silence.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the notice wrapper.'
+  }
+]} />
+
+## WordPress Mapping
+
+`Notice` is imported from `@wordpress/components` and is intended exclusively for the block editor UI. It is most useful for validation feedback in `InspectorControls`, empty-state guidance inside the block canvas, and API error messages after a failed `apiFetch`.
+
+Use `isDismissible={false}` for persistent validation errors the user must resolve, and `isDismissible={true}` (the default) for informational banners. To display notices in the post editor's global notification area rather than inside a block, use `dispatch( 'core/notices' ).createNotice()` from `@wordpress/notices` instead of this component directly.

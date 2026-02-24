@@ -1,0 +1,203 @@
+import FontSizePicker from '../components/FontSizePicker';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const FONT_SIZES = [
+  { name: 'Small', slug: 'small', size: 12 },
+  { name: 'Normal', slug: 'normal', size: 16 },
+  { name: 'Large', slug: 'large', size: 24 },
+  { name: 'XL', slug: 'xl', size: 32 },
+];
+
+export const BasicDemo = () => {
+  const [size, setSize] = useLocalStorage('demo-font-size-picker-size', 16);
+  return (
+    <div>
+      <FontSizePicker
+        fontSizes={FONT_SIZES}
+        value={size}
+        onChange={setSize}
+      />
+      <p
+        style={{
+          marginTop: '1.25rem',
+          fontSize: `${size}px`,
+          lineHeight: 1.4,
+          color: '#1e293b',
+          transition: 'font-size 0.15s ease',
+        }}
+      >
+        The quick brown fox jumps over the lazy dog.
+      </p>
+    </div>
+  );
+};
+
+export const SliderDemo = () => {
+  const [size, setSize] = useLocalStorage('demo-font-size-picker-slider', 16);
+  return (
+    <FontSizePicker
+      fontSizes={FONT_SIZES}
+      value={size}
+      onChange={setSize}
+      withSlider
+    />
+  );
+};
+
+# FontSizePicker
+
+A preset font size selector with an optional custom value input. Mirrors the WordPress [`FontSizePicker`](https://developer.wordpress.org/block-editor/reference-guides/components/font-size-picker/) from `@wordpress/components`.
+
+## Basic Usage
+
+Select a preset or type a custom value. The live preview below updates in real time.
+
+<BasicDemo />
+
+```jsx
+const FONT_SIZES = [
+  { name: 'Small',  slug: 'small',  size: 12 },
+  { name: 'Normal', slug: 'normal', size: 16 },
+  { name: 'Large',  slug: 'large',  size: 24 },
+  { name: 'XL',     slug: 'xl',     size: 32 },
+];
+
+<FontSizePicker
+  fontSizes={FONT_SIZES}
+  value={fontSize}
+  onChange={(value) => setAttributes({ fontSize: value })}
+/>
+```
+
+## With Slider
+
+Pass `withSlider` to add a range slider below the custom size input for faster scrubbing.
+
+<SliderDemo />
+
+```jsx
+<FontSizePicker
+  fontSizes={FONT_SIZES}
+  value={fontSize}
+  onChange={(value) => setAttributes({ fontSize: value })}
+  withSlider
+/>
+```
+
+## Presets Only (Custom Disabled)
+
+<FontSizePicker
+  fontSizes={FONT_SIZES}
+  value={16}
+  disableCustomFontSizes
+  onChange={() => {}}
+/>
+
+```jsx
+<FontSizePicker
+  fontSizes={FONT_SIZES}
+  value={fontSize}
+  onChange={(value) => setAttributes({ fontSize: value })}
+  disableCustomFontSizes
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { FontSizePicker, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+const FONT_SIZES = [
+  { name: __( 'Small',  'your-text-domain' ), slug: 'small',  size: 13 },
+  { name: __( 'Normal', 'your-text-domain' ), slug: 'normal', size: 16 },
+  { name: __( 'Medium', 'your-text-domain' ), slug: 'medium', size: 20 },
+  { name: __( 'Large',  'your-text-domain' ), slug: 'large',  size: 36 },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { fontSize } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+          <FontSizePicker
+            fontSizes={ FONT_SIZES }
+            value={ fontSize }
+            onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps } style={ { fontSize: fontSize ? `${ fontSize }px` : undefined } }>
+        { __( 'Sample text at the selected size.', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "fontSize": { "type": "number", "default": 16 }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'fontSizes',
+    type: 'array',
+    default: '[]',
+    required: false,
+    description: 'Array of { name, slug, size } preset objects shown as selectable buttons.'
+  },
+  {
+    name: 'value',
+    type: 'number',
+    default: '',
+    required: false,
+    description: 'Current font size value in pixels. Controlled.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired with the new numeric size, or undefined when reset.'
+  },
+  {
+    name: 'disableCustomFontSizes',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Hides the custom size input; only preset options are shown.'
+  },
+  {
+    name: 'withSlider',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Shows a range slider alongside the custom size input.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper element.'
+  }
+]} />
+
+## WordPress Mapping
+
+`FontSizePicker` is imported from `@wordpress/components` and used inside `InspectorControls` with a `PanelBody` for typography settings. Define a `fontSizes` array outside the component so it is not recreated on every render, and wrap each `name` string with `__()` from `@wordpress/i18n` for translation.
+
+Store the selected value as a `type: "number"` attribute in `block.json`. When rendering in `save.js`, apply the value as an inline `fontSize` style in pixels. For theme-aware scaling, store a companion `fontSizeSlug` attribute and output `var(--wp--preset--font-size--{slug})` when a preset is active. Blocks that need full typography support (fluid type, responsive sizes) should declare `"typography": { "fontSize": true }` in `block.json` `supports` instead of using a manual `FontSizePicker`.

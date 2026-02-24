@@ -1,0 +1,230 @@
+import UnitControl from '../components/UnitControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+export const WidthDemo = () => {
+  const [width, setWidth] = useLocalStorage('demo-unit-width', '100%');
+  return (
+    <div>
+      <UnitControl
+        label="Block Width"
+        value={width}
+        units={['px', 'em', 'rem', '%']}
+        min={0}
+        onChange={setWidth}
+      />
+      <div style={{ marginTop: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.375rem', padding: '0.75rem' }}>
+        <div style={{ width: width, maxWidth: '100%', background: '#3b82f6', borderRadius: '0.25rem', padding: '0.5rem', textAlign: 'center', color: '#fff', fontSize: '0.8125rem', transition: 'width 0.2s ease' }}>
+          {width}
+        </div>
+      </div>
+    </div>
+  );
+};
+export const FontSizeDemo = () => {
+  const [fontSize, setFontSize] = useLocalStorage('demo-unit-font-size', '16px');
+  return (
+    <div>
+      <UnitControl
+        label="Font Size"
+        value={fontSize}
+        units={['px', 'em', 'rem']}
+        min={8}
+        max={72}
+        help="Controls the text size for this block."
+        onChange={setFontSize}
+      />
+      <p style={{ marginTop: '1rem', fontSize: fontSize, lineHeight: 1.4, color: '#1e293b', transition: 'font-size 0.2s ease' }}>
+        Preview text at {fontSize}
+      </p>
+    </div>
+  );
+};
+
+# UnitControl
+
+A numeric input paired with a unit selector for CSS dimension values. Mirrors the WordPress [`UnitControl`](https://developer.wordpress.org/block-editor/reference-guides/components/unit-control/) from `@wordpress/components`.
+
+## Basic Usage
+
+Change the value or switch the unit to see the preview bar resize live.
+
+<WidthDemo />
+
+```jsx
+<UnitControl
+  label="Block Width"
+  value={blockWidth}
+  units={['px', 'em', 'rem', '%']}
+  min={0}
+  onChange={(value) => setAttributes({ blockWidth: value })}
+/>
+```
+
+## Font Size with Range Constraints
+
+Restrict available units and enforce numeric limits for type-specific controls.
+
+<FontSizeDemo />
+
+```jsx
+<UnitControl
+  label="Font Size"
+  value={fontSize}
+  units={['px', 'em', 'rem']}
+  min={8}
+  max={72}
+  help="Controls the text size for this block."
+  onChange={(value) => setAttributes({ fontSize: value })}
+/>
+```
+
+## Disabled State
+
+<UnitControl
+  label="Image Width"
+  value="300px"
+  units={['px', '%']}
+  disabled
+  onChange={() => {}}
+/>
+
+```jsx
+<UnitControl
+  label="Image Width"
+  value={imageWidth}
+  units={['px', '%']}
+  disabled={!canEdit}
+  onChange={(value) => setAttributes({ imageWidth: value })}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { UnitControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { blockWidth, fontSize } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Dimensions', 'your-text-domain' ) }>
+          <UnitControl
+            label={ __( 'Width', 'your-text-domain' ) }
+            value={ blockWidth }
+            units={ [ 'px', 'em', 'rem', '%' ] }
+            min={ 0 }
+            onChange={ ( value ) => setAttributes( { blockWidth: value } ) }
+          />
+          <UnitControl
+            label={ __( 'Font size', 'your-text-domain' ) }
+            value={ fontSize }
+            units={ [ 'px', 'em', 'rem' ] }
+            min={ 8 }
+            max={ 72 }
+            onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps } style={ { width: blockWidth, fontSize } }>
+        { __( 'Block content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "blockWidth": { "type": "string", "default": "100%" },
+    "fontSize": { "type": "string", "default": "16px" }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: "''",
+    required: true,
+    description: 'Visible label rendered above the control.'
+  },
+  {
+    name: 'value',
+    type: 'string',
+    default: "''",
+    required: true,
+    description: 'Current value including the unit suffix (e.g. "16px", "1.5rem", "100%").'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback receiving the new string value with unit whenever the number or unit changes.'
+  },
+  {
+    name: 'units',
+    type: 'array',
+    default: "['px','em','rem','%']",
+    required: false,
+    description: "Array of unit strings available in the unit selector (e.g. ['px', 'em', 'rem', '%'])."
+  },
+  {
+    name: 'min',
+    type: 'number',
+    default: '',
+    required: false,
+    description: 'Minimum allowed numeric value. Applied to the number input via the min HTML attribute.'
+  },
+  {
+    name: 'max',
+    type: 'number',
+    default: '',
+    required: false,
+    description: 'Maximum allowed numeric value. Applied to the number input via the max HTML attribute.'
+  },
+  {
+    name: 'step',
+    type: 'number',
+    default: '1',
+    required: false,
+    description: 'Step increment for the number input.'
+  },
+  {
+    name: 'help',
+    type: 'string | ReactNode',
+    default: "''",
+    required: false,
+    description: 'Help text displayed below the control. Linked to the input via aria-describedby.'
+  },
+  {
+    name: 'disabled',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Disables both the number input and the unit selector when true.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper div.'
+  }
+]} />
+
+## WordPress Mapping
+
+`UnitControl` is imported from `@wordpress/components` and is the standard control for any block attribute that holds a CSS dimension — width, height, font size, padding, gap, border radius, and so on. Always store values as strings with units (e.g. `"16px"`) in `block.json`, not as bare numbers, so they can be passed directly to inline `style` props without conversion.
+
+Use the `units` prop to restrict the available unit options to what your CSS context actually supports. For full padding or margin control across all four sides, use `BoxControl` instead of four separate `UnitControl` instances. `UnitControl` is appropriate whenever you need a single CSS measurement the user can express in their preferred unit.

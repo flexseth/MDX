@@ -1,0 +1,224 @@
+import Tooltip from '../components/Tooltip';
+import Button from '../components/Button';
+export const BasicTooltipDemo = () => {
+  return (
+    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+      <Tooltip text="Save your changes">
+        <Button variant="primary">Save</Button>
+      </Tooltip>
+      <Tooltip text="Discard all unsaved changes" position="bottom">
+        <Button variant="secondary">Discard</Button>
+      </Tooltip>
+      <Tooltip text="Delete this item permanently" position="right">
+        <Button variant="outline">Delete</Button>
+      </Tooltip>
+    </div>
+  );
+};
+export const PositionsDemo = () => {
+  return (
+    <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', justifyContent: 'center', padding: '2rem 0' }}>
+      <Tooltip text="Appears above" position="top">
+        <Button variant="secondary">Top</Button>
+      </Tooltip>
+      <Tooltip text="Appears below" position="bottom">
+        <Button variant="secondary">Bottom</Button>
+      </Tooltip>
+      <Tooltip text="Appears left" position="left">
+        <Button variant="secondary">Left</Button>
+      </Tooltip>
+      <Tooltip text="Appears right" position="right">
+        <Button variant="secondary">Right</Button>
+      </Tooltip>
+    </div>
+  );
+};
+export const HelpIconDemo = () => {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <span style={{ fontWeight: 500 }}>Column Count</span>
+      <Tooltip text="Sets the number of columns in the grid layout." position="right">
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '1.25rem',
+            height: '1.25rem',
+            borderRadius: '50%',
+            background: '#64748b',
+            color: '#fff',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            cursor: 'help',
+          }}
+          tabIndex={0}
+          role="img"
+          aria-label="Help"
+        >
+          ?
+        </span>
+      </Tooltip>
+    </div>
+  );
+};
+
+# Tooltip
+
+A hover-triggered tooltip wrapper that shows descriptive text when the user hovers or focuses the wrapped element. Mirrors the WordPress [`Tooltip`](https://developer.wordpress.org/block-editor/reference-guides/components/tooltip/) from `@wordpress/components`.
+
+## Basic Usage
+
+Hover over any button to see the tooltip appear. The default position is `top`.
+
+<BasicTooltipDemo />
+
+```jsx
+<Tooltip text="Save your changes">
+  <Button variant="primary">Save</Button>
+</Tooltip>
+```
+
+## Positions
+
+The `position` prop controls which side the tooltip bubble appears on.
+
+<PositionsDemo />
+
+```jsx
+<Tooltip text="Appears above" position="top">
+  <Button variant="secondary">Top</Button>
+</Tooltip>
+
+<Tooltip text="Appears below" position="bottom">
+  <Button variant="secondary">Bottom</Button>
+</Tooltip>
+
+<Tooltip text="Appears left" position="left">
+  <Button variant="secondary">Left</Button>
+</Tooltip>
+
+<Tooltip text="Appears right" position="right">
+  <Button variant="secondary">Right</Button>
+</Tooltip>
+```
+
+## Help Icon Pattern
+
+Tooltip is commonly used to annotate a small `?` icon next to a setting label, explaining what the control does.
+
+<HelpIconDemo />
+
+```jsx
+<div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+  <span>Column Count</span>
+  <Tooltip text="Sets the number of columns in the grid layout." position="right">
+    <span
+      tabIndex={0}
+      role="img"
+      aria-label="Help"
+      style={{ cursor: 'help' }}
+    >
+      ?
+    </span>
+  </Tooltip>
+</div>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, RangeControl, Tooltip } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { columns } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Layout', 'your-text-domain' ) }>
+          <div style={ { display: 'flex', alignItems: 'center', gap: '4px' } }>
+            <span>{ __( 'Columns', 'your-text-domain' ) }</span>
+            <Tooltip
+              text={ __( 'Sets the number of columns in the grid layout.', 'your-text-domain' ) }
+            >
+              <span
+                style={ { cursor: 'help', color: '#757575' } }
+                tabIndex={ 0 }
+                role="img"
+                aria-label={ __( 'Help', 'your-text-domain' ) }
+              >
+                ?
+              </span>
+            </Tooltip>
+          </div>
+          <RangeControl
+            value={ columns }
+            onChange={ ( value ) => setAttributes( { columns: value } ) }
+            min={ 1 }
+            max={ 6 }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div
+        { ...blockProps }
+        style={ { display: 'grid', gridTemplateColumns: `repeat( ${ columns }, 1fr )` } }
+      >
+        { __( 'Grid content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "columns": { "type": "number", "default": 2 }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'text',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'Content displayed inside the tooltip bubble.'
+  },
+  {
+    name: 'children',
+    type: 'node',
+    default: '',
+    required: true,
+    description: 'The trigger element the tooltip is attached to.'
+  },
+  {
+    name: 'position',
+    type: "'top' | 'bottom' | 'left' | 'right'",
+    default: "'top'",
+    required: false,
+    description: 'Which side of the trigger element the bubble appears on.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper element.'
+  }
+]} />
+
+## WordPress Mapping
+
+In WordPress, `Tooltip` is imported from `@wordpress/components` and wraps any focusable child element — most commonly icon-only `Button` components. The real WordPress component supports additional props such as `delay` (ms before the tooltip shows, default 700), `shortcut` (to display a keyboard shortcut string in the bubble), and `hideOnClick`. This replica implements the core hover/focus mechanic via CSS and covers the `text`, `position`, and `children` props used in the vast majority of real-world block code.
+
+`Tooltip` is editor-only: never place it inside `save.js`. For `ToolbarButton` in `BlockControls`, prefer the built-in `showTooltip` prop over manually wrapping with `Tooltip`. Always combine `Tooltip` with a `label` or `aria-label` on the wrapped button — the tooltip text is supplemental, not the primary accessible name.

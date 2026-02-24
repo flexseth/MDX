@@ -26,24 +26,24 @@ export default function Spacer( {
 	const style = {};
 
 	if ( marginY !== undefined ) {
-		style.marginTop = `${ marginY * 4 }px`;
-		style.marginBottom = `${ marginY * 4 }px`;
+		style.paddingTop = `${ marginY * 4 }px`;
+		style.paddingBottom = `${ marginY * 4 }px`;
 	}
 	if ( marginX !== undefined ) {
-		style.marginLeft = `${ marginX * 4 }px`;
-		style.marginRight = `${ marginX * 4 }px`;
+		style.paddingLeft = `${ marginX * 4 }px`;
+		style.paddingRight = `${ marginX * 4 }px`;
 	}
 	if ( marginTop !== undefined ) {
-		style.marginTop = `${ marginTop * 4 }px`;
+		style.paddingTop = `${ marginTop * 4 }px`;
 	}
 	if ( marginBottom !== undefined ) {
-		style.marginBottom = `${ marginBottom * 4 }px`;
+		style.paddingBottom = `${ marginBottom * 4 }px`;
 	}
 	if ( marginLeft !== undefined ) {
-		style.marginLeft = `${ marginLeft * 4 }px`;
+		style.paddingLeft = `${ marginLeft * 4 }px`;
 	}
 	if ( marginRight !== undefined ) {
-		style.marginRight = `${ marginRight * 4 }px`;
+		style.paddingRight = `${ marginRight * 4 }px`;
 	}
 
 	return (

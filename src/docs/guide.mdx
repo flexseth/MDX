@@ -1,0 +1,425 @@
+# Guide
+
+A multi-step tutorial modal that walks users through a series of pages with Previous, Next, and Finish navigation controls. Mirrors the WordPress [`Guide`](https://developer.wordpress.org/block-editor/reference-guides/components/guide/) from `@wordpress/components`.
+
+> **Note:** This component requires the WordPress block editor environment and the `@wordpress/components` package. While technically renderable in any React context, it is designed for use inside WordPress blocks and plugins. The examples below show correct usage in `edit.js`.
+
+## Basic Usage
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Guide } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+// Render conditionally — Guide is an overlay modal
+const [ isOpen, setIsOpen ] = useState( false );
+
+{ isOpen && (
+  <Guide
+    contentLabel={ __( 'Welcome Guide', 'your-text-domain' ) }
+    finishButtonText={ __( 'Get Started', 'your-text-domain' ) }
+    onFinish={ () => setIsOpen( false ) }
+    pages={ [
+      {
+        content: (
+          <p>{ __( 'Welcome! This guide walks you through the basics.', 'your-text-domain' ) }</p>
+        ),
+      },
+      {
+        content: (
+          <p>{ __( 'You are ready to begin. Click Get Started.', 'your-text-domain' ) }</p>
+        ),
+      },
+    ] }
+  />
+) }
+```
+
+## Common Patterns
+
+### Guide with images
+
+Each page object accepts an optional `image` property rendered above the `content`. This is ideal for annotated screenshots, feature illustrations, or branding imagery in onboarding flows.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Guide, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+  const blockProps = useBlockProps();
+  const [ isOpen, setIsOpen ] = useState( false );
+
+  return (
+    <div { ...blockProps }>
+      <Button variant="primary" onClick={ () => setIsOpen( true ) }>
+        { __( 'Launch Tutorial', 'your-text-domain' ) }
+      </Button>
+
+      { isOpen && (
+        <Guide
+          contentLabel={ __( 'Feature Tutorial', 'your-text-domain' ) }
+          finishButtonText={ __( 'Done', 'your-text-domain' ) }
+          onFinish={ () => setIsOpen( false ) }
+          pages={ [
+            {
+              image: (
+                <img
+                  src="https://s.w.org/images/core/5.5/edit-702702f1.png"
+                  alt={ __( 'Block editor overview', 'your-text-domain' ) }
+                  style={ { width: '100%', height: 'auto' } }
+                />
+              ),
+              content: (
+                <>
+                  <h2>{ __( 'Welcome to the Editor', 'your-text-domain' ) }</h2>
+                  <p>
+                    { __(
+                      'The block editor lets you build content with individual blocks.',
+                      'your-text-domain'
+                    ) }
+                  </p>
+                </>
+              ),
+            },
+            {
+              image: (
+                <img
+                  src="https://s.w.org/images/core/5.5/drag-handle-2fcf498f.png"
+                  alt={ __( 'Drag handle', 'your-text-domain' ) }
+                  style={ { width: '100%', height: 'auto' } }
+                />
+              ),
+              content: (
+                <>
+                  <h2>{ __( 'Drag and Drop', 'your-text-domain' ) }</h2>
+                  <p>{ __( 'Rearrange blocks by dragging and dropping them.', 'your-text-domain' ) }</p>
+                </>
+              ),
+            },
+            {
+              content: (
+                <>
+                  <h2>{ __( "You're All Set!", 'your-text-domain' ) }</h2>
+                  <p>{ __( 'Start creating content with the block editor.', 'your-text-domain' ) }</p>
+                </>
+              ),
+            },
+          ] }
+        />
+      ) }
+    </div>
+  );
+}
+```
+
+### Custom navigation button labels
+
+Override the default "Previous", "Next", and "Finish" button text to match your plugin's voice or the specific task the guide covers.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Guide, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+  const blockProps = useBlockProps();
+  const [ isOpen, setIsOpen ] = useState( false );
+
+  return (
+    <div { ...blockProps }>
+      <Button variant="secondary" onClick={ () => setIsOpen( true ) }>
+        { __( 'Show Setup Walkthrough', 'your-text-domain' ) }
+      </Button>
+
+      { isOpen && (
+        <Guide
+          contentLabel={ __( 'Setup Walkthrough', 'your-text-domain' ) }
+          nextButtonText={ __( 'Continue', 'your-text-domain' ) }
+          previousButtonText={ __( 'Go Back', 'your-text-domain' ) }
+          finishButtonText={ __( 'Complete Setup', 'your-text-domain' ) }
+          onFinish={ () => setIsOpen( false ) }
+          pages={ [
+            {
+              content: (
+                <>
+                  <h2>{ __( 'Step 1: Configure', 'your-text-domain' ) }</h2>
+                  <p>{ __( 'Set up your preferences in the Settings panel.', 'your-text-domain' ) }</p>
+                </>
+              ),
+            },
+            {
+              content: (
+                <>
+                  <h2>{ __( 'Step 2: Customize', 'your-text-domain' ) }</h2>
+                  <p>{ __( 'Choose your layout and visual style.', 'your-text-domain' ) }</p>
+                </>
+              ),
+            },
+            {
+              content: (
+                <>
+                  <h2>{ __( 'Step 3: Publish', 'your-text-domain' ) }</h2>
+                  <p>{ __( "You're ready to go live!", 'your-text-domain' ) }</p>
+                </>
+              ),
+            },
+          ] }
+        />
+      ) }
+    </div>
+  );
+}
+```
+
+### Rich content pages with icons
+
+Use `@wordpress/icons` and `Icon` from `@wordpress/components` to build visually polished onboarding pages without requiring external images.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Guide, Button, Icon } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+import { settings, page, starFilled } from '@wordpress/icons';
+
+export default function Edit() {
+  const blockProps = useBlockProps();
+  const [ isOpen, setIsOpen ] = useState( false );
+
+  const pageStyle = { textAlign: 'center', padding: '1.5rem 1rem' };
+
+  return (
+    <div { ...blockProps }>
+      <Button variant="primary" onClick={ () => setIsOpen( true ) }>
+        { __( 'Open Onboarding', 'your-text-domain' ) }
+      </Button>
+
+      { isOpen && (
+        <Guide
+          className="my-plugin-guide"
+          contentLabel={ __( 'Plugin Onboarding', 'your-text-domain' ) }
+          finishButtonText={ __( 'Start Using Plugin', 'your-text-domain' ) }
+          onFinish={ () => setIsOpen( false ) }
+          pages={ [
+            {
+              content: (
+                <div style={ pageStyle }>
+                  <Icon icon={ starFilled } size={ 48 } />
+                  <h2>{ __( 'Welcome', 'your-text-domain' ) }</h2>
+                  <p>{ __( 'Thanks for installing our plugin!', 'your-text-domain' ) }</p>
+                </div>
+              ),
+            },
+            {
+              content: (
+                <div style={ pageStyle }>
+                  <Icon icon={ settings } size={ 48 } />
+                  <h2>{ __( 'Configure Settings', 'your-text-domain' ) }</h2>
+                  <p>
+                    { __(
+                      'Visit the Settings page to connect your account and configure defaults.',
+                      'your-text-domain'
+                    ) }
+                  </p>
+                </div>
+              ),
+            },
+            {
+              content: (
+                <div style={ pageStyle }>
+                  <Icon icon={ page } size={ 48 } />
+                  <h2>{ __( 'Add the Block', 'your-text-domain' ) }</h2>
+                  <p>
+                    { __(
+                      'Insert the block into any post or page to get started.',
+                      'your-text-domain'
+                    ) }
+                  </p>
+                </div>
+              ),
+            },
+          ] }
+        />
+      ) }
+    </div>
+  );
+}
+```
+
+## WordPress Usage (edit.js)
+
+A common real-world pattern: show the guide automatically the first time the block is inserted (no stored attribute yet), then let users reopen it via a toolbar or sidebar button. The `hasShownGuide` attribute persists whether the user has already seen it.
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Guide, Button } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import { help } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { hasShownGuide } = attributes;
+
+  // Auto-open on first insert
+  const [ isGuideOpen, setIsGuideOpen ] = useState( ! hasShownGuide );
+
+  const handleFinish = () => {
+    setIsGuideOpen( false );
+    setAttributes( { hasShownGuide: true } );
+  };
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Help', 'your-text-domain' ) } initialOpen={ false }>
+          <Button
+            variant="secondary"
+            icon={ help }
+            onClick={ () => setIsGuideOpen( true ) }
+            style={ { width: '100%', justifyContent: 'center' } }
+          >
+            { __( 'Reopen Guide', 'your-text-domain' ) }
+          </Button>
+        </PanelBody>
+      </InspectorControls>
+
+      { isGuideOpen && (
+        <Guide
+          contentLabel={ __( 'Block Guide', 'your-text-domain' ) }
+          finishButtonText={ __( "Got It", 'your-text-domain' ) }
+          onFinish={ handleFinish }
+          pages={ [
+            {
+              content: (
+                <>
+                  <h2>{ __( 'How This Block Works', 'your-text-domain' ) }</h2>
+                  <p>
+                    { __(
+                      'This block displays dynamic content fetched from an external API.',
+                      'your-text-domain'
+                    ) }
+                  </p>
+                </>
+              ),
+            },
+            {
+              content: (
+                <>
+                  <h2>{ __( 'Sidebar Settings', 'your-text-domain' ) }</h2>
+                  <p>
+                    { __(
+                      'Use the Settings panel on the right to configure the data source and display options.',
+                      'your-text-domain'
+                    ) }
+                  </p>
+                </>
+              ),
+            },
+            {
+              content: (
+                <>
+                  <h2>{ __( 'Need More Help?', 'your-text-domain' ) }</h2>
+                  <p>
+                    { __(
+                      'Visit our documentation site or contact support if you have questions.',
+                      'your-text-domain'
+                    ) }
+                  </p>
+                </>
+              ),
+            },
+          ] }
+        />
+      ) }
+
+      <div { ...blockProps }>
+        { __( 'Block content appears here.', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+`Guide` itself produces no saved output. Only attributes that control when the guide opens need to be stored. The `hasShownGuide` pattern is common for auto-open-on-first-insert behavior.
+
+```json
+{
+  "attributes": {
+    "hasShownGuide": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'contentLabel',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'Accessible label for the modal, read by screen readers when the guide opens. Use a descriptive name like "Welcome Guide" or "Setup Walkthrough".'
+  },
+  {
+    name: 'onFinish',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired when the user clicks the Finish button on the last page or closes the modal. Use this to set state that hides the Guide.'
+  },
+  {
+    name: 'pages',
+    type: 'Array<{ content: ReactNode, image?: ReactNode }>',
+    default: '[]',
+    required: true,
+    description: 'Array of page objects. Each must have a content property (ReactNode). An optional image property renders above the content.'
+  },
+  {
+    name: 'finishButtonText',
+    type: 'string',
+    default: "'Finish'",
+    required: false,
+    description: 'Text for the finish/confirm button on the last page. Default is "Finish". Wrap in __() for translatability.'
+  },
+  {
+    name: 'nextButtonText',
+    type: 'string',
+    default: "'Next'",
+    required: false,
+    description: 'Text for the forward navigation button on all pages except the last. Default is "Next".'
+  },
+  {
+    name: 'previousButtonText',
+    type: 'string',
+    default: "'Previous'",
+    required: false,
+    description: 'Text for the back navigation button on all pages except the first. Default is "Previous".'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class name added to the Guide modal wrapper. Useful for plugin-specific styling.'
+  }
+]} />
+
+## WordPress Mapping
+
+`Guide` is imported from `@wordpress/components`, not `@wordpress/block-editor`. It renders as a full-screen modal overlay that traps keyboard focus while open, making it compliant with WCAG focus management requirements. The modal includes built-in page indicator dots (one dot per page), Previous/Next navigation buttons, and a Finish button on the last page.
+
+Always control the open state with `useState` from `@wordpress/element` — conditionally render the `Guide` component based on that state, and call `setIsOpen( false )` inside `onFinish`. Do not use a hidden/visible CSS approach; mount and unmount `Guide` entirely.
+
+Because the `Guide` renders as a portal at the document body level, it works correctly regardless of where in the block's JSX tree it is placed. In most cases, placing it after `InspectorControls` and `BlockControls` but before the main block content in the return fragment is the clearest structure.
+
+The `contentLabel` prop is required for accessibility: it populates the `aria-label` attribute on the modal element. Screen readers announce this label when the modal opens, so make it descriptive enough to orient the user — "Welcome Guide" or "Block Setup Walkthrough" rather than just "Guide".

@@ -1,0 +1,401 @@
+# RichText
+
+An editable inline content field that supports bold, italic, links, and other text formatting inside the block canvas. Mirrors the WordPress [`RichText`](https://developer.wordpress.org/block-editor/reference-guides/components/rich-text/) from `@wordpress/block-editor`.
+
+> **Note:** This component requires the WordPress block editor environment and cannot be rendered outside of a WordPress block. The examples below show correct usage in `edit.js` and `save.js`.
+
+## Basic Usage
+
+```jsx
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+// edit.js
+<RichText
+  tagName="p"
+  value={ content }
+  onChange={ ( value ) => setAttributes( { content: value } ) }
+  placeholder={ __( 'Enter your text here...', 'your-text-domain' ) }
+/>
+
+// save.js — use RichText.Content instead of RichText
+<RichText.Content
+  tagName="p"
+  value={ content }
+/>
+```
+
+## Common Patterns
+
+### Heading field
+
+Use `tagName="h2"` (or any h1–h6 level) to create an editable heading. Set `allowedFormats={ [] }` on heading fields where formatting like bold would be inappropriate.
+
+```jsx
+// edit.js
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { heading } = attributes;
+
+  return (
+    <RichText
+      { ...blockProps }
+      tagName="h2"
+      value={ heading }
+      onChange={ ( value ) => setAttributes( { heading: value } ) }
+      placeholder={ __( 'Enter heading...', 'your-text-domain' ) }
+    />
+  );
+}
+
+// save.js
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+  const blockProps = useBlockProps.save();
+  const { heading } = attributes;
+
+  return (
+    <RichText.Content
+      { ...blockProps }
+      tagName="h2"
+      value={ heading }
+    />
+  );
+}
+```
+
+`block.json` for heading:
+
+```json
+{
+  "attributes": {
+    "heading": {
+      "type": "string",
+      "source": "html",
+      "selector": "h2"
+    }
+  }
+}
+```
+
+### Multiple RichText fields
+
+A block can have any number of `RichText` fields. Spread `useBlockProps` onto the wrapping `div` rather than the `RichText` elements when there are multiple fields.
+
+```jsx
+// edit.js
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { title, subtitle, content } = attributes;
+
+  return (
+    <div { ...blockProps }>
+      <RichText
+        tagName="h2"
+        value={ title }
+        onChange={ ( value ) => setAttributes( { title: value } ) }
+        placeholder={ __( 'Enter title...', 'your-text-domain' ) }
+      />
+      <RichText
+        tagName="h3"
+        value={ subtitle }
+        onChange={ ( value ) => setAttributes( { subtitle: value } ) }
+        placeholder={ __( 'Enter subtitle...', 'your-text-domain' ) }
+      />
+      <RichText
+        tagName="p"
+        value={ content }
+        onChange={ ( value ) => setAttributes( { content: value } ) }
+        placeholder={ __( 'Enter body content...', 'your-text-domain' ) }
+      />
+    </div>
+  );
+}
+
+// save.js
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+  const blockProps = useBlockProps.save();
+  const { title, subtitle, content } = attributes;
+
+  return (
+    <div { ...blockProps }>
+      <RichText.Content tagName="h2" value={ title } />
+      <RichText.Content tagName="h3" value={ subtitle } />
+      <RichText.Content tagName="p" value={ content } />
+    </div>
+  );
+}
+```
+
+`block.json` for multiple fields:
+
+```json
+{
+  "attributes": {
+    "title": {
+      "type": "string",
+      "source": "html",
+      "selector": "h2"
+    },
+    "subtitle": {
+      "type": "string",
+      "source": "html",
+      "selector": "h3"
+    },
+    "content": {
+      "type": "string",
+      "source": "html",
+      "selector": "p"
+    }
+  }
+}
+```
+
+### Restricted formatting
+
+Pass an `allowedFormats` array to limit which formatting options appear in the inline toolbar. Pass an empty array to disable all formatting — useful for button labels, short titles, or any field where only plain text is appropriate.
+
+```jsx
+// Bold and italic only
+<RichText
+  tagName="p"
+  value={ text }
+  onChange={ ( value ) => setAttributes( { text: value } ) }
+  placeholder={ __( 'Bold and italic only...', 'your-text-domain' ) }
+  allowedFormats={ [ 'core/bold', 'core/italic' ] }
+/>
+
+// No formatting — plain text only
+<RichText
+  tagName="a"
+  value={ buttonText }
+  onChange={ ( value ) => setAttributes( { buttonText: value } ) }
+  placeholder={ __( 'Button label...', 'your-text-domain' ) }
+  allowedFormats={ [] }
+  className="wp-block-button__link"
+/>
+```
+
+## WordPress Usage (edit.js)
+
+A complete `edit.js` and `save.js` pair for a card block with a heading, body paragraph, and a styled blockquote — demonstrating multiline content and format restrictions in one block.
+
+```jsx
+// edit.js
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps, InspectorControls, BlockControls, AlignmentControl } from '@wordpress/block-editor';
+import { PanelBody, ToggleControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { title, body, quote, showQuote, textAlign } = attributes;
+
+  return (
+    <>
+      <BlockControls>
+        <AlignmentControl
+          value={ textAlign }
+          onChange={ ( value ) => setAttributes( { textAlign: value } ) }
+        />
+      </BlockControls>
+
+      <InspectorControls>
+        <PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+          <ToggleControl
+            label={ __( 'Show pull quote', 'your-text-domain' ) }
+            checked={ showQuote }
+            onChange={ ( value ) => setAttributes( { showQuote: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps } style={ { textAlign } }>
+        <RichText
+          tagName="h2"
+          value={ title }
+          onChange={ ( value ) => setAttributes( { title: value } ) }
+          placeholder={ __( 'Card title...', 'your-text-domain' ) }
+          allowedFormats={ [] }
+        />
+        <RichText
+          tagName="p"
+          value={ body }
+          onChange={ ( value ) => setAttributes( { body: value } ) }
+          placeholder={ __( 'Card body content...', 'your-text-domain' ) }
+        />
+        { showQuote && (
+          <RichText
+            tagName="blockquote"
+            value={ quote }
+            onChange={ ( value ) => setAttributes( { quote: value } ) }
+            placeholder={ __( 'Pull quote...', 'your-text-domain' ) }
+            allowedFormats={ [ 'core/bold', 'core/italic' ] }
+            style={ { fontStyle: 'italic', borderLeft: '4px solid #ccc', paddingLeft: '1rem' } }
+          />
+        ) }
+      </div>
+    </>
+  );
+}
+```
+
+```jsx
+// save.js
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+  const blockProps = useBlockProps.save();
+  const { title, body, quote, showQuote, textAlign } = attributes;
+
+  return (
+    <div { ...blockProps } style={ { textAlign } }>
+      <RichText.Content tagName="h2" value={ title } />
+      <RichText.Content tagName="p" value={ body } />
+      { showQuote && (
+        <RichText.Content
+          tagName="blockquote"
+          value={ quote }
+          style={ { fontStyle: 'italic', borderLeft: '4px solid #ccc', paddingLeft: '1rem' } }
+        />
+      ) }
+    </div>
+  );
+}
+```
+
+## block.json Attributes
+
+RichText content must use `"source": "html"` in `block.json`. The `selector` value must exactly match the `tagName` prop used in `edit.js` and `save.js`. For multiline fields using `div` as the wrapper, include the `multiline` key as well.
+
+```json
+{
+  "attributes": {
+    "title": {
+      "type": "string",
+      "source": "html",
+      "selector": "h2",
+      "default": ""
+    },
+    "body": {
+      "type": "string",
+      "source": "html",
+      "selector": "p",
+      "default": ""
+    },
+    "quote": {
+      "type": "string",
+      "source": "html",
+      "selector": "blockquote",
+      "default": ""
+    },
+    "showQuote": {
+      "type": "boolean",
+      "default": false
+    },
+    "textAlign": {
+      "type": "string",
+      "default": ""
+    }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'tagName',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'The HTML element to render. Common values: p, h1–h6, div, blockquote, ul, ol, li, a. Must match the selector in block.json and the tagName in save.js.'
+  },
+  {
+    name: 'value',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'The current HTML string value of the field, sourced from the block attribute.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: true,
+    description: 'Callback fired with the updated HTML string whenever the user edits the content.'
+  },
+  {
+    name: 'placeholder',
+    type: 'string',
+    default: '',
+    required: false,
+    description: 'Ghost text shown when the field is empty. Wrap in __() for translatability.'
+  },
+  {
+    name: 'allowedFormats',
+    type: 'string[]',
+    default: 'all formats',
+    required: false,
+    description: 'Restricts the inline formatting toolbar. Pass [] for plain text. Available formats: core/bold, core/italic, core/link, core/strikethrough, core/underline, core/text-color, core/subscript, core/superscript, core/code, core/image.'
+  },
+  {
+    name: 'multiline',
+    type: 'string | false',
+    default: 'false',
+    required: false,
+    description: "Enables multi-paragraph input. Pass 'p' for paragraphs or 'li' for list items. The tagName should be the list container (ul/ol/div)."
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the editable element.'
+  },
+  {
+    name: 'style',
+    type: 'object',
+    default: '',
+    required: false,
+    description: 'Inline style object applied to the editable element. Also pass to RichText.Content in save.js.'
+  },
+  {
+    name: 'keepPlaceholderOnFocus',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'When true, the placeholder text remains visible while the field has focus.'
+  },
+  {
+    name: 'withoutInteractiveFormatting',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Disables link creation and other interactive formats. Useful for elements where links are semantically inappropriate.'
+  },
+  {
+    name: 'preserveWhiteSpace',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Preserves white space characters and line breaks in the rendered output.'
+  }
+]} />
+
+## WordPress Mapping
+
+`RichText` is imported from `@wordpress/block-editor`. It renders as a `contenteditable` element in the editor and produces a static HTML element on the front end via `RichText.Content` in `save.js`.
+
+The most important rule is that `edit.js` uses `RichText` and `save.js` uses `RichText.Content` — using `RichText` in `save.js` will cause a block validation error. Both components must receive the same `tagName`, `value`, `className`, and `style` props; any mismatch between the editor render and the saved output will trigger block invalidation.
+
+Always define RichText attributes in `block.json` with `"source": "html"` and a `"selector"` that matches the `tagName`. If a block has two `RichText` fields using the same tag (two `p` tags, for example), use different wrapper elements or CSS classes as selectors to distinguish them.
+
+For plain-text-only fields (button labels, short titles), pass `allowedFormats={ [] }` to prevent the inline toolbar from appearing at all. For maximum flexibility on body content, omit `allowedFormats` entirely so the full WordPress format toolbar is available.
