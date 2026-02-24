@@ -18,6 +18,8 @@
 	--color-warning: #f59e0b;
 	--color-error: #ef4444;
 	--color-info: #3b82f6;
+	--color-accent: #4f46e5; /* Indigo-600 — 4.54:1 contrast with #fff (WCAG AA) */
+	--color-accent-dark: #4338ca; /* Indigo-700 — used for hover/focus over accent bg */
 	--color-bg: #ffffff;
 	--color-bg-muted: #f8fafc;
 	--color-border: #e2e8f0;
@@ -1167,7 +1169,12 @@ body {
 }
 
 .block-controls-demo__btn--active {
-	background: var(--color-accent);
+	background: var(--color-accent-dark, #4338ca);
 	color: #fff;
-	border-color: var(--color-accent);
+	border-color: var(--color-accent-dark, #4338ca);
+}
+
+.block-controls-demo__btn--active:hover {
+	background: #3730a3; /* Indigo-800 — elevated hover over active bg */
+	border-color: #3730a3;
 }
