@@ -1,0 +1,353 @@
+---
+title: SearchControl Component
+component: SearchControl
+package: '@wordpress/components'
+category: Form Controls
+description: A search input with a clear (×) button; used for filtering posts, taxonomy terms, or other lists inside the block editor
+---
+
+# SearchControl Component
+
+`SearchControl` renders a text input styled for search/filtering purposes, with a magnifying glass icon and a clear (×) button that appears when the field has a value. It is commonly used in block editor panels to filter posts, taxonomy terms, media items, or any dynamic list.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { SearchControl } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SearchControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const [ searchQuery, setSearchQuery ] = useState( '' );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Content', 'your-text-domain' ) }>
+					<SearchControl
+						label={ __( 'Search Posts', 'your-text-domain' ) }
+						value={ searchQuery }
+						onChange={ ( value ) => setSearchQuery( value ) }
+						__nextHasNoMarginBottom
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Filtering a Post List with apiFetch
+
+The most common pattern: search drives an API query to populate a selectable list:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SearchControl, PanelBody, Spinner, Button } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { selectedPostId, selectedPostTitle } = attributes;
+
+	const [ searchQuery, setSearchQuery ] = useState( '' );
+	const [ searchResults, setSearchResults ] = useState( [] );
+	const [ isLoading, setIsLoading ] = useState( false );
+
+	useEffect( () => {
+		if ( searchQuery.length < 2 ) {
+			setSearchResults( [] );
+			return;
+		}
+
+		setIsLoading( true );
+
+		apiFetch( {
+			path: addQueryArgs( '/wp/v2/posts', {
+				search: searchQuery,
+				per_page: 10,
+				_fields: 'id,title',
+			} ),
+		} )
+			.then( ( posts ) => {
+				setSearchResults( posts );
+				setIsLoading( false );
+			} )
+			.catch( () => setIsLoading( false ) );
+	}, [ searchQuery ] );
+
+	const selectPost = ( post ) => {
+		setAttributes( {
+			selectedPostId: post.id,
+			selectedPostTitle: post.title.rendered,
+		} );
+		setSearchQuery( '' );
+		setSearchResults( [] );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Select Post', 'your-text-domain' ) }>
+					{ selectedPostTitle && (
+						<p>
+							<strong>{ __( 'Selected:', 'your-text-domain' ) }</strong>{ ' ' }
+							{ selectedPostTitle }{ ' ' }
+							<Button
+								variant="link"
+								isDestructive
+								onClick={ () =>
+									setAttributes( {
+										selectedPostId: undefined,
+										selectedPostTitle: '',
+									} )
+								}
+							>
+								{ __( 'Clear', 'your-text-domain' ) }
+							</Button>
+						</p>
+					) }
+
+					<SearchControl
+						label={ __( 'Search Posts', 'your-text-domain' ) }
+						value={ searchQuery }
+						onChange={ setSearchQuery }
+						__nextHasNoMarginBottom
+					/>
+
+					{ isLoading && <Spinner /> }
+
+					{ ! isLoading && searchResults.length > 0 && (
+						<ul style={ { margin: '8px 0', padding: 0, listStyle: 'none' } }>
+							{ searchResults.map( ( post ) => (
+								<li key={ post.id }>
+									<Button
+										variant="tertiary"
+										onClick={ () => selectPost( post ) }
+										style={ { display: 'block', width: '100%', textAlign: 'left' } }
+									>
+										{ post.title.rendered }
+									</Button>
+								</li>
+							) ) }
+						</ul>
+					) }
+
+					{ ! isLoading &&
+						searchQuery.length >= 2 &&
+						searchResults.length === 0 && (
+							<p>{ __( 'No posts found.', 'your-text-domain' ) }</p>
+						) }
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				{ selectedPostTitle ? (
+					<p>
+						{ __( 'Showing:', 'your-text-domain' ) } { selectedPostTitle }
+					</p>
+				) : (
+					<p>{ __( 'Select a post in the sidebar.', 'your-text-domain' ) }</p>
+				) }
+			</div>
+		</>
+	);
+}
+```
+
+## Filtering a Static List
+
+When the full list is already loaded in memory:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SearchControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { useState, useMemo } from '@wordpress/element';
+
+const ALL_ICONS = [
+	{ id: 'star', label: __( 'Star', 'your-text-domain' ) },
+	{ id: 'heart', label: __( 'Heart', 'your-text-domain' ) },
+	{ id: 'arrow', label: __( 'Arrow', 'your-text-domain' ) },
+	{ id: 'check', label: __( 'Checkmark', 'your-text-domain' ) },
+	{ id: 'info', label: __( 'Info', 'your-text-domain' ) },
+	{ id: 'warning', label: __( 'Warning', 'your-text-domain' ) },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { iconId } = attributes;
+	const [ search, setSearch ] = useState( '' );
+
+	const filteredIcons = useMemo( () => {
+		if ( ! search ) return ALL_ICONS;
+		const lower = search.toLowerCase();
+		return ALL_ICONS.filter( ( icon ) =>
+			icon.label.toLowerCase().includes( lower )
+		);
+	}, [ search ] );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Icon', 'your-text-domain' ) }>
+					<SearchControl
+						label={ __( 'Filter icons', 'your-text-domain' ) }
+						value={ search }
+						onChange={ setSearch }
+						__nextHasNoMarginBottom
+					/>
+
+					<ul style={ { margin: '8px 0', padding: 0, listStyle: 'none' } }>
+						{ filteredIcons.map( ( icon ) => (
+							<li key={ icon.id }>
+								<button
+									type="button"
+									onClick={ () =>
+										setAttributes( { iconId: icon.id } )
+									}
+									style={ {
+										fontWeight: iconId === icon.id ? 'bold' : 'normal',
+									} }
+								>
+									{ icon.label }
+								</button>
+							</li>
+						) ) }
+					</ul>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Selected icon:', 'your-text-domain' ) } { iconId }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## With Debounce for Performance
+
+Add debounce to avoid firing API requests on every keystroke:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { SearchControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { useState, useEffect, useCallback } from '@wordpress/element';
+import { debounce } from '@wordpress/compose';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const [ search, setSearch ] = useState( '' );
+	const [ debouncedQuery, setDebouncedQuery ] = useState( '' );
+
+	const updateQuery = useCallback(
+		debounce( ( value ) => setDebouncedQuery( value ), 400 ),
+		[]
+	);
+
+	const handleChange = ( value ) => {
+		setSearch( value );
+		updateQuery( value );
+	};
+
+	useEffect( () => {
+		// Use debouncedQuery to fire API requests
+	}, [ debouncedQuery ] );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Search', 'your-text-domain' ) }>
+					<SearchControl
+						label={ __( 'Search', 'your-text-domain' ) }
+						value={ search }
+						onChange={ handleChange }
+						__nextHasNoMarginBottom
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`SearchControl` is editor-only. The selected result is stored as an attribute:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { selectedPostId } = attributes;
+
+	return (
+		<div { ...blockProps } data-post-id={ selectedPostId }>
+			{ /* Dynamic block renders via PHP render_callback */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | — | Accessible label (visually hidden by default) |
+| `value` | string | — | Current search string |
+| `onChange` | function | — | Called with new value on every keystroke |
+| `onClose` | function | — | Called when the clear button is clicked |
+| `placeholder` | string | — | Placeholder text |
+| `help` | string | — | Help text below the input |
+| `disabled` | boolean | `false` | Disable the input |
+| `__nextHasNoMarginBottom` | boolean | `false` | Opt-in to no-margin-bottom style |
+| `className` | string | — | Additional CSS classes |
+| `size` | string | `'default'` | `'default'` or `'small'` |
+
+## Common Use Cases
+
+1. **Post picker** — search by title, select one post to feature
+2. **Taxonomy filter** — search category/tag names to filter a query
+3. **Icon picker** — filter a large icon library by name
+4. **User picker** — search users by name or email
+5. **In-panel list filter** — narrow a rendered list of options
+
+## Accessibility
+
+- Renders as `<input type="search">` for proper browser semantics
+- Clear button has `aria-label` for screen readers
+- Magnifying glass icon is decorative (hidden from assistive tech)
+- Associates label via `htmlFor` / `id`
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `__nextHasNoMarginBottom` to opt in to updated spacing
+- For async search, debounce `onChange` to avoid excessive API calls
+- `SearchControl` stores only ephemeral UI state; persist the **result** (e.g., post ID) as a block attribute

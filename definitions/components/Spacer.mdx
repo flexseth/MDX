@@ -1,0 +1,268 @@
+---
+title: Spacer Component
+component: Spacer
+package: '@wordpress/components'
+category: Layout
+description: A flexible spacing utility that adds controlled vertical or horizontal gap between elements in sidebar panels and editor UI layouts
+---
+
+# Spacer Component
+
+`Spacer` is a layout utility that adds consistent spacing between elements. It is used primarily in sidebar panels and custom modal/popover layouts to insert visual breathing room without manually setting margins or padding. All spacing values use the WordPress grid-unit system (1 unit = 4px).
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Spacer } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+Add vertical space between two controls in a panel:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Spacer, TextControl, RangeControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title, columns } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+					<TextControl
+						label={ __( 'Title', 'your-text-domain' ) }
+						value={ title }
+						onChange={ ( value ) => setAttributes( { title: value } ) }
+						__nextHasNoMarginBottom
+					/>
+
+					<Spacer marginY={ 3 } />
+
+					<RangeControl
+						label={ __( 'Columns', 'your-text-domain' ) }
+						value={ columns }
+						onChange={ ( value ) => setAttributes( { columns: value } ) }
+						min={ 1 }
+						max={ 6 }
+						__nextHasNoMarginBottom
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Horizontal Spacing
+
+Use `marginX` for horizontal spacing inside a `Flex` row:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Spacer, Flex, FlexItem, Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Actions', 'your-text-domain' ) }>
+					<Flex>
+						<FlexItem>
+							<Button variant="secondary">
+								{ __( 'Cancel', 'your-text-domain' ) }
+							</Button>
+						</FlexItem>
+
+						<Spacer marginX={ 2 } />
+
+						<FlexItem>
+							<Button variant="primary">
+								{ __( 'Apply', 'your-text-domain' ) }
+							</Button>
+						</FlexItem>
+					</Flex>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Combining margin Props
+
+Use individual directional props for fine-grained control:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Spacer, TextControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { label, sublabel } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Text', 'your-text-domain' ) }>
+					<TextControl
+						label={ __( 'Main Label', 'your-text-domain' ) }
+						value={ label }
+						onChange={ ( value ) => setAttributes( { label: value } ) }
+						__nextHasNoMarginBottom
+					/>
+
+					{ /* More space below the first control than above the second */ }
+					<Spacer marginBottom={ 5 } marginTop={ 2 } />
+
+					<TextControl
+						label={ __( 'Sublabel', 'your-text-domain' ) }
+						value={ sublabel }
+						onChange={ ( value ) => setAttributes( { sublabel: value } ) }
+						__nextHasNoMarginBottom
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## As a Section Divider
+
+Use `Spacer` with a border to create a visual section divider:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Spacer, TextControl, SelectControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title, category } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'your-text-domain' ) } initialOpen>
+					<TextControl
+						label={ __( 'Title', 'your-text-domain' ) }
+						value={ title }
+						onChange={ ( v ) => setAttributes( { title: v } ) }
+						__nextHasNoMarginBottom
+					/>
+
+					<Spacer
+						marginY={ 4 }
+						style={ { borderBottom: '1px solid #e0e0e0' } }
+					/>
+
+					<SelectControl
+						label={ __( 'Category', 'your-text-domain' ) }
+						value={ category }
+						options={ [
+							{ label: __( 'All', 'your-text-domain' ), value: '' },
+							{ label: __( 'News', 'your-text-domain' ), value: 'news' },
+						] }
+						onChange={ ( v ) => setAttributes( { category: v } ) }
+						__nextHasNoMarginBottom
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`Spacer` is an editor-only layout utility with no front-end output. Use CSS `margin` or `gap` in `style.scss` for front-end spacing:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	return <div { ...blockProps }>{ /* content */ }</div>;
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `margin` | number | `2` | All sides (grid units, 1 = 4px) |
+| `marginY` | number | — | Top and bottom margin |
+| `marginX` | number | — | Left and right margin |
+| `marginTop` | number | — | Top margin only |
+| `marginBottom` | number | — | Bottom margin only |
+| `marginLeft` | number | — | Left margin only |
+| `marginRight` | number | — | Right margin only |
+| `padding` | number | — | All sides padding |
+| `paddingY` | number | — | Top and bottom padding |
+| `paddingX` | number | — | Left and right padding |
+| `paddingTop` | number | — | Top padding only |
+| `paddingBottom` | number | — | Bottom padding only |
+| `as` | string | `'div'` | Rendered HTML element |
+| `className` | string | — | Additional CSS classes |
+| `style` | object | — | Inline styles (for border dividers, etc.) |
+| `children` | node | — | Optional content inside the spacer |
+
+### Grid Unit Scale
+
+| Units | px |
+|---|---|
+| 1 | 4px |
+| 2 | 8px |
+| 3 | 12px |
+| 4 | 16px |
+| 5 | 20px |
+| 6 | 24px |
+
+## Common Use Cases
+
+1. **Control separation** — extra vertical gap between unrelated controls in a panel
+2. **Section divider** — `Spacer` with a bottom border as a visual rule
+3. **Button row spacing** — horizontal gap inside `Flex` rows
+4. **Panel breathing room** — top/bottom margin after panel headings
+5. **Modal content sections** — consistent spacing between form groups
+
+## Accessibility
+
+- `Spacer` renders as an empty `<div>` with no semantic role; screen readers ignore it
+- Do not use `Spacer` to represent structure — use semantic HTML elements or ARIA for that
+- Purely visual / layout utility
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use grid-unit values (`1–8`) rather than pixel values for consistency with the WordPress design system
+- Prefer `Spacer` over inline `style={{ margin }}` for spacing between editor UI elements
+- Do not use `Spacer` in front-end block output — use CSS in `style.scss` instead

@@ -1,0 +1,260 @@
+---
+title: Snackbar Component
+component: Snackbar
+package: '@wordpress/components'
+category: Feedback
+description: A brief, dismissible toast notification that appears at the bottom of the editor; distinct from Notice — Snackbar auto-dismisses and is used for transient confirmations rather than persistent warnings
+---
+
+# Snackbar Component
+
+`Snackbar` renders a brief, non-blocking notification message (a "toast") at the bottom of the screen. Unlike `Notice` (which stays visible in the sidebar until dismissed and is used for persistent warnings), `Snackbar` is designed for **transient confirmations** — "Settings saved", "Item added", "Link copied" — that auto-dismiss after a few seconds.
+
+In the block editor, the canonical way to trigger snackbars is via the `@wordpress/notices` dispatch. Use the raw `Snackbar` component only for custom rendering outside the standard notices area.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+// Raw component:
+import { Snackbar } from '@wordpress/components';
+
+// Via the notices store (recommended for block editor):
+import { dispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
+```
+
+## Using @wordpress/notices (Recommended)
+
+The WordPress block editor has a centralized notices store. Dispatch to it instead of rendering `Snackbar` directly:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { dispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+
+	const handleSave = () => {
+		// ... do save work ...
+
+		dispatch( noticesStore ).createSuccessNotice(
+			__( 'Settings saved.', 'your-text-domain' ),
+			{
+				type: 'snackbar',
+				isDismissible: true,
+			}
+		);
+	};
+
+	const handleCopy = () => {
+		navigator.clipboard.writeText( 'https://example.com' );
+
+		dispatch( noticesStore ).createInfoNotice(
+			__( 'Link copied to clipboard.', 'your-text-domain' ),
+			{
+				type: 'snackbar',
+				isDismissible: true,
+			}
+		);
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Actions', 'your-text-domain' ) }>
+					<Button variant="primary" onClick={ handleSave }>
+						{ __( 'Save Settings', 'your-text-domain' ) }
+					</Button>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<Button variant="secondary" onClick={ handleCopy }>
+					{ __( 'Copy Link', 'your-text-domain' ) }
+				</Button>
+			</div>
+		</>
+	);
+}
+```
+
+## Raw Snackbar Component
+
+Render `Snackbar` directly when you need a custom notification area outside the standard editor notices:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Snackbar, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ showSnackbar, setShowSnackbar ] = useState( false );
+
+	const handleAction = () => {
+		// ... perform action ...
+		setShowSnackbar( true );
+
+		// Auto-dismiss after 3 seconds
+		setTimeout( () => setShowSnackbar( false ), 3000 );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<Button variant="primary" onClick={ handleAction }>
+				{ __( 'Perform Action', 'your-text-domain' ) }
+			</Button>
+
+			{ showSnackbar && (
+				<Snackbar
+					onRemove={ () => setShowSnackbar( false ) }
+				>
+					{ __( 'Action completed successfully!', 'your-text-domain' ) }
+				</Snackbar>
+			) }
+		</div>
+	);
+}
+```
+
+## Snackbar with Action Button
+
+Provide an undo or follow-up action link inside the snackbar:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { dispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { items = [] } = attributes;
+
+	const handleDelete = ( itemId ) => {
+		const previousItems = items;
+
+		setAttributes( {
+			items: items.filter( ( item ) => item.id !== itemId ),
+		} );
+
+		dispatch( noticesStore ).createInfoNotice(
+			__( 'Item deleted.', 'your-text-domain' ),
+			{
+				type: 'snackbar',
+				isDismissible: true,
+				actions: [
+					{
+						label: __( 'Undo', 'your-text-domain' ),
+						onClick: () =>
+							setAttributes( { items: previousItems } ),
+					},
+				],
+			}
+		);
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Items', 'your-text-domain' ) }>
+					{ items.map( ( item ) => (
+						<div key={ item.id } style={ { display: 'flex', justifyContent: 'space-between' } }>
+							<span>{ item.label }</span>
+							<Button
+								variant="link"
+								isDestructive
+								onClick={ () => handleDelete( item.id ) }
+							>
+								{ __( 'Delete', 'your-text-domain' ) }
+							</Button>
+						</div>
+					) ) }
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Snackbar vs Notice
+
+| Feature | `Snackbar` | `Notice` |
+|---|---|---|
+| Position | Bottom of screen (toast) | Inline in sidebar / panel |
+| Duration | Transient (auto-dismisses) | Persistent until dismissed |
+| Use for | Confirmations ("Saved!", "Copied!") | Warnings, errors, required actions |
+| Blocking | No | No |
+| Actions | One optional action link | Multiple action links |
+| Appropriate for | Success feedback | Error reporting, important info |
+
+## save.js
+
+`Snackbar` is editor-only and has no front-end output:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	return <div { ...blockProps }>{ /* content */ }</div>;
+}
+```
+
+## Props Reference
+
+### Snackbar (raw component)
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | string \| node | — | The message content |
+| `onRemove` | function | — | Called when the snackbar should be dismissed |
+| `actions` | array | — | Array of `{ label, onClick }` action objects |
+| `icon` | Component | — | Icon to show before the message |
+| `explicitDismiss` | boolean | `false` | Show an explicit ✕ dismiss button |
+| `politeness` | string | `'polite'` | ARIA live politeness: `'polite'` or `'assertive'` |
+| `className` | string | — | Additional CSS classes |
+
+### dispatch( noticesStore ).createSuccessNotice / createInfoNotice / createWarningNotice / createErrorNotice
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `type` | string | `'default'` | `'snackbar'` for toast; `'default'` for inline notice |
+| `isDismissible` | boolean | `true` | Show dismiss button |
+| `actions` | array | — | Array of `{ label, onClick }` action objects |
+| `icon` | string | — | Dashicon name |
+
+## Common Use Cases
+
+1. **Save confirmation** — "Settings saved" after a form submit
+2. **Copy to clipboard** — "Link copied" after clicking a copy button
+3. **Undo delete** — "Item deleted. Undo." with an action link
+4. **API success** — "Published successfully"
+5. **Non-critical warnings** — "Changes may take a moment to appear"
+
+## Accessibility
+
+- Renders as a live region (`aria-live="polite"` by default)
+- Set `politeness="assertive"` for time-sensitive messages (e.g., errors)
+- `explicitDismiss` adds a keyboard-focusable close button
+- Auto-dismissed snackbars should not contain critical information users might miss
+
+## WordPress Standards
+
+- Import from `@wordpress/components` for raw rendering
+- Prefer `dispatch( noticesStore ).createSuccessNotice( ..., { type: 'snackbar' } )` for standard block editor integration
+- Do not use `Snackbar` for errors or required actions — use `Notice` instead
+- Auto-dismiss timing: typically 3–5 seconds; do not dismiss before the user can read the message

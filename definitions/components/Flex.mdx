@@ -1,0 +1,307 @@
+---
+title: Flex Component
+component: Flex
+package: '@wordpress/components'
+category: Layout
+description: A CSS flexbox layout helper with FlexItem and FlexBlock sub-components; used heavily in the block editor UI for sidebar rows, toolbar layouts, and control groups
+---
+
+# Flex Component
+
+`Flex` is a layout utility component that renders a flexbox container. It comes with two sub-components:
+- `FlexItem` — shrinks and grows minimally; used for fixed-width items
+- `FlexBlock` — fills all available space; used for the "main" item in a row
+
+These are used throughout the block editor to build sidebar rows, label + control pairs, icon + text combos, and multi-column control layouts.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Flex, FlexItem, FlexBlock } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+A simple row with two items side by side:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Flex, FlexItem, FlexBlock, Button, TextControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { url } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Link', 'your-text-domain' ) }>
+					<Flex>
+						<FlexBlock>
+							<TextControl
+								label={ __( 'URL', 'your-text-domain' ) }
+								value={ url }
+								onChange={ ( value ) =>
+									setAttributes( { url: value } )
+								}
+								__nextHasNoMarginBottom
+							/>
+						</FlexBlock>
+						<FlexItem>
+							<Button
+								variant="secondary"
+								onClick={ () => setAttributes( { url: '' } ) }
+							>
+								{ __( 'Clear', 'your-text-domain' ) }
+							</Button>
+						</FlexItem>
+					</Flex>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## FlexItem vs FlexBlock
+
+| Component | CSS | Use for |
+|---|---|---|
+| `FlexItem` | `flex: 0 0 auto` | Icons, buttons, labels — fixed-width items |
+| `FlexBlock` | `flex: 1 1 auto` | Main content area — fills remaining space |
+
+## Justified Row
+
+Use `justify` prop to space items apart:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Flex, FlexItem, Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Actions', 'your-text-domain' ) }>
+					<Flex justify="space-between">
+						<FlexItem>
+							<Button variant="secondary">
+								{ __( 'Cancel', 'your-text-domain' ) }
+							</Button>
+						</FlexItem>
+						<FlexItem>
+							<Button variant="primary">
+								{ __( 'Apply', 'your-text-domain' ) }
+							</Button>
+						</FlexItem>
+					</Flex>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Column Layout (direction="column")
+
+Stack items vertically with controlled alignment:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Flex, FlexItem, TextControl, SelectControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title, category } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Content', 'your-text-domain' ) }>
+					<Flex direction="column" gap={ 3 }>
+						<FlexItem>
+							<TextControl
+								label={ __( 'Title', 'your-text-domain' ) }
+								value={ title }
+								onChange={ ( value ) =>
+									setAttributes( { title: value } )
+								}
+								__nextHasNoMarginBottom
+							/>
+						</FlexItem>
+						<FlexItem>
+							<SelectControl
+								label={ __( 'Category', 'your-text-domain' ) }
+								value={ category }
+								options={ [
+									{ label: __( 'News', 'your-text-domain' ), value: 'news' },
+									{ label: __( 'Events', 'your-text-domain' ), value: 'events' },
+								] }
+								onChange={ ( value ) =>
+									setAttributes( { category: value } )
+								}
+								__nextHasNoMarginBottom
+							/>
+						</FlexItem>
+					</Flex>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				{ title && <h2>{ title }</h2> }
+			</div>
+		</>
+	);
+}
+```
+
+## Inline Icon + Text Row
+
+`FlexItem` for icon, `FlexBlock` for text — a common badge/label pattern:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Flex, FlexItem, FlexBlock } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Icon, info } from '@wordpress/icons';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<Flex align="center" gap={ 2 }>
+				<FlexItem>
+					<Icon icon={ info } />
+				</FlexItem>
+				<FlexBlock>
+					<p style={ { margin: 0 } }>
+						{ __( 'This block requires a featured image to display correctly.', 'your-text-domain' ) }
+					</p>
+				</FlexBlock>
+			</Flex>
+		</div>
+	);
+}
+```
+
+## Responsive Wrap
+
+Allow items to wrap on narrow containers:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Flex, FlexItem, Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Spacing Presets', 'your-text-domain' ) }>
+					<Flex wrap gap={ 2 }>
+						{ [ 'xs', 'sm', 'md', 'lg', 'xl' ].map( ( size ) => (
+							<FlexItem key={ size }>
+								<Button variant="secondary">{ size }</Button>
+							</FlexItem>
+						) ) }
+					</Flex>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`Flex` is an editor-only layout utility. It has no front-end output — use plain CSS flexbox in `save.js` instead:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+
+	return (
+		<div { ...blockProps }>
+			<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+				<span>Block content.</span>
+			</div>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### Flex
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `direction` | string \| array | `'row'` | `'row'` or `'column'`; array allows responsive values |
+| `justify` | string | `'flex-start'` | CSS `justify-content` value |
+| `align` | string | `'center'` | CSS `align-items` value |
+| `gap` | number | `2` | Gap between items in grid units (1 = 4px) |
+| `wrap` | boolean | `false` | Allow items to wrap |
+| `expanded` | boolean | `true` | Whether `Flex` takes up full width |
+| `as` | string | `'div'` | Rendered HTML element |
+| `children` | node | — | `FlexItem` and/or `FlexBlock` children |
+| `className` | string | — | Additional CSS classes |
+
+### FlexItem
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `isBlock` | boolean | `false` | Make this item fill available space (same as `FlexBlock`) |
+| `children` | node | — | Item content |
+| `className` | string | — | Additional CSS classes |
+| `as` | string | `'div'` | Rendered HTML element |
+
+### FlexBlock
+
+Identical to `FlexItem` with `isBlock` forced to `true`.
+
+## Common Use Cases
+
+1. **Input + action button row** — `FlexBlock` for input, `FlexItem` for button
+2. **Label + help icon** — `FlexBlock` for label, `FlexItem` for tooltip icon
+3. **Icon + text badge** — `FlexItem` for icon, `FlexBlock` for text
+4. **Action bar** — `space-between` to push buttons to edges
+5. **Stacked panel rows** — `direction="column"` for vertical control groups
+
+## Accessibility
+
+- `Flex` renders a plain `<div>` by default; change `as` for semantic HTML when needed
+- Flex layout does not affect keyboard navigation order (follows DOM order)
+- For interactive flex children, ensure each child maintains its own accessible role
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `Flex` for editor UI layouts, not for front-end block output
+- Front-end layouts should use CSS classes in `style.scss`, not `Flex`
+- Use `gap` prop (grid-unit-based) rather than inline `style` margin for spacing

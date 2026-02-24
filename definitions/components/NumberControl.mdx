@@ -1,0 +1,263 @@
+---
+title: NumberControl Component
+component: NumberControl
+package: '@wordpress/components'
+category: Form Controls
+description: A numeric text input with increment/decrement spin buttons; distinct from RangeControl's slider — use when you need direct numeric entry with optional min/max/step constraints
+---
+
+# NumberControl Component
+
+`NumberControl` renders a text input that accepts numeric values, with optional increment/decrement spin buttons (▲/▼). Unlike `RangeControl` (which renders a slider), `NumberControl` is best when the user needs to type an exact value or when the range is too large for a slider to be practical.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { NumberControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"itemCount": {
+			"type": "number",
+			"default": 3
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { NumberControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { itemCount } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Query Settings', 'your-text-domain' ) }>
+					<NumberControl
+						label={ __( 'Number of Items', 'your-text-domain' ) }
+						value={ itemCount }
+						onChange={ ( value ) =>
+							setAttributes( { itemCount: Number( value ) } )
+						}
+						min={ 1 }
+						max={ 100 }
+						step={ 1 }
+						__next40pxDefaultSize
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>
+					{ itemCount } { __( 'items will be shown.', 'your-text-domain' ) }
+				</p>
+			</div>
+		</>
+	);
+}
+```
+
+## With Spin Buttons Hidden
+
+When you only need a plain numeric input without the ▲/▼ controls:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { NumberControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { year } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+					<NumberControl
+						label={ __( 'Year', 'your-text-domain' ) }
+						value={ year }
+						onChange={ ( value ) =>
+							setAttributes( { year: Number( value ) } )
+						}
+						min={ 1900 }
+						max={ 2100 }
+						spinControls="none"
+						__next40pxDefaultSize
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Year:', 'your-text-domain' ) } { year }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Decimal Values (Step)
+
+Use `step` with a decimal value to allow fractional input:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { NumberControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { opacity } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Appearance', 'your-text-domain' ) }>
+					<NumberControl
+						label={ __( 'Opacity', 'your-text-domain' ) }
+						value={ opacity }
+						onChange={ ( value ) =>
+							setAttributes( { opacity: parseFloat( value ) } )
+						}
+						min={ 0 }
+						max={ 1 }
+						step={ 0.01 }
+						help={ __( 'Between 0 (transparent) and 1 (opaque)', 'your-text-domain' ) }
+						__next40pxDefaultSize
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } style={ { opacity } }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Native Spin Buttons Style
+
+The `spinControls` prop accepts `'native'` to use the browser's default spin buttons instead of the custom WordPress ones:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { NumberControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { columns } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout', 'your-text-domain' ) }>
+					<NumberControl
+						label={ __( 'Columns', 'your-text-domain' ) }
+						value={ columns }
+						onChange={ ( value ) =>
+							setAttributes( { columns: Number( value ) } )
+						}
+						min={ 1 }
+						max={ 12 }
+						spinControls="native"
+						__next40pxDefaultSize
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div
+				{ ...blockProps }
+				style={ { gridTemplateColumns: `repeat(${ columns }, 1fr)` } }
+			>
+				<p>{ __( 'Grid content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## NumberControl vs RangeControl
+
+| Situation | Use |
+|---|---|
+| User needs to type an exact number | `NumberControl` |
+| Range is small and a slider is intuitive (e.g., 1–10) | `RangeControl` |
+| Range is large (e.g., 1–1000) | `NumberControl` |
+| Visual feedback of the range is useful | `RangeControl` |
+| Fractional / decimal values | Either (both support `step`) |
+
+## save.js
+
+`NumberControl` is editor-only. The value is stored as an attribute and applied in `save.js`:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { itemCount } = attributes;
+
+	return (
+		<div { ...blockProps } data-count={ itemCount }>
+			{ /* Render itemCount items */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | — | Visible label above the input |
+| `value` | number \| string | — | Current value |
+| `onChange` | function | — | Called with the new string value on change |
+| `min` | number | — | Minimum allowed value |
+| `max` | number | — | Maximum allowed value |
+| `step` | number | `1` | Increment/decrement step size |
+| `spinControls` | string | `'custom'` | `'custom'` (WordPress style), `'native'`, or `'none'` |
+| `help` | string | — | Help text below the input |
+| `disabled` | boolean | `false` | Disable the input |
+| `required` | boolean | `false` | Mark as required |
+| `placeholder` | string | — | Placeholder text |
+| `__next40pxDefaultSize` | boolean | `false` | Opt-in to 40px height |
+
+## Common Use Cases
+
+1. **Post count** — how many posts to display in a query loop
+2. **Column count** — grid columns (when a slider is too coarse)
+3. **Year input** — 4-digit year without a slider
+4. **Opacity** — decimal value 0–1 with step 0.01
+5. **Z-index** — large integer range unsuitable for a slider
+6. **Duration (ms)** — animation duration in milliseconds
+
+## Accessibility
+
+- Renders as `<input type="number">` with proper labeling
+- Spin buttons have `aria-label` for increment/decrement
+- `min` / `max` / `step` constraints are applied both visually and to the native input
+- `disabled` state is announced by screen readers
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- `onChange` receives a **string** — parse with `Number()` or `parseFloat()` before storing
+- Use `__next40pxDefaultSize` for updated height
+- Do not use `NumberControl` in place of `RangeControl` when a slider adds meaningful UX

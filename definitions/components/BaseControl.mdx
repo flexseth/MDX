@@ -1,0 +1,294 @@
+---
+title: BaseControl Component
+component: BaseControl
+package: '@wordpress/components'
+category: Form Controls
+description: The foundational wrapper for custom form controls; provides a label, help text, and proper accessibility wiring (htmlFor/id association) for any child input
+---
+
+# BaseControl Component
+
+`BaseControl` is the wrapper that all `@wordpress/components` form controls use internally to render their label and help text. Use it directly when building a **custom control** that is not already covered by an existing WordPress component — it handles the `htmlFor`/`id` association, label rendering, and help text placement consistently with all other core controls.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { BaseControl } from '@wordpress/components';
+// useBaseControlProps is the modern hook-based approach:
+import { BaseControl, useBaseControlProps } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+The simplest use: wrap a custom `<input>` with a label and help text:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { BaseControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { customColor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Appearance', 'your-text-domain' ) }>
+					<BaseControl
+						id="my-block-custom-color"
+						label={ __( 'Custom Color', 'your-text-domain' ) }
+						help={ __( 'Choose a hex color value.', 'your-text-domain' ) }
+					>
+						<input
+							id="my-block-custom-color"
+							type="color"
+							value={ customColor }
+							onChange={ ( event ) =>
+								setAttributes( { customColor: event.target.value } )
+							}
+							style={ { display: 'block', width: '100%', height: '40px' } }
+						/>
+					</BaseControl>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } style={ { color: customColor } }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Using useBaseControlProps Hook (Modern Pattern)
+
+The `useBaseControlProps` hook generates the `id`, `labelProps`, and `controlProps` automatically, avoiding manual ID management:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { BaseControl, useBaseControlProps, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+function CustomSlider( { label, help, value, onChange, min, max } ) {
+	const { baseControlProps, controlProps } = useBaseControlProps( {
+		label,
+		help,
+	} );
+
+	return (
+		<BaseControl { ...baseControlProps }>
+			<input
+				{ ...controlProps }
+				type="range"
+				value={ value }
+				min={ min }
+				max={ max }
+				onChange={ ( e ) => onChange( Number( e.target.value ) ) }
+				style={ { width: '100%' } }
+			/>
+			<span>{ value }</span>
+		</BaseControl>
+	);
+}
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { brightness } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Image', 'your-text-domain' ) }>
+					<CustomSlider
+						label={ __( 'Brightness', 'your-text-domain' ) }
+						help={ __( 'Adjusts the image brightness filter.', 'your-text-domain' ) }
+						value={ brightness }
+						onChange={ ( value ) => setAttributes( { brightness: value } ) }
+						min={ 0 }
+						max={ 200 }
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p
+					style={ { filter: `brightness(${ brightness }%)` } }
+				>
+					{ __( 'Block content.', 'your-text-domain' ) }
+				</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Custom Textarea with BaseControl
+
+Wrapping a `<textarea>` when `TextareaControl` props are insufficient:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { BaseControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { customCSS } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Custom CSS', 'your-text-domain' ) }>
+					<BaseControl
+						id="my-block-custom-css"
+						label={ __( 'Custom CSS', 'your-text-domain' ) }
+						help={ __( 'Add custom CSS rules for this block.', 'your-text-domain' ) }
+					>
+						<textarea
+							id="my-block-custom-css"
+							value={ customCSS }
+							onChange={ ( event ) =>
+								setAttributes( { customCSS: event.target.value } )
+							}
+							rows={ 8 }
+							style={ {
+								width: '100%',
+								fontFamily: 'monospace',
+								fontSize: '12px',
+								padding: '8px',
+								border: '1px solid #ddd',
+							} }
+						/>
+					</BaseControl>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## BaseControl.VisualLabel Sub-component
+
+When you want a label rendered without a corresponding `<label>` element (for groups of controls that cannot be associated with a single input):
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { BaseControl, Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { alignment } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout', 'your-text-domain' ) }>
+					<BaseControl help={ __( 'Choose content alignment.', 'your-text-domain' ) }>
+						<BaseControl.VisualLabel>
+							{ __( 'Alignment', 'your-text-domain' ) }
+						</BaseControl.VisualLabel>
+
+						<div style={ { display: 'flex', gap: '4px', marginTop: '8px' } }>
+							{ [ 'left', 'center', 'right' ].map( ( align ) => (
+								<Button
+									key={ align }
+									variant={
+										alignment === align ? 'primary' : 'secondary'
+									}
+									onClick={ () =>
+										setAttributes( { alignment: align } )
+									}
+									aria-pressed={ alignment === align }
+								>
+									{ align.charAt( 0 ).toUpperCase() + align.slice( 1 ) }
+								</Button>
+							) ) }
+						</div>
+					</BaseControl>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } style={ { textAlign: alignment } }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`BaseControl` is editor-only. The values it wraps are saved as attributes:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { customColor } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { color: customColor } }>
+			<p>Block content.</p>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### BaseControl
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `id` | string | — | `id` of the child input; used as `htmlFor` on the `<label>` |
+| `label` | string \| node | — | Label text |
+| `hideLabelFromVision` | boolean | `false` | Render label in DOM but visually hide it |
+| `help` | string \| node | — | Help text below the control |
+| `children` | node | — | The actual input or custom control |
+| `className` | string | — | Additional CSS classes |
+| `__nextHasNoMarginBottom` | boolean | `false` | Opt-in to no-margin-bottom style |
+
+### useBaseControlProps
+
+```javascript
+const { baseControlProps, controlProps } = useBaseControlProps( {
+	label,      // string — passed to BaseControl label
+	help,       // string — passed to BaseControl help
+	id,         // string — optional; auto-generated if omitted
+} );
+// Spread baseControlProps onto BaseControl
+// Spread controlProps onto the inner input
+```
+
+## Common Use Cases
+
+1. **Custom native `<input type="color">`** — with label and help text
+2. **Custom `<input type="range">`** — when `RangeControl` props are not enough
+3. **Reusable custom control components** — built from raw HTML inputs
+4. **Button group controls** — use `BaseControl.VisualLabel` for non-label headings
+5. **Complex composite controls** — multiple related inputs under one label
+
+## Accessibility
+
+- Wires `<label htmlFor>` to the child input's `id` automatically
+- `help` text is associated via `aria-describedby`
+- `hideLabelFromVision` hides the label visually while keeping it in the DOM for screen readers
+- `BaseControl.VisualLabel` renders a `<span>` instead of `<label>` when no single input association exists
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Always set `id` to match the child input's `id` so label clicking focuses the correct input
+- Prefer `useBaseControlProps` for new custom controls to avoid manual ID management
+- If an existing WordPress component (`TextControl`, `RangeControl`, etc.) covers your use case, use it instead of building on `BaseControl` directly

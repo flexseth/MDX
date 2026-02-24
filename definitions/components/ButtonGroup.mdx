@@ -1,0 +1,245 @@
+---
+title: ButtonGroup Component
+component: ButtonGroup
+package: '@wordpress/components'
+category: Form Controls
+description: Groups related buttons visually into a single cohesive unit with no gap between them; used for mutually exclusive or closely related actions
+---
+
+# ButtonGroup Component
+
+`ButtonGroup` visually merges a set of `Button` components by removing the border radius between them, creating a connected row. It is used for groups of related actions (e.g., bold / italic / underline in a toolbar, or layout mode toggles) where the connection between buttons communicates their relationship.
+
+> For selecting one value from a set of options, consider `ToggleGroupControl` instead — it has built-in selection state. `ButtonGroup` is for visually grouping `Button` components with explicit `isPressed` or other state management.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { ButtonGroup, Button } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ButtonGroup, Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { alignment } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout', 'your-text-domain' ) }>
+					<p>{ __( 'Alignment', 'your-text-domain' ) }</p>
+					<ButtonGroup>
+						<Button
+							variant={ alignment === 'left' ? 'primary' : 'secondary' }
+							onClick={ () => setAttributes( { alignment: 'left' } ) }
+							aria-pressed={ alignment === 'left' }
+						>
+							{ __( 'Left', 'your-text-domain' ) }
+						</Button>
+						<Button
+							variant={ alignment === 'center' ? 'primary' : 'secondary' }
+							onClick={ () => setAttributes( { alignment: 'center' } ) }
+							aria-pressed={ alignment === 'center' }
+						>
+							{ __( 'Center', 'your-text-domain' ) }
+						</Button>
+						<Button
+							variant={ alignment === 'right' ? 'primary' : 'secondary' }
+							onClick={ () => setAttributes( { alignment: 'right' } ) }
+							aria-pressed={ alignment === 'right' }
+						>
+							{ __( 'Right', 'your-text-domain' ) }
+						</Button>
+					</ButtonGroup>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } style={ { textAlign: alignment } }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Icon Button Group
+
+Group icon-only buttons (e.g., text formatting or view mode toggles):
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ButtonGroup, Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { list, grid } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { displayMode } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Display', 'your-text-domain' ) }>
+					<ButtonGroup aria-label={ __( 'Display mode', 'your-text-domain' ) }>
+						<Button
+							icon={ list }
+							label={ __( 'List view', 'your-text-domain' ) }
+							isPressed={ displayMode === 'list' }
+							onClick={ () =>
+								setAttributes( { displayMode: 'list' } )
+							}
+							showTooltip
+						/>
+						<Button
+							icon={ grid }
+							label={ __( 'Grid view', 'your-text-domain' ) }
+							isPressed={ displayMode === 'grid' }
+							onClick={ () =>
+								setAttributes( { displayMode: 'grid' } )
+							}
+							showTooltip
+						/>
+					</ButtonGroup>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } className={ `display-${ displayMode }` }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Multi-Select Button Group
+
+When more than one button can be active at once (e.g., text formatting flags):
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ButtonGroup, Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	// styleFlags is an array, e.g. ['bold', 'italic']
+	const { styleFlags = [] } = attributes;
+
+	const toggleFlag = ( flag ) => {
+		const updated = styleFlags.includes( flag )
+			? styleFlags.filter( ( f ) => f !== flag )
+			: [ ...styleFlags, flag ];
+		setAttributes( { styleFlags: updated } );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Text Style', 'your-text-domain' ) }>
+					<ButtonGroup aria-label={ __( 'Text formatting', 'your-text-domain' ) }>
+						{ [
+							{ key: 'bold', label: 'B', ariaLabel: __( 'Bold', 'your-text-domain' ) },
+							{ key: 'italic', label: 'I', ariaLabel: __( 'Italic', 'your-text-domain' ) },
+							{ key: 'underline', label: 'U', ariaLabel: __( 'Underline', 'your-text-domain' ) },
+						].map( ( { key, label, ariaLabel } ) => (
+							<Button
+								key={ key }
+								variant={ styleFlags.includes( key ) ? 'primary' : 'secondary' }
+								isPressed={ styleFlags.includes( key ) }
+								onClick={ () => toggleFlag( key ) }
+								aria-label={ ariaLabel }
+							>
+								{ label }
+							</Button>
+						) ) }
+					</ButtonGroup>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p
+					style={ {
+						fontWeight: styleFlags.includes( 'bold' ) ? 'bold' : 'normal',
+						fontStyle: styleFlags.includes( 'italic' ) ? 'italic' : 'normal',
+						textDecoration: styleFlags.includes( 'underline' )
+							? 'underline'
+							: 'none',
+					} }
+				>
+					{ __( 'Block content.', 'your-text-domain' ) }
+				</p>
+			</div>
+		</>
+	);
+}
+```
+
+## ButtonGroup vs ToggleGroupControl
+
+| Situation | Use |
+|---|---|
+| Picking one value from a short list (modern WP 6.x UI) | `ToggleGroupControl` |
+| Grouping `Button` components with custom state logic | `ButtonGroup` |
+| Toolbar-style formatting buttons (bold/italic/etc.) | `ButtonGroup` |
+| You need icons with `isPressed` semantics | `ButtonGroup` |
+
+## save.js
+
+`ButtonGroup` is editor-only. Save the selected values as attributes:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { alignment } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { textAlign: alignment } }>
+			<p>Block content.</p>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### ButtonGroup
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | node | — | `Button` components to group |
+| `className` | string | — | Additional CSS classes |
+| `aria-label` | string | — | Accessible group label (recommended for icon-only groups) |
+
+## Common Use Cases
+
+1. **Alignment controls** — left / center / right buttons
+2. **View mode toggle** — list / grid icons with `isPressed`
+3. **Text formatting group** — bold / italic / underline / strike
+4. **Breakpoint override** — desktop / tablet / mobile layout flags
+5. **Confirm/Cancel action pair** — visually joined action buttons
+
+## Accessibility
+
+- Add `aria-label` to `ButtonGroup` when icons are used without text
+- Each `Button` inside needs its own `label` prop when icon-only
+- Use `isPressed` (or `aria-pressed`) on each button to communicate toggle state
+- Screen readers announce each button independently; the group label provides context
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- For selecting a single value from short options, prefer `ToggleGroupControl`
+- Use `isPressed` on child `Button` components to communicate the active state
+- `ButtonGroup` only handles visual grouping — you manage state via `attributes` and `setAttributes`

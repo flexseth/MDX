@@ -1,0 +1,290 @@
+---
+title: Tabs Component
+component: Tabs
+package: '@wordpress/components'
+category: Layout
+description: A modern slot-based tab component using Tabs, TabList, Tab, and TabPanel sub-components; the successor to TabPanel with a more composable API
+---
+
+# Tabs Component
+
+The `Tabs` component is the modern, composable tab interface introduced in WordPress 6.4+. Unlike the older `TabPanel` component (which accepts a `tabs` array), `Tabs` uses a slot-based architecture: you render `Tabs.TabList` with `Tabs.Tab` children, and separate `Tabs.TabPanel` children inside the same `Tabs` context.
+
+> **Note:** `Tabs` and `TabPanel` (older) are different components. See [TabPanel vs Tabs](#tabpanel-vs-tabs) below.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Tabs } from '@wordpress/components';
+// Sub-components are accessed as Tabs.TabList, Tabs.Tab, Tabs.TabPanel
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Tabs, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+
+	return (
+		<>
+			<InspectorControls>
+				<Tabs>
+					<Tabs.TabList>
+						<Tabs.Tab tabId="general">
+							{ __( 'General', 'your-text-domain' ) }
+						</Tabs.Tab>
+						<Tabs.Tab tabId="style">
+							{ __( 'Style', 'your-text-domain' ) }
+						</Tabs.Tab>
+						<Tabs.Tab tabId="advanced">
+							{ __( 'Advanced', 'your-text-domain' ) }
+						</Tabs.Tab>
+					</Tabs.TabList>
+
+					<Tabs.TabPanel tabId="general">
+						<PanelBody opened title={ false }>
+							<p>{ __( 'General settings here.', 'your-text-domain' ) }</p>
+						</PanelBody>
+					</Tabs.TabPanel>
+
+					<Tabs.TabPanel tabId="style">
+						<PanelBody opened title={ false }>
+							<p>{ __( 'Style settings here.', 'your-text-domain' ) }</p>
+						</PanelBody>
+					</Tabs.TabPanel>
+
+					<Tabs.TabPanel tabId="advanced">
+						<PanelBody opened title={ false }>
+							<p>{ __( 'Advanced settings here.', 'your-text-domain' ) }</p>
+						</PanelBody>
+					</Tabs.TabPanel>
+				</Tabs>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## General / Style Pattern with Real Controls
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import {
+	Tabs,
+	PanelBody,
+	TextControl,
+	RangeControl,
+	ToggleControl,
+} from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title, columns, showBorder, borderRadius } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<Tabs>
+					<Tabs.TabList>
+						<Tabs.Tab tabId="general">
+							{ __( 'General', 'your-text-domain' ) }
+						</Tabs.Tab>
+						<Tabs.Tab tabId="style">
+							{ __( 'Style', 'your-text-domain' ) }
+						</Tabs.Tab>
+					</Tabs.TabList>
+
+					<Tabs.TabPanel tabId="general">
+						<PanelBody opened title={ __( 'Content', 'your-text-domain' ) }>
+							<TextControl
+								label={ __( 'Title', 'your-text-domain' ) }
+								value={ title }
+								onChange={ ( value ) =>
+									setAttributes( { title: value } )
+								}
+								__nextHasNoMarginBottom
+							/>
+							<RangeControl
+								label={ __( 'Columns', 'your-text-domain' ) }
+								value={ columns }
+								onChange={ ( value ) =>
+									setAttributes( { columns: value } )
+								}
+								min={ 1 }
+								max={ 6 }
+								__nextHasNoMarginBottom
+							/>
+						</PanelBody>
+					</Tabs.TabPanel>
+
+					<Tabs.TabPanel tabId="style">
+						<PanelBody opened title={ __( 'Border', 'your-text-domain' ) }>
+							<ToggleControl
+								label={ __( 'Show Border', 'your-text-domain' ) }
+								checked={ showBorder }
+								onChange={ ( value ) =>
+									setAttributes( { showBorder: value } )
+								}
+								__nextHasNoMarginBottom
+							/>
+							{ showBorder && (
+								<RangeControl
+									label={ __( 'Border Radius', 'your-text-domain' ) }
+									value={ borderRadius }
+									onChange={ ( value ) =>
+										setAttributes( { borderRadius: value } )
+									}
+									min={ 0 }
+									max={ 50 }
+									__nextHasNoMarginBottom
+								/>
+							) }
+						</PanelBody>
+					</Tabs.TabPanel>
+				</Tabs>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				{ title && <h2>{ title }</h2> }
+			</div>
+		</>
+	);
+}
+```
+
+## Controlled Tab (selectedTabId)
+
+Control which tab is active from outside the component:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Tabs } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ activeTab, setActiveTab ] = useState( 'style' );
+
+	return (
+		<>
+			<InspectorControls>
+				<Tabs
+					selectedTabId={ activeTab }
+					onSelect={ ( tabId ) => setActiveTab( tabId ) }
+				>
+					<Tabs.TabList>
+						<Tabs.Tab tabId="general">
+							{ __( 'General', 'your-text-domain' ) }
+						</Tabs.Tab>
+						<Tabs.Tab tabId="style">
+							{ __( 'Style', 'your-text-domain' ) }
+						</Tabs.Tab>
+					</Tabs.TabList>
+
+					<Tabs.TabPanel tabId="general">
+						<p style={ { padding: '12px 16px' } }>
+							{ __( 'General tab content.', 'your-text-domain' ) }
+						</p>
+					</Tabs.TabPanel>
+
+					<Tabs.TabPanel tabId="style">
+						<p style={ { padding: '12px 16px' } }>
+							{ __( 'Style tab content.', 'your-text-domain' ) }
+						</p>
+					</Tabs.TabPanel>
+				</Tabs>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## TabPanel vs Tabs
+
+| Feature | `TabPanel` (older) | `Tabs` (newer, WP 6.4+) |
+|---|---|---|
+| API style | Array-driven (`tabs` prop) | Composable slot children |
+| Tab content location | Single `children` render prop | Separate `Tabs.TabPanel` per tab |
+| Controlled | Via `initialTabName` only | Full `selectedTabId` + `onSelect` |
+| Recommended for | Legacy / wide compatibility | New blocks (WP 6.4+) |
+
+Use `TabPanel` if you need support below WP 6.4. Use `Tabs` for all new blocks to align with core UI patterns.
+
+## save.js
+
+`Tabs` is an editor-only component and has no front-end output:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	return <div { ...blockProps }>{ /* front-end rendering */ }</div>;
+}
+```
+
+## Props Reference
+
+### Tabs
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `defaultTabId` | string | — | Tab selected on first render (uncontrolled) |
+| `selectedTabId` | string | — | Currently active tab (controlled) |
+| `onSelect` | function | — | Called with new tab ID on selection change |
+| `children` | node | — | One `Tabs.TabList` + one `Tabs.TabPanel` per tab |
+
+### Tabs.Tab
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `tabId` | string | — | Unique ID; must match a `Tabs.TabPanel` `tabId` |
+| `children` | node | — | Tab label (text, icon, or both) |
+| `disabled` | boolean | `false` | Disable this specific tab |
+
+### Tabs.TabPanel
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `tabId` | string | — | Must match a `Tabs.Tab` `tabId` |
+| `children` | node | — | Panel content rendered when tab is active |
+| `focusable` | boolean | `true` | Whether the panel div is focusable |
+
+## Common Use Cases
+
+1. **Inspector Controls** — General / Style / Advanced tabs
+2. **Desktop vs Mobile settings** — two tabs with different layout controls
+3. **Content vs Layout** — separate panels for what vs how
+4. **Multi-step form patterns** — each tab as a logical step
+
+## Accessibility
+
+- Renders proper ARIA `role="tablist"`, `role="tab"`, `role="tabpanel"` attributes
+- Arrow keys navigate between tabs; `Tab` key moves into the active panel
+- Inactive panels are hidden from screen readers (`hidden` attribute)
+- `disabled` tabs are focusable but not activatable (announces as disabled)
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `Tabs` for WP 6.4+ blocks; use `TabPanel` for broader compatibility
+- Always use stable `tabId` strings (not numeric indices)
+- Wrap panel content in `PanelBody` with `opened` for visual consistency with core sidebar

@@ -1,0 +1,300 @@
+---
+title: CustomSelectControl Component
+component: CustomSelectControl
+package: '@wordpress/components'
+category: Form Controls
+description: An improved custom select dropdown with full keyboard navigation, custom option rendering, and accessible UI; v2 API replaces the deprecated v1
+---
+
+# CustomSelectControl Component
+
+`CustomSelectControl` renders a fully accessible dropdown where each option can include custom content (icons, labels, hints). Unlike the native `<select>` rendered by `SelectControl`, this component renders a stylized listbox that is fully keyboard-navigable and supports rich option display.
+
+> **Note:** There are two versions. This file documents the **v2 API** (stable, `@wordpress/components` 25+). The original `CustomSelectControl` (v1) is deprecated. The v2 import is the same name but with a different prop shape.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { CustomSelectControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"fontFamily": {
+			"type": "string",
+			"default": "sans-serif"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { CustomSelectControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+const FONT_OPTIONS = [
+	{
+		key: 'sans-serif',
+		name: __( 'Sans Serif', 'your-text-domain' ),
+	},
+	{
+		key: 'serif',
+		name: __( 'Serif', 'your-text-domain' ),
+	},
+	{
+		key: 'monospace',
+		name: __( 'Monospace', 'your-text-domain' ),
+	},
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontFamily } = attributes;
+
+	const selectedOption =
+		FONT_OPTIONS.find( ( opt ) => opt.key === fontFamily ) ??
+		FONT_OPTIONS[ 0 ];
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<CustomSelectControl
+						label={ __( 'Font Family', 'your-text-domain' ) }
+						options={ FONT_OPTIONS }
+						value={ selectedOption }
+						onChange={ ( { selectedItem } ) =>
+							setAttributes( { fontFamily: selectedItem.key } )
+						}
+						__next40pxDefaultSize
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div
+				{ ...blockProps }
+				style={ { fontFamily } }
+			>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Options with Hint Text
+
+Each option can include a `hint` property for supplementary information:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { CustomSelectControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+const LAYOUT_OPTIONS = [
+	{
+		key: 'stacked',
+		name: __( 'Stacked', 'your-text-domain' ),
+		hint: __( 'Image above content', 'your-text-domain' ),
+	},
+	{
+		key: 'side-by-side',
+		name: __( 'Side by Side', 'your-text-domain' ),
+		hint: __( 'Image left, content right', 'your-text-domain' ),
+	},
+	{
+		key: 'overlay',
+		name: __( 'Overlay', 'your-text-domain' ),
+		hint: __( 'Content over image', 'your-text-domain' ),
+	},
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { layout } = attributes;
+
+	const selectedOption =
+		LAYOUT_OPTIONS.find( ( opt ) => opt.key === layout ) ??
+		LAYOUT_OPTIONS[ 0 ];
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout', 'your-text-domain' ) }>
+					<CustomSelectControl
+						label={ __( 'Card Layout', 'your-text-domain' ) }
+						options={ LAYOUT_OPTIONS }
+						value={ selectedOption }
+						onChange={ ( { selectedItem } ) =>
+							setAttributes( { layout: selectedItem.key } )
+						}
+						__next40pxDefaultSize
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } className={ `layout-${ layout }` }>
+				<p>{ __( 'Card content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Options with Style Previews
+
+Use `style` on options to show a visual preview in the dropdown:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { CustomSelectControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+const FONT_WEIGHT_OPTIONS = [
+	{
+		key: '300',
+		name: __( 'Light', 'your-text-domain' ),
+		style: { fontWeight: '300' },
+	},
+	{
+		key: '400',
+		name: __( 'Normal', 'your-text-domain' ),
+		style: { fontWeight: '400' },
+	},
+	{
+		key: '600',
+		name: __( 'Semibold', 'your-text-domain' ),
+		style: { fontWeight: '600' },
+	},
+	{
+		key: '700',
+		name: __( 'Bold', 'your-text-domain' ),
+		style: { fontWeight: '700' },
+	},
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontWeight } = attributes;
+
+	const selectedOption =
+		FONT_WEIGHT_OPTIONS.find( ( opt ) => opt.key === fontWeight ) ??
+		FONT_WEIGHT_OPTIONS[ 1 ];
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<CustomSelectControl
+						label={ __( 'Font Weight', 'your-text-domain' ) }
+						options={ FONT_WEIGHT_OPTIONS }
+						value={ selectedOption }
+						onChange={ ( { selectedItem } ) =>
+							setAttributes( { fontWeight: selectedItem.key } )
+						}
+						__next40pxDefaultSize
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } style={ { fontWeight } }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## CustomSelectControl v1 vs v2
+
+| Feature | v1 (deprecated) | v2 (current) |
+|---|---|---|
+| Option shape | `{ key, name, style?, className?, hint? }` | Same |
+| `onChange` payload | `{ selectedItem }` object | `{ selectedItem }` object |
+| `value` prop | `selectedItem` object | `selectedItem` object |
+| `__next40pxDefaultSize` | Not available | Available |
+| Deprecation status | Deprecated | Stable |
+
+The shapes are similar, but v2 has better accessibility and the `__next40pxDefaultSize` opt-in for the updated size standard.
+
+## When to Use CustomSelectControl vs SelectControl
+
+| Situation | Use |
+|---|---|
+| Simple text options, native browser feel | `SelectControl` |
+| Rich options with hints, icons, or custom styles | `CustomSelectControl` |
+| Long lists where search filtering is needed | `ComboboxControl` |
+
+## save.js
+
+`CustomSelectControl` is editor-only. The selected value is saved as an attribute:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { fontFamily } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { fontFamily } }>
+			<p>Block content.</p>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | — | Visible label above the select |
+| `options` | array | — | Array of `{ key, name, style?, hint? }` objects |
+| `value` | object | — | The currently selected option object |
+| `onChange` | function | — | Called with `{ selectedItem }` on selection |
+| `describedBy` | string | — | `id` of an element that describes the control |
+| `size` | string | `'default'` | `'default'` or `'small'` |
+| `__next40pxDefaultSize` | boolean | `false` | Opt-in to 40px height standard |
+| `className` | string | — | Additional CSS classes |
+
+### Option Object Shape
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `key` | string | Yes | Unique identifier stored as the attribute value |
+| `name` | string | Yes | Display text in the dropdown |
+| `style` | object | No | Inline styles applied to the option row |
+| `hint` | string | No | Secondary text displayed alongside the name |
+| `className` | string | No | CSS class applied to the option row |
+
+## Common Use Cases
+
+1. **Font family picker** — show font name in its own typeface
+2. **Font weight picker** — show each weight rendered at that weight
+3. **Layout variant picker** — hint describes the visual layout
+4. **Icon style picker** — custom style previews per option
+
+## Accessibility
+
+- Implements ARIA `role="listbox"` / `role="option"` for full screen reader support
+- Keyboard: `Space`/`Enter` to open, arrow keys to navigate, `Enter` to select, `Escape` to close
+- Selected option is announced with `aria-selected`
+- `hint` text is announced alongside the option name
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `__next40pxDefaultSize` to opt in to updated 40px height standard
+- Store the option `key` (not the full object) as the block attribute
+- Look up the full option object by `key` when passing to `value` prop
+- Use `__()` for all `name` and `hint` strings

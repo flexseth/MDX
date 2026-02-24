@@ -1,0 +1,431 @@
+---
+title: ToolsPanel Component
+component: ToolsPanel
+package: '@wordpress/components'
+category: Layout
+description: A modern sidebar panel that lets users show/hide individual control items; used by all new core blocks in WP 6.x+. Works with ToolsPanelItem sub-components.
+---
+
+# ToolsPanel Component
+
+`ToolsPanel` is the modern sidebar panel used by all new core blocks in WordPress 6.x+. Unlike `PanelBody` (which always shows all controls), `ToolsPanel` allows each control to be individually toggled via an options menu (⋮). Controls that match their default value are hidden by default and shown only when the user explicitly adds them.
+
+Each child is wrapped in a `ToolsPanelItem`, which handles the show/hide logic and provides a `resetAllFilter` mechanism.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { ToolsPanel, ToolsPanelItem } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"fontSize": {
+			"type": "number"
+		},
+		"letterSpacing": {
+			"type": "string"
+		},
+		"lineHeight": {
+			"type": "string"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToolsPanel, ToolsPanelItem, RangeControl, TextControl } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontSize, letterSpacing } = attributes;
+
+	const resetAll = () => {
+		setAttributes( {
+			fontSize: undefined,
+			letterSpacing: undefined,
+		} );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<ToolsPanel
+					label={ __( 'Typography', 'your-text-domain' ) }
+					resetAll={ resetAll }
+				>
+					<ToolsPanelItem
+						label={ __( 'Font Size', 'your-text-domain' ) }
+						hasValue={ () => fontSize !== undefined }
+						onDeselect={ () => setAttributes( { fontSize: undefined } ) }
+						isShownByDefault={ false }
+					>
+						<RangeControl
+							label={ __( 'Font Size', 'your-text-domain' ) }
+							value={ fontSize }
+							onChange={ ( value ) =>
+								setAttributes( { fontSize: value } )
+							}
+							min={ 10 }
+							max={ 72 }
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+
+					<ToolsPanelItem
+						label={ __( 'Letter Spacing', 'your-text-domain' ) }
+						hasValue={ () => letterSpacing !== undefined }
+						onDeselect={ () =>
+							setAttributes( { letterSpacing: undefined } )
+						}
+						isShownByDefault={ false }
+					>
+						<TextControl
+							label={ __( 'Letter Spacing', 'your-text-domain' ) }
+							value={ letterSpacing ?? '' }
+							onChange={ ( value ) =>
+								setAttributes( { letterSpacing: value || undefined } )
+							}
+							placeholder="0px"
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p
+					style={ {
+						fontSize: fontSize ? `${ fontSize }px` : undefined,
+						letterSpacing: letterSpacing ?? undefined,
+					} }
+				>
+					{ __( 'Block content.', 'your-text-domain' ) }
+				</p>
+			</div>
+		</>
+	);
+}
+```
+
+## isShownByDefault: Mixing Required and Optional Controls
+
+Some controls should always be visible (e.g., primary settings), while others are optional:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import {
+	ToolsPanel,
+	ToolsPanelItem,
+	ToggleControl,
+	RangeControl,
+	SelectControl,
+} from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { showImage, imageSize, borderRadius } = attributes;
+
+	const resetAll = () => {
+		setAttributes( {
+			showImage: true,
+			imageSize: 'medium',
+			borderRadius: undefined,
+		} );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<ToolsPanel
+					label={ __( 'Settings', 'your-text-domain' ) }
+					resetAll={ resetAll }
+				>
+					{ /* Always shown — isShownByDefault: true (default) */ }
+					<ToolsPanelItem
+						label={ __( 'Show Image', 'your-text-domain' ) }
+						hasValue={ () => ! showImage }
+						onDeselect={ () =>
+							setAttributes( { showImage: true } )
+						}
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __( 'Show Image', 'your-text-domain' ) }
+							checked={ showImage }
+							onChange={ ( value ) =>
+								setAttributes( { showImage: value } )
+							}
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+
+					{ /* Always shown */ }
+					<ToolsPanelItem
+						label={ __( 'Image Size', 'your-text-domain' ) }
+						hasValue={ () => imageSize !== 'medium' }
+						onDeselect={ () =>
+							setAttributes( { imageSize: 'medium' } )
+						}
+						isShownByDefault
+					>
+						<SelectControl
+							label={ __( 'Image Size', 'your-text-domain' ) }
+							value={ imageSize }
+							options={ [
+								{ label: __( 'Thumbnail', 'your-text-domain' ), value: 'thumbnail' },
+								{ label: __( 'Medium', 'your-text-domain' ), value: 'medium' },
+								{ label: __( 'Large', 'your-text-domain' ), value: 'large' },
+								{ label: __( 'Full', 'your-text-domain' ), value: 'full' },
+							] }
+							onChange={ ( value ) =>
+								setAttributes( { imageSize: value } )
+							}
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+
+					{ /* Hidden by default — user adds via ⋮ menu */ }
+					<ToolsPanelItem
+						label={ __( 'Border Radius', 'your-text-domain' ) }
+						hasValue={ () => borderRadius !== undefined }
+						onDeselect={ () =>
+							setAttributes( { borderRadius: undefined } )
+						}
+						isShownByDefault={ false }
+					>
+						<RangeControl
+							label={ __( 'Border Radius', 'your-text-domain' ) }
+							value={ borderRadius ?? 0 }
+							onChange={ ( value ) =>
+								setAttributes( { borderRadius: value } )
+							}
+							min={ 0 }
+							max={ 50 }
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				{ showImage && (
+					<img
+						src="placeholder.jpg"
+						alt=""
+						style={ {
+							borderRadius: borderRadius
+								? `${ borderRadius }px`
+								: undefined,
+						} }
+					/>
+				) }
+			</div>
+		</>
+	);
+}
+```
+
+## resetAllFilter Pattern
+
+`resetAll` must reset every attribute managed by the panel. It is called when the user clicks "Reset all" in the ⋮ menu:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToolsPanel, ToolsPanelItem, RangeControl } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { paddingTop, paddingBottom, marginTop } = attributes;
+
+	/**
+	 * Reset all attributes managed by this ToolsPanel.
+	 * Called when user chooses "Reset all" from the panel's ⋮ menu.
+	 */
+	const resetAll = () => {
+		setAttributes( {
+			paddingTop: undefined,
+			paddingBottom: undefined,
+			marginTop: undefined,
+		} );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<ToolsPanel
+					label={ __( 'Spacing', 'your-text-domain' ) }
+					resetAll={ resetAll }
+				>
+					<ToolsPanelItem
+						label={ __( 'Padding Top', 'your-text-domain' ) }
+						hasValue={ () => paddingTop !== undefined }
+						onDeselect={ () =>
+							setAttributes( { paddingTop: undefined } )
+						}
+					>
+						<RangeControl
+							label={ __( 'Padding Top', 'your-text-domain' ) }
+							value={ paddingTop ?? 0 }
+							onChange={ ( value ) =>
+								setAttributes( { paddingTop: value } )
+							}
+							min={ 0 }
+							max={ 100 }
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+
+					<ToolsPanelItem
+						label={ __( 'Padding Bottom', 'your-text-domain' ) }
+						hasValue={ () => paddingBottom !== undefined }
+						onDeselect={ () =>
+							setAttributes( { paddingBottom: undefined } )
+						}
+					>
+						<RangeControl
+							label={ __( 'Padding Bottom', 'your-text-domain' ) }
+							value={ paddingBottom ?? 0 }
+							onChange={ ( value ) =>
+								setAttributes( { paddingBottom: value } )
+							}
+							min={ 0 }
+							max={ 100 }
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+
+					<ToolsPanelItem
+						label={ __( 'Margin Top', 'your-text-domain' ) }
+						hasValue={ () => marginTop !== undefined }
+						onDeselect={ () =>
+							setAttributes( { marginTop: undefined } )
+						}
+					>
+						<RangeControl
+							label={ __( 'Margin Top', 'your-text-domain' ) }
+							value={ marginTop ?? 0 }
+							onChange={ ( value ) =>
+								setAttributes( { marginTop: value } )
+							}
+							min={ 0 }
+							max={ 100 }
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
+			</InspectorControls>
+
+			<div
+				{ ...blockProps }
+				style={ {
+					paddingTop: paddingTop ? `${ paddingTop }px` : undefined,
+					paddingBottom: paddingBottom
+						? `${ paddingBottom }px`
+						: undefined,
+					marginTop: marginTop ? `${ marginTop }px` : undefined,
+				} }
+			>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## ToolsPanel vs PanelBody
+
+| Feature | `PanelBody` | `ToolsPanel` |
+|---|---|---|
+| All controls always visible | Yes | No — user chooses |
+| Show/hide individual items | No | Yes |
+| "Reset all" in ⋮ menu | No | Yes |
+| Individual item reset | No | Yes (per `ToolsPanelItem`) |
+| Used in core blocks | Older blocks | All new WP 6.x+ blocks |
+| Complexity | Low | Medium |
+
+Use `PanelBody` for simple settings that should always be visible. Use `ToolsPanel` when you have many optional settings and want a clean, uncluttered sidebar.
+
+## save.js
+
+`ToolsPanel` is editor-only. Apply the collected attributes in `save.js`:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { fontSize, letterSpacing } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<p
+				style={ {
+					fontSize: fontSize ? `${ fontSize }px` : undefined,
+					letterSpacing: letterSpacing ?? undefined,
+				} }
+			>
+				Block content.
+			</p>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### ToolsPanel
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | — | Panel header text |
+| `resetAll` | function | — | Called when "Reset all" is selected in the ⋮ menu; must reset all managed attributes |
+| `panelId` | string | — | Unique identifier; required when using multiple `ToolsPanel` in the same sidebar |
+| `children` | node | — | `ToolsPanelItem` children |
+| `className` | string | — | Additional CSS class names |
+
+### ToolsPanelItem
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | — | Display name in the ⋮ add/remove menu |
+| `hasValue` | function | — | Returns `true` when the attribute has a non-default value |
+| `onDeselect` | function | — | Called when user removes this item; should reset its attribute(s) to default |
+| `isShownByDefault` | boolean | `true` | Show this item without the user needing to add it |
+| `panelId` | string | — | Must match parent `ToolsPanel` `panelId` when specified |
+| `children` | node | — | The control(s) for this item |
+
+## Common Use Cases
+
+1. **Typography panel** — font size, line height, letter spacing (all optional)
+2. **Spacing panel** — padding/margin per side (user adds only what they need)
+3. **Border panel** — width, color, style, radius
+4. **Color panel** — text color, background color, link color
+5. **Dimensions panel** — width, height, aspect ratio
+
+## Accessibility
+
+- The ⋮ menu is keyboard accessible; announces add/remove actions to screen readers
+- Hidden items are removed from the DOM (not just visually hidden)
+- `resetAll` is announced as "Reset all" in the options menu
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- `hasValue` must return `true` only when the attribute differs from its default (to correctly drive show/hide)
+- `onDeselect` must reset the attribute to its default value (or `undefined`) to match `hasValue`
+- `resetAll` must reset **every** attribute managed by the panel
+- Use `panelId` when rendering multiple `ToolsPanel` components in the same `InspectorControls` group

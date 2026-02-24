@@ -1,0 +1,333 @@
+---
+title: ToggleGroupControl Component
+component: ToggleGroupControl
+package: '@wordpress/components'
+category: Form Controls
+description: A modern radio-style group of toggle buttons for selecting a single option from a set; preferred over RadioControl in WP 6.x+ blocks
+---
+
+# ToggleGroupControl Component
+
+The `ToggleGroupControl` component provides a set of toggle buttons where exactly one option is selected at a time. It is the modern replacement for `RadioControl` in newer core block UIs and renders as a visually cohesive button group rather than individual radio inputs.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { ToggleGroupControl, ToggleGroupControlOption } from '@wordpress/components';
+```
+
+For icon-based options, also import:
+
+```javascript
+import { ToggleGroupControl, ToggleGroupControlOptionIcon } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"justification": {
+			"type": "string",
+			"default": "left"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleGroupControl, ToggleGroupControlOption } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { justification } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Layout', 'your-text-domain' ) }>
+					<ToggleGroupControl
+						label={ __( 'Justification', 'your-text-domain' ) }
+						value={ justification }
+						onChange={ ( value ) => setAttributes( { justification: value } ) }
+						isBlock
+					>
+						<ToggleGroupControlOption
+							value="left"
+							label={ __( 'Left', 'your-text-domain' ) }
+						/>
+						<ToggleGroupControlOption
+							value="center"
+							label={ __( 'Center', 'your-text-domain' ) }
+						/>
+						<ToggleGroupControlOption
+							value="right"
+							label={ __( 'Right', 'your-text-domain' ) }
+						/>
+					</ToggleGroupControl>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } style={ { textAlign: justification } }>
+				<p>{ __( 'Block content here.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Icon-Based Options
+
+Use `ToggleGroupControlOptionIcon` when you want icon buttons instead of text labels:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import {
+	ToggleGroupControl,
+	ToggleGroupControlOptionIcon,
+	PanelBody,
+} from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { alignLeft, alignCenter, alignRight, alignJustify } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { textAlign } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<ToggleGroupControl
+						label={ __( 'Text Alignment', 'your-text-domain' ) }
+						value={ textAlign }
+						onChange={ ( value ) => setAttributes( { textAlign: value } ) }
+						isBlock
+					>
+						<ToggleGroupControlOptionIcon
+							value="left"
+							icon={ alignLeft }
+							label={ __( 'Align Left', 'your-text-domain' ) }
+						/>
+						<ToggleGroupControlOptionIcon
+							value="center"
+							icon={ alignCenter }
+							label={ __( 'Align Center', 'your-text-domain' ) }
+						/>
+						<ToggleGroupControlOptionIcon
+							value="right"
+							icon={ alignRight }
+							label={ __( 'Align Right', 'your-text-domain' ) }
+						/>
+						<ToggleGroupControlOptionIcon
+							value="justify"
+							icon={ alignJustify }
+							label={ __( 'Justify', 'your-text-domain' ) }
+						/>
+					</ToggleGroupControl>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } className={ `has-text-align-${ textAlign }` }>
+				<p>{ __( 'Block content here.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Size Variants
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleGroupControl, ToggleGroupControlOption } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { buttonSize } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<div style={ { padding: '16px' } }>
+					{ /* Default (medium) size */ }
+					<ToggleGroupControl
+						label={ __( 'Button Size', 'your-text-domain' ) }
+						value={ buttonSize }
+						onChange={ ( value ) => setAttributes( { buttonSize: value } ) }
+						isBlock
+						__nextHasNoMarginBottom
+					>
+						<ToggleGroupControlOption value="small" label={ __( 'S', 'your-text-domain' ) } />
+						<ToggleGroupControlOption value="medium" label={ __( 'M', 'your-text-domain' ) } />
+						<ToggleGroupControlOption value="large" label={ __( 'L', 'your-text-domain' ) } />
+					</ToggleGroupControl>
+				</div>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content here.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Without `isBlock` (Inline / Adaptive Width)
+
+When `isBlock` is omitted, the control renders at the natural width of its options:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleGroupControl, ToggleGroupControlOption } from '@wordpress/components';
+
+// Standalone usage outside of InspectorControls
+function DisplayModeControl( { value, onChange } ) {
+	return (
+		<ToggleGroupControl
+			label={ __( 'Display Mode', 'your-text-domain' ) }
+			value={ value }
+			onChange={ onChange }
+		>
+			<ToggleGroupControlOption value="list" label={ __( 'List', 'your-text-domain' ) } />
+			<ToggleGroupControlOption value="grid" label={ __( 'Grid', 'your-text-domain' ) } />
+		</ToggleGroupControl>
+	);
+}
+```
+
+## With Help Text
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleGroupControl, ToggleGroupControlOption } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageSize } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Image Settings', 'your-text-domain' ) }>
+					<ToggleGroupControl
+						label={ __( 'Image Size', 'your-text-domain' ) }
+						help={ __( 'Controls how the image is sized on the front end.', 'your-text-domain' ) }
+						value={ imageSize }
+						onChange={ ( value ) => setAttributes( { imageSize: value } ) }
+						isBlock
+						__nextHasNoMarginBottom
+					>
+						<ToggleGroupControlOption
+							value="thumbnail"
+							label={ __( 'Thumb', 'your-text-domain' ) }
+						/>
+						<ToggleGroupControlOption
+							value="medium"
+							label={ __( 'Med', 'your-text-domain' ) }
+						/>
+						<ToggleGroupControlOption
+							value="large"
+							label={ __( 'Large', 'your-text-domain' ) }
+						/>
+						<ToggleGroupControlOption
+							value="full"
+							label={ __( 'Full', 'your-text-domain' ) }
+						/>
+					</ToggleGroupControl>
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content here.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`ToggleGroupControl` is an editor-only component. Save the selected value as an attribute and use it in `save.js` to apply classes or styles:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { justification } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { textAlign: justification } }>
+			<p>Block content here.</p>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### ToggleGroupControl
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | — | Visible label above the control |
+| `value` | string \| number | — | Currently selected value |
+| `onChange` | function | — | Called with the new value when selection changes |
+| `isBlock` | boolean | `false` | Expand to full container width |
+| `isDeselectable` | boolean | `false` | Allow deselecting the current option (value becomes `undefined`) |
+| `help` | string | — | Help text displayed below the control |
+| `__nextHasNoMarginBottom` | boolean | `false` | Opt-in to the no-margin-bottom style |
+| `children` | node | — | `ToggleGroupControlOption` or `ToggleGroupControlOptionIcon` children |
+
+### ToggleGroupControlOption
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | string \| number | — | Value emitted when this option is selected |
+| `label` | string | — | Display text |
+| `aria-label` | string | — | Override accessible label (use when `label` is abbreviated) |
+| `showTooltip` | boolean | `false` | Show tooltip with `aria-label` on hover |
+
+### ToggleGroupControlOptionIcon
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `value` | string \| number | — | Value emitted when selected |
+| `icon` | Component | — | Icon from `@wordpress/icons` |
+| `label` | string | — | Required accessible label (shown as tooltip) |
+
+## Common Use Cases
+
+1. **Text alignment** — left / center / right / justify (icon buttons)
+2. **Image orientation** — landscape / portrait / square
+3. **Layout mode** — list / grid / masonry
+4. **Content position** — top / middle / bottom
+5. **Breakpoint override** — desktop / tablet / mobile
+
+## Accessibility
+
+- Each option is a radio button internally; selection is announced by screen readers
+- `ToggleGroupControlOptionIcon` **requires** a `label` prop — it serves as the `aria-label`
+- Abbreviated text labels should use `aria-label` on `ToggleGroupControlOption` to provide full context
+- Keyboard: `Tab` to focus the group, arrow keys to move between options
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `__nextHasNoMarginBottom` to opt in to updated spacing
+- Prefer `ToggleGroupControl` over `RadioControl` for short option sets (2–5 options) in WP 6.x+ UI
+- Use `isDeselectable` only when "none" is a valid state; otherwise keep one option always selected
+- Values should map to CSS classes or `block.json`-defined presets when possible

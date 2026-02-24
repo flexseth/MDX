@@ -1,0 +1,279 @@
+---
+title: Popover Component
+component: Popover
+package: '@wordpress/components'
+category: Overlay
+description: A floating container anchored to a reference element; the base for all custom popovers, inline color pickers, link tooltips, and overlay menus in the block editor
+---
+
+# Popover Component
+
+`Popover` renders a floating overlay positioned relative to an anchor element. It is the foundation for `Dropdown`, `DropdownMenu`, link editing overlays, and any custom popover UI in the block editor. Unlike `Modal` (which is centered and blocking), `Popover` is anchored to a specific element and non-blocking.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Popover } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+A button that toggles a custom popover panel:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Popover, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState, useRef } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+	const anchorRef = useRef( null );
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				ref={ anchorRef }
+				variant="secondary"
+				onClick={ () => setIsOpen( ( prev ) => ! prev ) }
+			>
+				{ __( 'Open Popover', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Popover
+					anchor={ anchorRef.current }
+					onClose={ () => setIsOpen( false ) }
+					placement="bottom-start"
+				>
+					<div style={ { padding: '12px', minWidth: '200px' } }>
+						<p>{ __( 'Popover content here.', 'your-text-domain' ) }</p>
+						<Button
+							variant="secondary"
+							onClick={ () => setIsOpen( false ) }
+						>
+							{ __( 'Close', 'your-text-domain' ) }
+						</Button>
+					</div>
+				</Popover>
+			) }
+		</div>
+	);
+}
+```
+
+## Inline Color Picker Popover
+
+A common pattern: a color swatch button opens an inline color picker:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Popover, Button, ColorPicker, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { useState, useRef } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { accentColor } = attributes;
+	const [ showPicker, setShowPicker ] = useState( false );
+	const swatchRef = useRef( null );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Colors', 'your-text-domain' ) }>
+					<div style={ { display: 'flex', alignItems: 'center', gap: '8px' } }>
+						<span>{ __( 'Accent Color', 'your-text-domain' ) }</span>
+						<button
+							ref={ swatchRef }
+							type="button"
+							onClick={ () => setShowPicker( ( prev ) => ! prev ) }
+							aria-label={ __( 'Choose accent color', 'your-text-domain' ) }
+							style={ {
+								width: '24px',
+								height: '24px',
+								borderRadius: '50%',
+								border: '1px solid #ccc',
+								background: accentColor || '#000',
+								cursor: 'pointer',
+							} }
+						/>
+					</div>
+
+					{ showPicker && (
+						<Popover
+							anchor={ swatchRef.current }
+							onClose={ () => setShowPicker( false ) }
+							placement="bottom-start"
+						>
+							<ColorPicker
+								color={ accentColor }
+								onChange={ ( value ) =>
+									setAttributes( { accentColor: value } )
+								}
+								enableAlpha
+							/>
+						</Popover>
+					) }
+				</PanelBody>
+			</InspectorControls>
+
+			<div { ...blockProps } style={ { borderLeft: `4px solid ${ accentColor }` } }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## Placement Options
+
+`Popover` uses Floating UI placement strings:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Popover, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState, useRef } from '@wordpress/element';
+
+// Available placement values:
+// 'top', 'top-start', 'top-end'
+// 'right', 'right-start', 'right-end'
+// 'bottom', 'bottom-start', 'bottom-end'
+// 'left', 'left-start', 'left-end'
+// 'overlay' (centered over anchor)
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+	const anchorRef = useRef( null );
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				ref={ anchorRef }
+				variant="secondary"
+				onClick={ () => setIsOpen( true ) }
+			>
+				{ __( 'Show Tooltip Above', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Popover
+					anchor={ anchorRef.current }
+					placement="top"
+					onClose={ () => setIsOpen( false ) }
+					noArrow={ false }
+				>
+					<p style={ { padding: '8px 12px', margin: 0 } }>
+						{ __( 'Content above the button.', 'your-text-domain' ) }
+					</p>
+				</Popover>
+			) }
+		</div>
+	);
+}
+```
+
+## Slot-Based Popover (Render into SlotFill)
+
+In the block editor, `Popover` renders into a `Popover.Slot` provided by the editor shell. For this to work in a custom block, no extra configuration is needed — it works automatically:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Popover, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isOpen, setIsOpen ] = useState( false );
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="primary"
+				onClick={ () => setIsOpen( true ) }
+			>
+				{ __( 'Settings', 'your-text-domain' ) }
+			</Button>
+
+			{ isOpen && (
+				<Popover onClose={ () => setIsOpen( false ) }>
+					<p style={ { padding: '12px' } }>
+						{ __( 'Settings panel content.', 'your-text-domain' ) }
+					</p>
+				</Popover>
+			) }
+		</div>
+	);
+}
+```
+
+## Popover vs Dropdown vs Modal
+
+| Situation | Use |
+|---|---|
+| Custom floating panel with any content | `Popover` |
+| Dropdown with a toggle trigger and close-on-outside-click | `Dropdown` |
+| Pre-built menu with `controls` array | `DropdownMenu` |
+| Blocking dialog that traps focus | `Modal` |
+
+## save.js
+
+`Popover` is editor-only and has no front-end output:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	return <div { ...blockProps }>{ /* content */ }</div>;
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `anchor` | Element | — | DOM element the popover is positioned relative to |
+| `placement` | string | `'bottom-start'` | Floating UI placement string |
+| `onClose` | function | — | Called when the popover should close (Escape, outside click) |
+| `onFocusOutside` | function | — | Called on focus outside (override default close behavior) |
+| `noArrow` | boolean | `true` | Hide the directional arrow |
+| `offset` | number | `0` | Distance from anchor in pixels |
+| `resize` | boolean | `true` | Resize popover to fit in the viewport |
+| `flip` | boolean | `true` | Flip placement if the popover would overflow |
+| `shift` | boolean | `false` | Shift along the axis to prevent overflow |
+| `isAlternate` | boolean | `false` | Render with alternate (lighter) background |
+| `children` | node | — | Popover content |
+| `className` | string | — | Additional CSS classes |
+
+## Common Use Cases
+
+1. **Inline color pickers** — swatch button opens floating `ColorPicker`
+2. **Custom link editing UI** — text selection opens a URL input popover
+3. **Contextual settings panel** — block-canvas-level settings in a floating panel
+4. **Rich tooltip** — non-blocking informational overlay with interactive content
+5. **Date picker dropdown** — date input opens a calendar popover
+
+## Accessibility
+
+- Focus is moved into the popover when it opens
+- `Escape` key closes the popover and returns focus to the trigger
+- Clicking outside closes the popover (managed via `onClose`)
+- `onFocusOutside` can be used to prevent closing in complex nested UIs
+- Ensure the trigger element has an accessible label
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Always provide `onClose` to handle Escape / outside-click dismissal
+- For simple trigger + dropdown patterns, prefer `Dropdown` which handles open/close state automatically
+- For pre-built menus, use `DropdownMenu`
+- In the block editor, `Popover` renders into the editor's `Popover.Slot` — no manual slot configuration needed

@@ -1,0 +1,317 @@
+---
+title: DropdownMenu Component
+component: DropdownMenu
+package: '@wordpress/components'
+category: Overlay
+description: A pre-built dropdown menu with a trigger button and a controls array; simpler than Dropdown for standard menu patterns. Supports both controls array shorthand and children render prop.
+---
+
+# DropdownMenu Component
+
+`DropdownMenu` is a pre-built menu component that renders a trigger button (typically an icon) and a dropdown list of menu items. It wraps `Dropdown` + `MenuGroup` + `MenuItem` into a single component with a `controls` array shorthand for common cases.
+
+For full composition control over the dropdown content, pass a `children` render prop instead.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { DropdownMenu } from '@wordpress/components';
+import { moreVertical } from '@wordpress/icons';
+```
+
+## Basic Usage: controls Array
+
+The `controls` array is the simplest API — each object describes one menu item:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DropdownMenu } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { moreVertical, trash, edit, copy } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<DropdownMenu
+				icon={ moreVertical }
+				label={ __( 'Block options', 'your-text-domain' ) }
+				controls={ [
+					{
+						title: __( 'Edit', 'your-text-domain' ),
+						icon: edit,
+						onClick: () => {
+							// Handle edit action
+						},
+					},
+					{
+						title: __( 'Duplicate', 'your-text-domain' ),
+						icon: copy,
+						onClick: () => {
+							// Handle duplicate action
+						},
+					},
+					{
+						title: __( 'Delete', 'your-text-domain' ),
+						icon: trash,
+						isDestructive: true,
+						onClick: () => {
+							setAttributes( { deleted: true } );
+						},
+					},
+				] }
+			/>
+			<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+		</div>
+	);
+}
+```
+
+## Grouped Controls
+
+Pass an array of arrays to group controls with separators:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DropdownMenu } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { moreHorizontal, arrowUp, arrowDown, copy, trash } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { items = [] } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<DropdownMenu
+				icon={ moreHorizontal }
+				label={ __( 'Item actions', 'your-text-domain' ) }
+				controls={ [
+					[
+						{
+							title: __( 'Move up', 'your-text-domain' ),
+							icon: arrowUp,
+							onClick: () => {
+								// Move item up
+							},
+						},
+						{
+							title: __( 'Move down', 'your-text-domain' ),
+							icon: arrowDown,
+							onClick: () => {
+								// Move item down
+							},
+						},
+					],
+					[
+						{
+							title: __( 'Duplicate', 'your-text-domain' ),
+							icon: copy,
+							onClick: () => {
+								// Duplicate item
+							},
+						},
+						{
+							title: __( 'Remove', 'your-text-domain' ),
+							icon: trash,
+							isDestructive: true,
+							onClick: () => {
+								setAttributes( { items: [] } );
+							},
+						},
+					],
+				] }
+			/>
+
+			<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+		</div>
+	);
+}
+```
+
+## Children Render Prop (Full Control)
+
+Use `children` when you need `MenuGroup` organization, custom `MenuItem` rendering, or `ToggleMenuItemControl`:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { settings, chevronRight } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { layout } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<DropdownMenu
+				icon={ settings }
+				label={ __( 'Display options', 'your-text-domain' ) }
+			>
+				{ ( { onClose } ) => (
+					<>
+						<MenuGroup label={ __( 'Layout', 'your-text-domain' ) }>
+							<MenuItem
+								icon={ layout === 'list' ? chevronRight : null }
+								onClick={ () => {
+									setAttributes( { layout: 'list' } );
+									onClose();
+								} }
+							>
+								{ __( 'List', 'your-text-domain' ) }
+							</MenuItem>
+							<MenuItem
+								icon={ layout === 'grid' ? chevronRight : null }
+								onClick={ () => {
+									setAttributes( { layout: 'grid' } );
+									onClose();
+								} }
+							>
+								{ __( 'Grid', 'your-text-domain' ) }
+							</MenuItem>
+						</MenuGroup>
+
+						<MenuGroup>
+							<MenuItem
+								isDestructive
+								onClick={ () => {
+									setAttributes( {
+										layout: 'list',
+									} );
+									onClose();
+								} }
+							>
+								{ __( 'Reset to defaults', 'your-text-domain' ) }
+							</MenuItem>
+						</MenuGroup>
+					</>
+				) }
+			</DropdownMenu>
+
+			<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+		</div>
+	);
+}
+```
+
+## In BlockControls Toolbar
+
+`DropdownMenu` is commonly used in block toolbars for overflow actions:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { DropdownMenu } from '@wordpress/components';
+import { BlockControls, useBlockProps } from '@wordpress/block-editor';
+import { moreVertical, link, linkOff, image } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { hasLink } = attributes;
+
+	return (
+		<>
+			<BlockControls>
+				<DropdownMenu
+					icon={ moreVertical }
+					label={ __( 'More options', 'your-text-domain' ) }
+					controls={ [
+						{
+							title: __( 'Add link', 'your-text-domain' ),
+							icon: link,
+							isDisabled: hasLink,
+							onClick: () => setAttributes( { hasLink: true } ),
+						},
+						{
+							title: __( 'Remove link', 'your-text-domain' ),
+							icon: linkOff,
+							isDisabled: ! hasLink,
+							onClick: () => setAttributes( { hasLink: false } ),
+						},
+					] }
+				/>
+			</BlockControls>
+
+			<div { ...blockProps }>
+				<p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+			</div>
+		</>
+	);
+}
+```
+
+## DropdownMenu vs Dropdown
+
+| Situation | Use |
+|---|---|
+| Standard action menu with icon items | `DropdownMenu` |
+| Custom popover with non-menu content | `Dropdown` |
+| Icon pickers, color pickers, rich panels | `Dropdown` |
+| Simple action list (edit, delete, etc.) | `DropdownMenu` |
+
+## save.js
+
+`DropdownMenu` is editor-only and has no front-end output:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	return <div { ...blockProps }>{ /* content */ }</div>;
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `icon` | Component | `moreVertical` | Icon for the trigger button |
+| `label` | string | — | Accessible label for the trigger button (required) |
+| `controls` | array | — | Array of control objects (or array of arrays for groups) |
+| `children` | function | — | Render prop `( { onClose } ) => node` for full control |
+| `text` | string | — | Text label on the trigger button |
+| `toggleProps` | object | — | Props forwarded to the trigger `Button` |
+| `menuProps` | object | — | Props forwarded to the menu container |
+| `popoverProps` | object | — | Props forwarded to the underlying `Popover` |
+| `disableOpenOnArrowDown` | boolean | `false` | Disable opening on arrow-down key |
+| `className` | string | — | Additional CSS classes |
+
+### Control Object
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `title` | string | Yes | Menu item label |
+| `icon` | Component | No | Icon from `@wordpress/icons` |
+| `onClick` | function | Yes | Click handler |
+| `isDestructive` | boolean | No | Style as a destructive action |
+| `isDisabled` | boolean | No | Disable this item |
+| `role` | string | No | ARIA role override |
+
+## Common Use Cases
+
+1. **Block overflow menu** — actions that don't fit in the toolbar (⋮)
+2. **Item-level actions** — edit / duplicate / delete on list items
+3. **View mode selector** — list / grid / compact display
+4. **Export options** — CSV / JSON / PDF format picker
+5. **Context actions** — right-click-style actions via a button
+
+## Accessibility
+
+- Trigger button has `aria-haspopup="true"` and `aria-expanded` state
+- `label` prop is required and used as `aria-label` on the trigger
+- Menu items are keyboard navigable (arrow keys, Enter to activate, Escape to close)
+- `isDestructive` items are announced with a visual color distinction only; add `aria-label` if additional context is needed
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Always provide `label` for the trigger button — it is announced by screen readers
+- Use `controls` array for simple menus; use `children` render prop for complex grouped layouts
+- Import icons from `@wordpress/icons`
+- Use `isDestructive` for delete/remove actions
