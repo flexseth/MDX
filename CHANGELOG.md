@@ -18,6 +18,14 @@ All notable changes to this project will be documented in this file.
   - Registered in `MDXProvider`, barrel export, route `/docs/block-controls`, sidebar nav, and `docs.css`
 
 ### Added
+- `Dropdown` component — composable dropdown with render-prop trigger and popover panel mirroring `@wordpress/components`
+  - Props: `renderToggle`, `renderContent`, `popoverProps` (placement), `className`, `contentClassName`, `defaultOpen`, `onToggle`, `onClose`
+  - Closes on outside click and Escape key; popover aligns via `placement` option
+  - `dropdown.mdx` — three interactive persistent demos:
+    - `StyleMenuDemo` — text menu with checkmark on selected item (key: `demo-dropdown-style`)
+    - `IconPickerDemo` — 3×3 symbol grid picker with large preview (key: `demo-dropdown-icon`)
+    - `ColorSwatchDemo` — colored circle trigger opens an 8-swatch palette (key: `demo-dropdown-color`)
+  - Registered in `MDXProvider`, barrel export, route `/docs/dropdown`, sidebar nav, and `docs.css`
 - `ComboboxControl` component — searchable autocomplete dropdown mirroring `@wordpress/components`
   - Props: `label`, `value`, `options`, `onChange`, `onFilterValueChange`, `help`, `isLoading`, `messages`, `className`
   - Full keyboard navigation: arrow keys, Enter to select, Escape to close
