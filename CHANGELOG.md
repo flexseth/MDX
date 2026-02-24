@@ -7,6 +7,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- `BlockControls` component — block toolbar slot simulation mirroring `@wordpress/block-editor`
+  - Props: `group`, `children`, `className`
+  - Renders a labelled toolbar preview showing group name; in real WP this is a slot/fill
+  - `block-controls.mdx` — three interactive demos:
+    - `AlignmentDemo` — four alignment buttons drive live text alignment (key: `demo-block-controls-align`)
+    - `FormatButtonsDemo` — Bold/Italic/Underline toggles with live text preview (keys: `demo-block-controls-bold`, `demo-block-controls-italic`, `demo-block-controls-underline`)
+    - `StyleMenuDemo` — style variant selector drives a live block preview (key: `demo-block-controls-style`)
+  - Includes slot group reference table; notes editor-only usage
+  - Registered in `MDXProvider`, barrel export, route `/docs/block-controls`, sidebar nav, and `docs.css`
+
+### Added
 - `Dropdown` component — composable dropdown with render-prop trigger and popover panel mirroring `@wordpress/components`
   - Props: `renderToggle`, `renderContent`, `popoverProps` (placement), `className`, `contentClassName`, `defaultOpen`, `onToggle`, `onClose`
   - Closes on outside click and Escape key; popover aligns via `placement` option

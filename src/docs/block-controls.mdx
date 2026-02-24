@@ -1,0 +1,289 @@
+import BlockControls from '../components/BlockControls';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const ALIGNMENTS = [
+  { value: 'left',    label: 'Align left',    symbol: '⬤◯◯' },
+  { value: 'center',  label: 'Align center',  symbol: '◯⬤◯' },
+  { value: 'right',   label: 'Align right',   symbol: '◯◯⬤' },
+  { value: 'justify', label: 'Justify',       symbol: '☰' },
+];
+
+export const AlignmentDemo = () => {
+  const [align, setAlign] = useLocalStorage('demo-block-controls-align', 'left');
+  return (
+    <div>
+      <BlockControls>
+        { ALIGNMENTS.map( ( a ) => (
+          <button
+            key={ a.value }
+            className={ `block-controls-demo__btn${ align === a.value ? ' block-controls-demo__btn--active' : '' }` }
+            aria-pressed={ align === a.value }
+            title={ a.label }
+            onClick={ () => setAlign( a.value ) }
+          >
+            { a.symbol }
+          </button>
+        ) ) }
+      </BlockControls>
+      <div style={ {
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        textAlign: align === 'justify' ? 'justify' : align,
+      } }>
+        This paragraph's alignment is controlled by the toolbar above. The selected alignment is <strong>{ align }</strong>.
+      </div>
+    </div>
+  );
+};
+
+export const FormatButtonsDemo = () => {
+  const [bold, setBold] = useLocalStorage('demo-block-controls-bold', false);
+  const [italic, setItalic] = useLocalStorage('demo-block-controls-italic', false);
+  const [underline, setUnderline] = useLocalStorage('demo-block-controls-underline', false);
+  return (
+    <div>
+      <BlockControls group="inline">
+        <button
+          className={ `block-controls-demo__btn${ bold ? ' block-controls-demo__btn--active' : '' }` }
+          aria-pressed={ bold }
+          title="Bold"
+          onClick={ () => setBold( !bold ) }
+        >
+          <strong>B</strong>
+        </button>
+        <button
+          className={ `block-controls-demo__btn${ italic ? ' block-controls-demo__btn--active' : '' }` }
+          aria-pressed={ italic }
+          title="Italic"
+          onClick={ () => setItalic( !italic ) }
+        >
+          <em>I</em>
+        </button>
+        <button
+          className={ `block-controls-demo__btn${ underline ? ' block-controls-demo__btn--active' : '' }` }
+          aria-pressed={ underline }
+          title="Underline"
+          onClick={ () => setUnderline( !underline ) }
+        >
+          <span style={ { textDecoration: 'underline' } }>U</span>
+        </button>
+      </BlockControls>
+      <div style={ {
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        fontWeight: bold ? 700 : 400,
+        fontStyle: italic ? 'italic' : 'normal',
+        textDecoration: underline ? 'underline' : 'none',
+      } }>
+        Sample text with active formatting applied in real time.
+      </div>
+    </div>
+  );
+};
+
+export const StyleMenuDemo = () => {
+  const [style, setStyle] = useLocalStorage('demo-block-controls-style', 'default');
+  const styles = [
+    { value: 'default',  label: 'Default' },
+    { value: 'featured', label: 'Featured' },
+    { value: 'minimal',  label: 'Minimal' },
+  ];
+  return (
+    <div>
+      <BlockControls group="other">
+        { styles.map( ( s ) => (
+          <button
+            key={ s.value }
+            className={ `block-controls-demo__btn${ style === s.value ? ' block-controls-demo__btn--active' : '' }` }
+            aria-pressed={ style === s.value }
+            onClick={ () => setStyle( s.value ) }
+          >
+            { s.label }
+          </button>
+        ) ) }
+      </BlockControls>
+      <div style={ {
+        marginTop: '0.75rem',
+        padding: '1rem',
+        borderRadius: '0.375rem',
+        background: style === 'featured' ? '#1e293b' : style === 'minimal' ? 'transparent' : '#f8fafc',
+        color: style === 'featured' ? '#f1f5f9' : '#1e293b',
+        border: style === 'minimal' ? 'none' : '1px solid #e2e8f0',
+        fontWeight: style === 'featured' ? 600 : 400,
+      } }>
+        Block rendered in <strong>{ style }</strong> style.
+      </div>
+    </div>
+  );
+};
+
+# BlockControls
+
+A toolbar slot for block-level controls. Renders children into the block toolbar in the Gutenberg editor. Imported from [`@wordpress/block-editor`](https://developer.wordpress.org/block-editor/reference-guides/components/block-controls/).
+
+> **Note:** `BlockControls` is a slot/fill — in a real block it renders nothing visible itself; its children appear in the editor toolbar. The demos below simulate this with a styled toolbar wrapper.
+
+## Alignment Controls
+
+<AlignmentDemo />
+
+```jsx
+import { BlockControls } from '@wordpress/block-editor';
+import { AlignmentControl } from '@wordpress/block-editor';
+
+<BlockControls>
+  <AlignmentControl
+    value={ textAlign }
+    onChange={ ( value ) => setAttributes( { textAlign: value } ) }
+  />
+</BlockControls>
+```
+
+## Inline Format Buttons
+
+<FormatButtonsDemo />
+
+```jsx
+import { BlockControls } from '@wordpress/block-editor';
+import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { formatBold, formatItalic, formatUnderline } from '@wordpress/icons';
+
+<BlockControls group="inline">
+  <ToolbarGroup>
+    <ToolbarButton
+      icon={ formatBold }
+      label={ __( 'Bold', 'your-text-domain' ) }
+      isActive={ isBold }
+      onClick={ () => setAttributes( { isBold: ! isBold } ) }
+    />
+    <ToolbarButton
+      icon={ formatItalic }
+      label={ __( 'Italic', 'your-text-domain' ) }
+      isActive={ isItalic }
+      onClick={ () => setAttributes( { isItalic: ! isItalic } ) }
+    />
+  </ToolbarGroup>
+</BlockControls>
+```
+
+## Style Variants
+
+<StyleMenuDemo />
+
+```jsx
+import { BlockControls } from '@wordpress/block-editor';
+import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+
+<BlockControls group="other">
+  <ToolbarGroup>
+    { [ 'default', 'featured', 'minimal' ].map( ( s ) => (
+      <ToolbarButton
+        key={ s }
+        isActive={ style === s }
+        onClick={ () => setAttributes( { style: s } ) }
+      >
+        { s.charAt( 0 ).toUpperCase() + s.slice( 1 ) }
+      </ToolbarButton>
+    ) ) }
+  </ToolbarGroup>
+</BlockControls>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls, AlignmentControl } from '@wordpress/block-editor';
+import { ToolbarGroup, ToolbarButton } from '@wordpress/components';
+import { formatBold } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps( {
+    style: { textAlign: attributes.textAlign },
+  } );
+
+  return (
+    <>
+      <BlockControls>
+        <AlignmentControl
+          value={ attributes.textAlign }
+          onChange={ ( value ) => setAttributes( { textAlign: value } ) }
+        />
+      </BlockControls>
+
+      <BlockControls group="inline">
+        <ToolbarGroup>
+          <ToolbarButton
+            icon={ formatBold }
+            label={ __( 'Bold', 'your-text-domain' ) }
+            isActive={ attributes.isBold }
+            onClick={ () => setAttributes( { isBold: ! attributes.isBold } ) }
+          />
+        </ToolbarGroup>
+      </BlockControls>
+
+      <div { ...blockProps }>
+        { __( 'Block content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "textAlign": { "type": "string",  "default": "left"  },
+    "isBold":    { "type": "boolean", "default": false    },
+    "style":     { "type": "string",  "default": "default" }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'group',
+    type: 'string',
+    default: "'default'",
+    required: false,
+    description: "Slot group name. One of: 'default', 'block', 'inline', 'other', 'parent'. Controls which toolbar slot children render into."
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    default: '',
+    required: true,
+    description: 'Toolbar controls to render. Typically ToolbarGroup containing ToolbarButton elements, or AlignmentControl.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the slot wrapper.'
+  }
+]} />
+
+## Slot Groups
+
+| Group | Purpose |
+|-------|---------|
+| `default` | Primary block controls (alignment, media replace) |
+| `block` | Block-level transformations |
+| `inline` | Text formatting controls |
+| `other` | Secondary/custom actions |
+| `parent` | Controls that appear when a child block is selected |
+
+## WordPress Mapping
+
+`BlockControls` is imported from `@wordpress/block-editor`, not `@wordpress/components`. It is a **slot** — it renders nothing visible in the DOM itself; its children are teleported into the block toolbar via WordPress's slot/fill system. Always nest toolbar controls inside a `ToolbarGroup` for proper spacing and grouping. Use `AlignmentControl` or `AlignmentToolbar` for standard text alignment rather than building custom alignment buttons. `BlockControls` is editor-only and must never appear in `save.js`.
