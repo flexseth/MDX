@@ -16,6 +16,9 @@ build/
 .env.test.local
 .env.production.local
 
+# Private stuff
+private/
+
 # Editor / OS
 .DS_Store
 Thumbs.db
