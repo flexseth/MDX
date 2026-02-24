@@ -1,0 +1,254 @@
+import DropdownMenu from '../components/DropdownMenu';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [message, setMessage] = useLocalStorage('demo-dropdown-message', '');
+
+  const controls = [
+    {
+      title: 'Edit',
+      icon: '✏️',
+      onClick: () => setMessage('Edit clicked'),
+    },
+    {
+      title: 'Duplicate',
+      icon: '📋',
+      onClick: () => setMessage('Duplicate clicked'),
+    },
+    {
+      title: 'Delete',
+      icon: '🗑️',
+      isDestructive: true,
+      onClick: () => setMessage('Delete clicked'),
+    },
+  ];
+
+  return (
+    <div>
+      <DropdownMenu
+        icon="⋮"
+        label="Block options"
+        controls={controls}
+      />
+      {message && (
+        <div style={{
+          marginTop: '0.75rem',
+          padding: '1rem',
+          background: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '0.375rem',
+        }}>
+          {message}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const GroupedControlsDemo = () => {
+  const [message, setMessage] = useLocalStorage('demo-dropdown-grouped', '');
+
+  const controls = [
+    [
+      {
+        title: 'Move up',
+        icon: '↑',
+        onClick: () => setMessage('Moved up'),
+      },
+      {
+        title: 'Move down',
+        icon: '↓',
+        onClick: () => setMessage('Moved down'),
+      },
+    ],
+    [
+      {
+        title: 'Duplicate',
+        icon: '📋',
+        onClick: () => setMessage('Duplicated'),
+      },
+      {
+        title: 'Remove',
+        icon: '🗑️',
+        isDestructive: true,
+        onClick: () => setMessage('Removed'),
+      },
+    ],
+  ];
+
+  return (
+    <div>
+      <DropdownMenu
+        icon="⋯"
+        label="Item actions"
+        controls={controls}
+      />
+      {message && (
+        <div style={{
+          marginTop: '0.75rem',
+          padding: '1rem',
+          background: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '0.375rem',
+        }}>
+          {message}
+        </div>
+      )}
+    </div>
+  );
+};
+
+# DropdownMenu
+
+A pre-built dropdown menu with a trigger button and a controls array. Simpler than Dropdown for standard menu patterns. Supports both controls array shorthand and children render prop. Mirrors the WordPress [`DropdownMenu`](https://developer.wordpress.org/block-editor/reference-guides/components/dropdown-menu/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BasicDemo />
+
+```jsx
+<DropdownMenu
+  icon="⋮"
+  label="Block options"
+  controls={[
+    {
+      title: 'Edit',
+      icon: '✏️',
+      onClick: () => handleEdit(),
+    },
+    {
+      title: 'Duplicate',
+      icon: '📋',
+      onClick: () => handleDuplicate(),
+    },
+    {
+      title: 'Delete',
+      icon: '🗑️',
+      isDestructive: true,
+      onClick: () => setAttributes({ deleted: true }),
+    },
+  ]}
+/>
+```
+
+## Grouped Controls
+
+<GroupedControlsDemo />
+
+```jsx
+<DropdownMenu
+  icon="⋯"
+  label="Item actions"
+  controls={[
+    [
+      {
+        title: 'Move up',
+        icon: '↑',
+        onClick: () => handleMoveUp(),
+      },
+      {
+        title: 'Move down',
+        icon: '↓',
+        onClick: () => handleMoveDown(),
+      },
+    ],
+    [
+      {
+        title: 'Duplicate',
+        icon: '📋',
+        onClick: () => handleDuplicate(),
+      },
+      {
+        title: 'Remove',
+        icon: '🗑️',
+        isDestructive: true,
+        onClick: () => setAttributes({ items: [] }),
+      },
+    ],
+  ]}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { DropdownMenu } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { moreVertical, trash, edit, copy } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+
+  return (
+    <div { ...blockProps }>
+      <DropdownMenu
+        icon={ moreVertical }
+        label={ __( 'Block options', 'your-text-domain' ) }
+        controls={ [
+          {
+            title: __( 'Edit', 'your-text-domain' ),
+            icon: edit,
+            onClick: () => {
+              // Handle edit action
+            },
+          },
+          {
+            title: __( 'Duplicate', 'your-text-domain' ),
+            icon: copy,
+            onClick: () => {
+              // Handle duplicate action
+            },
+          },
+          {
+            title: __( 'Delete', 'your-text-domain' ),
+            icon: trash,
+            isDestructive: true,
+            onClick: () => {
+              setAttributes( { deleted: true } );
+            },
+          },
+        ] }
+      />
+      <p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+    </div>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'icon',
+    type: 'string | ReactNode',
+    required: true,
+    default: '',
+    description: 'Icon to display in the trigger button.'
+  },
+  {
+    name: 'label',
+    type: 'string',
+    required: true,
+    default: '',
+    description: 'Accessible label for the trigger button.'
+  },
+  {
+    name: 'controls',
+    type: 'array',
+    required: true,
+    default: '[]',
+    description: 'Array of { title, icon?, onClick, isDestructive? } or array of arrays for groups.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Additional CSS class names.'
+  }
+]} />
+
+## WordPress Mapping
+
+Pass an array of arrays to group controls with separators between groups. For full control over the dropdown content, use the `children` render prop instead of the `controls` array.

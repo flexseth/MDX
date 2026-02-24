@@ -1,0 +1,231 @@
+import NumberControl from '../components/NumberControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [itemCount, setItemCount] = useLocalStorage('demo-number-basic', 3);
+  return (
+    <div>
+      <NumberControl
+        label="Number of Items"
+        value={itemCount}
+        onChange={setItemCount}
+        min={1}
+        max={100}
+        step={1}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+      }}>
+        {itemCount} items will be shown
+      </div>
+    </div>
+  );
+};
+
+export const DecimalDemo = () => {
+  const [opacity, setOpacity] = useLocalStorage('demo-number-opacity', 1.0);
+  return (
+    <div>
+      <NumberControl
+        label="Opacity"
+        value={opacity}
+        onChange={setOpacity}
+        min={0}
+        max={1}
+        step={0.01}
+        help="Between 0 (transparent) and 1 (opaque)"
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#3b82f6',
+        color: 'white',
+        borderRadius: '0.375rem',
+        opacity: opacity,
+      }}>
+        Preview area (opacity: {opacity})
+      </div>
+    </div>
+  );
+};
+
+export const NoSpinButtonsDemo = () => {
+  const [year, setYear] = useLocalStorage('demo-number-year', 2024);
+  return (
+    <NumberControl
+      label="Year"
+      value={year}
+      onChange={setYear}
+      min={1900}
+      max={2100}
+      spinControls="none"
+    />
+  );
+};
+
+# NumberControl
+
+A numeric text input with increment/decrement spin buttons. Distinct from RangeControl's slider — use when you need direct numeric entry with optional min/max/step constraints. Mirrors the WordPress [`NumberControl`](https://developer.wordpress.org/block-editor/reference-guides/components/number-control/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BasicDemo />
+
+```jsx
+<NumberControl
+  label="Number of Items"
+  value={itemCount}
+  onChange={(value) => setAttributes({ itemCount: Number(value) })}
+  min={1}
+  max={100}
+  step={1}
+/>
+```
+
+## Decimal Values
+
+<DecimalDemo />
+
+```jsx
+<NumberControl
+  label="Opacity"
+  value={opacity}
+  onChange={(value) => setAttributes({ opacity: parseFloat(value) })}
+  min={0}
+  max={1}
+  step={0.01}
+  help="Between 0 (transparent) and 1 (opaque)"
+/>
+```
+
+## Without Spin Buttons
+
+<NoSpinButtonsDemo />
+
+```jsx
+<NumberControl
+  label="Year"
+  value={year}
+  onChange={(value) => setAttributes({ year: Number(value) })}
+  min={1900}
+  max={2100}
+  spinControls="none"
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { NumberControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { itemCount } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Query Settings', 'your-text-domain' ) }>
+          <NumberControl
+            label={ __( 'Number of Items', 'your-text-domain' ) }
+            value={ itemCount }
+            onChange={ ( value ) =>
+              setAttributes( { itemCount: Number( value ) } )
+            }
+            min={ 1 }
+            max={ 100 }
+            step={ 1 }
+          />
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps }>
+        <p>
+          { itemCount } { __( 'items will be shown.', 'your-text-domain' ) }
+        </p>
+      </div>
+    </>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    required: true,
+    default: '',
+    description: 'Label text for the input.'
+  },
+  {
+    name: 'value',
+    type: 'number',
+    required: true,
+    default: '',
+    description: 'Current numeric value (controlled).'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    required: true,
+    default: '',
+    description: 'Callback fired with the new number on change.'
+  },
+  {
+    name: 'min',
+    type: 'number',
+    required: false,
+    default: '',
+    description: 'Minimum allowed value.'
+  },
+  {
+    name: 'max',
+    type: 'number',
+    required: false,
+    default: '',
+    description: 'Maximum allowed value.'
+  },
+  {
+    name: 'step',
+    type: 'number',
+    required: false,
+    default: '1',
+    description: 'Step increment for spin buttons.'
+  },
+  {
+    name: 'help',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Optional help text displayed below the input.'
+  },
+  {
+    name: 'spinControls',
+    type: 'string',
+    required: false,
+    default: 'custom',
+    description: "'custom' | 'none' | 'native'."
+  },
+  {
+    name: 'disabled',
+    type: 'boolean',
+    required: false,
+    default: 'false',
+    description: 'Whether the input is disabled.'
+  }
+]} />
+
+## WordPress Mapping
+
+**NumberControl vs RangeControl:**
+- Use `NumberControl` when the user needs to type an exact number
+- Use `RangeControl` when the range is small enough for a slider to be practical
+- `NumberControl` is best for large ranges (e.g., year 1900-2100) or when precision is needed

@@ -1,0 +1,256 @@
+import Popover from '../components/Popover';
+import Button from '../components/Button';
+import { useState, useRef } from 'react';
+import ColorPicker from '../components/ColorPicker';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const anchorRef = useRef(null);
+
+  return (
+    <div>
+      <Button
+        ref={anchorRef}
+        variant="secondary"
+        onClick={() => setIsOpen((prev) => !prev)}
+      >
+        {isOpen ? 'Close Popover' : 'Open Popover'}
+      </Button>
+
+      {isOpen && (
+        <Popover
+          anchor={anchorRef.current}
+          onClose={() => setIsOpen(false)}
+          placement="bottom-start"
+        >
+          <div style={{ padding: '12px', minWidth: '200px' }}>
+            <p style={{ margin: '0 0 8px' }}>Popover content here.</p>
+            <Button
+              variant="secondary"
+              onClick={() => setIsOpen(false)}
+            >
+              Close
+            </Button>
+          </div>
+        </Popover>
+      )}
+    </div>
+  );
+};
+
+export const ColorPickerDemo = () => {
+  const [accentColor, setAccentColor] = useLocalStorage('demo-popover-color', '#3b82f6');
+  const [showPicker, setShowPicker] = useState(false);
+  const swatchRef = useRef(null);
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+        <span>Accent Color</span>
+        <button
+          ref={swatchRef}
+          type="button"
+          onClick={() => setShowPicker((prev) => !prev)}
+          aria-label="Choose accent color"
+          style={{
+            width: '24px',
+            height: '24px',
+            borderRadius: '50%',
+            border: '1px solid #ccc',
+            background: accentColor || '#000',
+            cursor: 'pointer',
+          }}
+        />
+      </div>
+
+      {showPicker && (
+        <Popover
+          anchor={swatchRef.current}
+          onClose={() => setShowPicker(false)}
+          placement="bottom-start"
+        >
+          <ColorPicker
+            color={accentColor}
+            onChange={setAccentColor}
+          />
+        </Popover>
+      )}
+
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: `4px solid ${accentColor}`,
+        borderRadius: '0.375rem',
+      }}>
+        Preview with accent color border
+      </div>
+    </div>
+  );
+};
+
+# Popover
+
+A floating container anchored to a reference element. The base for all custom popovers, inline color pickers, link tooltips, and overlay menus in the block editor. Unlike Modal (which is centered and blocking), Popover is anchored to a specific element and non-blocking. Mirrors the WordPress [`Popover`](https://developer.wordpress.org/block-editor/reference-guides/components/popover/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BasicDemo />
+
+```jsx
+import { useState, useRef } from '@wordpress/element';
+
+const [isOpen, setIsOpen] = useState(false);
+const anchorRef = useRef(null);
+
+<Button
+  ref={anchorRef}
+  variant="secondary"
+  onClick={() => setIsOpen((prev) => !prev)}
+>
+  Open Popover
+</Button>
+
+{isOpen && (
+  <Popover
+    anchor={anchorRef.current}
+    onClose={() => setIsOpen(false)}
+    placement="bottom-start"
+  >
+    <div style={{ padding: '12px', minWidth: '200px' }}>
+      <p>Popover content here.</p>
+    </div>
+  </Popover>
+)}
+```
+
+## Color Picker Popover
+
+<ColorPickerDemo />
+
+```jsx
+const [accentColor, setAccentColor] = useState('#3b82f6');
+const [showPicker, setShowPicker] = useState(false);
+const swatchRef = useRef(null);
+
+<button
+  ref={swatchRef}
+  onClick={() => setShowPicker((prev) => !prev)}
+  style={{
+    width: '24px',
+    height: '24px',
+    background: accentColor,
+  }}
+/>
+
+{showPicker && (
+  <Popover
+    anchor={swatchRef.current}
+    onClose={() => setShowPicker(false)}
+    placement="bottom-start"
+  >
+    <ColorPicker
+      color={accentColor}
+      onChange={(value) => setAttributes({ accentColor: value })}
+    />
+  </Popover>
+)}
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Popover, Button, ColorPicker, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { useState, useRef } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { accentColor } = attributes;
+  const [ showPicker, setShowPicker ] = useState( false );
+  const swatchRef = useRef( null );
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Colors', 'your-text-domain' ) }>
+          <button
+            ref={ swatchRef }
+            onClick={ () => setShowPicker( ( prev ) => ! prev ) }
+            style={ {
+              width: '24px',
+              height: '24px',
+              background: accentColor,
+            } }
+          />
+
+          { showPicker && (
+            <Popover
+              anchor={ swatchRef.current }
+              onClose={ () => setShowPicker( false ) }
+              placement="bottom-start"
+            >
+              <ColorPicker
+                color={ accentColor }
+                onChange={ ( value ) =>
+                  setAttributes( { accentColor: value } )
+                }
+              />
+            </Popover>
+          ) }
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps }>
+        <p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+      </div>
+    </>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'anchor',
+    type: 'HTMLElement',
+    required: true,
+    default: '',
+    description: 'Element to anchor the popover to.'
+  },
+  {
+    name: 'onClose',
+    type: 'function',
+    required: false,
+    default: '',
+    description: 'Callback fired when popover should close.'
+  },
+  {
+    name: 'placement',
+    type: 'string',
+    required: false,
+    default: 'bottom-start',
+    description: "Placement: 'top', 'bottom', 'left', 'right', 'bottom-start', etc."
+  },
+  {
+    name: 'className',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Additional CSS class names.'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    required: true,
+    default: '',
+    description: 'Popover content.'
+  }
+]} />
+
+## WordPress Mapping
+
+`Popover` uses Floating UI placement strings: `'top'`, `'top-start'`, `'top-end'`, `'right'`, `'right-start'`, `'right-end'`, `'bottom'`, `'bottom-start'`, `'bottom-end'`, `'left'`, `'left-start'`, `'left-end'`, `'overlay'` (centered over anchor).

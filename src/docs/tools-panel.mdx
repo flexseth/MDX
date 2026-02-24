@@ -1,0 +1,413 @@
+import ToolsPanel, { ToolsPanelItem } from '../components/ToolsPanel';
+import RangeControl from '../components/RangeControl';
+import TextControl from '../components/TextControl';
+import ToggleControl from '../components/ToggleControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [fontSize, setFontSize] = useLocalStorage('demo-tools-panel-font-size', undefined);
+  const [letterSpacing, setLetterSpacing] = useLocalStorage('demo-tools-panel-spacing', undefined);
+  const [lineHeight, setLineHeight] = useLocalStorage('demo-tools-panel-height', undefined);
+
+  const resetAll = () => {
+    setFontSize(undefined);
+    setLetterSpacing(undefined);
+    setLineHeight(undefined);
+  };
+
+  return (
+    <div>
+      <ToolsPanel
+        label="Typography"
+        resetAll={resetAll}
+      >
+        <ToolsPanelItem
+          label="Font Size"
+          hasValue={() => fontSize !== undefined}
+          onDeselect={() => setFontSize(undefined)}
+          isShownByDefault={false}
+        >
+          <RangeControl
+            label="Font Size"
+            value={fontSize || 16}
+            onChange={setFontSize}
+            min={10}
+            max={72}
+          />
+        </ToolsPanelItem>
+
+        <ToolsPanelItem
+          label="Letter Spacing"
+          hasValue={() => letterSpacing !== undefined}
+          onDeselect={() => setLetterSpacing(undefined)}
+          isShownByDefault={false}
+        >
+          <TextControl
+            label="Letter Spacing"
+            value={letterSpacing || ''}
+            onChange={(value) => setLetterSpacing(value || undefined)}
+            placeholder="0px"
+          />
+        </ToolsPanelItem>
+
+        <ToolsPanelItem
+          label="Line Height"
+          hasValue={() => lineHeight !== undefined}
+          onDeselect={() => setLineHeight(undefined)}
+          isShownByDefault={false}
+        >
+          <TextControl
+            label="Line Height"
+            value={lineHeight || ''}
+            onChange={(value) => setLineHeight(value || undefined)}
+            placeholder="1.5"
+          />
+        </ToolsPanelItem>
+      </ToolsPanel>
+
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        fontSize: fontSize ? `${fontSize}px` : '16px',
+        letterSpacing: letterSpacing || 'normal',
+        lineHeight: lineHeight || '1.5',
+      }}>
+        Preview text with custom typography settings
+      </div>
+    </div>
+  );
+};
+
+export const MixedControlsDemo = () => {
+  const [showImage, setShowImage] = useLocalStorage('demo-tools-panel-show-image', true);
+  const [imageSize, setImageSize] = useLocalStorage('demo-tools-panel-image-size', 'medium');
+  const [borderRadius, setBorderRadius] = useLocalStorage('demo-tools-panel-border-radius', undefined);
+
+  const resetAll = () => {
+    setShowImage(true);
+    setImageSize('medium');
+    setBorderRadius(undefined);
+  };
+
+  return (
+    <div>
+      <ToolsPanel
+        label="Display Settings"
+        resetAll={resetAll}
+      >
+        <ToolsPanelItem
+          label="Show Image"
+          hasValue={() => showImage !== true}
+          onDeselect={() => setShowImage(true)}
+          isShownByDefault={true}
+        >
+          <ToggleControl
+            label="Show Image"
+            checked={showImage}
+            onChange={setShowImage}
+          />
+        </ToolsPanelItem>
+
+        <ToolsPanelItem
+          label="Image Size"
+          hasValue={() => imageSize !== 'medium'}
+          onDeselect={() => setImageSize('medium')}
+          isShownByDefault={true}
+        >
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>
+              Image Size
+            </label>
+            <select
+              value={imageSize}
+              onChange={(e) => setImageSize(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+              }}
+            >
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </div>
+        </ToolsPanelItem>
+
+        <ToolsPanelItem
+          label="Border Radius"
+          hasValue={() => borderRadius !== undefined}
+          onDeselect={() => setBorderRadius(undefined)}
+          isShownByDefault={false}
+        >
+          <RangeControl
+            label="Border Radius"
+            value={borderRadius || 0}
+            onChange={setBorderRadius}
+            min={0}
+            max={24}
+          />
+        </ToolsPanelItem>
+      </ToolsPanel>
+
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: borderRadius ? `${borderRadius}px` : '0',
+      }}>
+        <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+          Image: {showImage ? 'Visible' : 'Hidden'}
+          {showImage && ` (${imageSize})`}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+# ToolsPanel
+
+A modern sidebar panel that lets users show/hide individual control items. Used by all new core blocks in WP 6.x+. Unlike PanelBody (which always shows all controls), ToolsPanel allows each control to be individually toggled via an options menu (⋮). Mirrors the WordPress [`ToolsPanel`](https://developer.wordpress.org/block-editor/reference-guides/components/tools-panel/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BasicDemo />
+
+```jsx
+const resetAll = () => {
+  setAttributes({
+    fontSize: undefined,
+    letterSpacing: undefined,
+  });
+};
+
+<ToolsPanel
+  label="Typography"
+  resetAll={resetAll}
+>
+  <ToolsPanelItem
+    label="Font Size"
+    hasValue={() => fontSize !== undefined}
+    onDeselect={() => setAttributes({ fontSize: undefined })}
+    isShownByDefault={false}
+  >
+    <RangeControl
+      label="Font Size"
+      value={fontSize}
+      onChange={(value) => setAttributes({ fontSize: value })}
+      min={10}
+      max={72}
+    />
+  </ToolsPanelItem>
+
+  <ToolsPanelItem
+    label="Letter Spacing"
+    hasValue={() => letterSpacing !== undefined}
+    onDeselect={() => setAttributes({ letterSpacing: undefined })}
+    isShownByDefault={false}
+  >
+    <TextControl
+      label="Letter Spacing"
+      value={letterSpacing ?? ''}
+      onChange={(value) => setAttributes({ letterSpacing: value || undefined })}
+      placeholder="0px"
+    />
+  </ToolsPanelItem>
+</ToolsPanel>
+```
+
+## Mixed Required and Optional Controls
+
+<MixedControlsDemo />
+
+```jsx
+<ToolsPanel
+  label="Display Settings"
+  resetAll={resetAll}
+>
+  <ToolsPanelItem
+    label="Show Image"
+    hasValue={() => showImage !== true}
+    onDeselect={() => setAttributes({ showImage: true })}
+    isShownByDefault={true}
+  >
+    <ToggleControl
+      label="Show Image"
+      checked={showImage}
+      onChange={(value) => setAttributes({ showImage: value })}
+    />
+  </ToolsPanelItem>
+
+  <ToolsPanelItem
+    label="Border Radius"
+    hasValue={() => borderRadius !== undefined}
+    onDeselect={() => setAttributes({ borderRadius: undefined })}
+    isShownByDefault={false}
+  >
+    <RangeControl
+      label="Border Radius"
+      value={borderRadius}
+      onChange={(value) => setAttributes({ borderRadius: value })}
+      min={0}
+      max={24}
+    />
+  </ToolsPanelItem>
+</ToolsPanel>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { ToolsPanel, ToolsPanelItem, RangeControl, TextControl } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { fontSize, letterSpacing } = attributes;
+
+  const resetAll = () => {
+    setAttributes({
+      fontSize: undefined,
+      letterSpacing: undefined,
+    });
+  };
+
+  return (
+    <>
+      <InspectorControls>
+        <ToolsPanel
+          label={ __( 'Typography', 'your-text-domain' ) }
+          resetAll={ resetAll }
+        >
+          <ToolsPanelItem
+            label={ __( 'Font Size', 'your-text-domain' ) }
+            hasValue={ () => fontSize !== undefined }
+            onDeselect={ () => setAttributes( { fontSize: undefined } ) }
+            isShownByDefault={ false }
+          >
+            <RangeControl
+              label={ __( 'Font Size', 'your-text-domain' ) }
+              value={ fontSize }
+              onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+              min={ 10 }
+              max={ 72 }
+            />
+          </ToolsPanelItem>
+
+          <ToolsPanelItem
+            label={ __( 'Letter Spacing', 'your-text-domain' ) }
+            hasValue={ () => letterSpacing !== undefined }
+            onDeselect={ () => setAttributes( { letterSpacing: undefined } ) }
+            isShownByDefault={ false }
+          >
+            <TextControl
+              label={ __( 'Letter Spacing', 'your-text-domain' ) }
+              value={ letterSpacing ?? '' }
+              onChange={ ( value ) =>
+                setAttributes( { letterSpacing: value || undefined } )
+              }
+              placeholder="0px"
+            />
+          </ToolsPanelItem>
+        </ToolsPanel>
+      </InspectorControls>
+
+      <div { ...blockProps }>
+        <p
+          style={{
+            fontSize: fontSize ? `${ fontSize }px` : undefined,
+            letterSpacing: letterSpacing ?? undefined,
+          }}
+        >
+          { __( 'Block content.', 'your-text-domain' ) }
+        </p>
+      </div>
+    </>
+  );
+}
+```
+
+## Props
+
+### ToolsPanel
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    required: true,
+    default: '',
+    description: 'Panel label text.'
+  },
+  {
+    name: 'resetAll',
+    type: 'function',
+    required: false,
+    default: '',
+    description: 'Callback to reset all values to defaults.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Additional CSS class names.'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    required: true,
+    default: '',
+    description: 'ToolsPanelItem components.'
+  }
+]} />
+
+### ToolsPanelItem
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    required: true,
+    default: '',
+    description: 'Label for the control item.'
+  },
+  {
+    name: 'hasValue',
+    type: 'function',
+    required: true,
+    default: '',
+    description: 'Function that returns true if the control has a non-default value.'
+  },
+  {
+    name: 'onDeselect',
+    type: 'function',
+    required: true,
+    default: '',
+    description: 'Callback to reset the control to its default value.'
+  },
+  {
+    name: 'isShownByDefault',
+    type: 'boolean',
+    required: false,
+    default: 'false',
+    description: 'Whether the control is always visible (required controls).'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    required: true,
+    default: '',
+    description: 'The control component.'
+  }
+]} />
+
+## WordPress Mapping
+
+Controls that match their default value are hidden by default and shown only when the user explicitly adds them via the options menu. Each child is wrapped in a `ToolsPanelItem`, which handles the show/hide logic and provides a `resetAllFilter` mechanism.

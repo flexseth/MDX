@@ -1,0 +1,258 @@
+import Flex, { FlexItem, FlexBlock } from '../components/Flex';
+import Button from '../components/Button';
+import TextControl from '../components/TextControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicRowDemo = () => {
+  const [url, setUrl] = useLocalStorage('demo-flex-url', '');
+  return (
+    <Flex>
+      <FlexBlock>
+        <TextControl
+          label="URL"
+          value={url}
+          onChange={setUrl}
+          placeholder="https://example.com"
+        />
+      </FlexBlock>
+      <FlexItem>
+        <Button
+          variant="secondary"
+          onClick={() => setUrl('')}
+        >
+          Clear
+        </Button>
+      </FlexItem>
+    </Flex>
+  );
+};
+
+export const JustifiedRowDemo = () => {
+  return (
+    <Flex justify="space-between">
+      <FlexItem>
+        <Button variant="secondary">Cancel</Button>
+      </FlexItem>
+      <FlexItem>
+        <Button variant="primary">Apply</Button>
+      </FlexItem>
+    </Flex>
+  );
+};
+
+export const ColumnDemo = () => {
+  const [title, setTitle] = useLocalStorage('demo-flex-title', '');
+  const [category, setCategory] = useLocalStorage('demo-flex-category', 'news');
+  return (
+    <div>
+      <Flex direction="column" gap={3}>
+        <FlexItem>
+          <TextControl
+            label="Title"
+            value={title}
+            onChange={setTitle}
+            placeholder="Enter title..."
+          />
+        </FlexItem>
+        <FlexItem>
+          <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+              }}
+            >
+              <option value="news">News</option>
+              <option value="blog">Blog</option>
+              <option value="events">Events</option>
+            </select>
+          </div>
+        </FlexItem>
+      </Flex>
+      {(title || category) && (
+        <div style={{
+          marginTop: '0.75rem',
+          padding: '1rem',
+          background: '#f8fafc',
+          border: '1px solid #e2e8f0',
+          borderRadius: '0.375rem',
+        }}>
+          <strong>{category}:</strong> {title || 'Untitled'}
+        </div>
+      )}
+    </div>
+  );
+};
+
+# Flex
+
+A CSS flexbox layout helper with FlexItem and FlexBlock sub-components. Used heavily in the block editor UI for sidebar rows, toolbar layouts, and control groups. Mirrors the WordPress [`Flex`](https://developer.wordpress.org/block-editor/reference-guides/components/flex/) from `@wordpress/components`.
+
+## Basic Row
+
+<BasicRowDemo />
+
+```jsx
+<Flex>
+  <FlexBlock>
+    <TextControl
+      label="URL"
+      value={url}
+      onChange={(value) => setAttributes({ url: value })}
+    />
+  </FlexBlock>
+  <FlexItem>
+    <Button
+      variant="secondary"
+      onClick={() => setAttributes({ url: '' })}
+    >
+      Clear
+    </Button>
+  </FlexItem>
+</Flex>
+```
+
+## Justified Row
+
+<JustifiedRowDemo />
+
+```jsx
+<Flex justify="space-between">
+  <FlexItem>
+    <Button variant="secondary">Cancel</Button>
+  </FlexItem>
+  <FlexItem>
+    <Button variant="primary">Apply</Button>
+  </FlexItem>
+</Flex>
+```
+
+## Column Layout
+
+<ColumnDemo />
+
+```jsx
+<Flex direction="column" gap={3}>
+  <FlexItem>
+    <TextControl
+      label="Title"
+      value={title}
+      onChange={(value) => setAttributes({ title: value })}
+    />
+  </FlexItem>
+  <FlexItem>
+    <SelectControl
+      label="Category"
+      value={category}
+      onChange={(value) => setAttributes({ category: value })}
+      options={[
+        { label: 'News', value: 'news' },
+        { label: 'Blog', value: 'blog' },
+      ]}
+    />
+  </FlexItem>
+</Flex>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Flex, FlexItem, FlexBlock, Button, TextControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { url } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Link', 'your-text-domain' ) }>
+          <Flex>
+            <FlexBlock>
+              <TextControl
+                label={ __( 'URL', 'your-text-domain' ) }
+                value={ url }
+                onChange={ ( value ) => setAttributes( { url: value } ) }
+              />
+            </FlexBlock>
+            <FlexItem>
+              <Button
+                variant="secondary"
+                onClick={ () => setAttributes( { url: '' } ) }
+              >
+                { __( 'Clear', 'your-text-domain' ) }
+              </Button>
+            </FlexItem>
+          </Flex>
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps }>
+        <p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+      </div>
+    </>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'direction',
+    type: 'string',
+    required: false,
+    default: 'row',
+    description: "Flex direction: 'row' | 'column'."
+  },
+  {
+    name: 'justify',
+    type: 'string',
+    required: false,
+    default: '',
+    description: "Justify content: 'flex-start' | 'center' | 'space-between' | etc."
+  },
+  {
+    name: 'align',
+    type: 'string',
+    required: false,
+    default: '',
+    description: "Align items: 'flex-start' | 'center' | 'flex-end' | etc."
+  },
+  {
+    name: 'gap',
+    type: 'number',
+    required: false,
+    default: '',
+    description: 'Gap between items (grid units: 1 unit = 4px).'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Additional CSS class names.'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    required: true,
+    default: '',
+    description: 'FlexItem, FlexBlock, or other elements.'
+  }
+]} />
+
+## WordPress Mapping
+
+**FlexItem** vs **FlexBlock**:
+- `FlexItem` - `flex: 0 0 auto` - fixed-width items like icons, buttons, labels
+- `FlexBlock` - `flex: 1 1 auto` - fills remaining space

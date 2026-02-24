@@ -1,0 +1,248 @@
+import Snackbar from '../components/Snackbar';
+import Button from '../components/Button';
+import { useState, useEffect } from 'react';
+
+export const BasicDemo = () => {
+  const [showSnackbar, setShowSnackbar] = useState(false);
+
+  useEffect(() => {
+    if (showSnackbar) {
+      const timer = setTimeout(() => setShowSnackbar(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSnackbar]);
+
+  return (
+    <div>
+      <Button
+        variant="primary"
+        onClick={() => setShowSnackbar(true)}
+      >
+        Perform Action
+      </Button>
+
+      {showSnackbar && (
+        <Snackbar onRemove={() => setShowSnackbar(false)}>
+          Action completed successfully!
+        </Snackbar>
+      )}
+    </div>
+  );
+};
+
+export const WithActionDemo = () => {
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [undone, setUndone] = useState(false);
+
+  useEffect(() => {
+    if (showSnackbar && !undone) {
+      const timer = setTimeout(() => setShowSnackbar(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSnackbar, undone]);
+
+  const handleDelete = () => {
+    setShowSnackbar(true);
+    setUndone(false);
+  };
+
+  const handleUndo = () => {
+    setUndone(true);
+    setShowSnackbar(false);
+  };
+
+  return (
+    <div>
+      <Button
+        variant="primary"
+        onClick={handleDelete}
+      >
+        Delete Item
+      </Button>
+
+      {showSnackbar && !undone && (
+        <Snackbar
+          onRemove={() => setShowSnackbar(false)}
+          actions={[
+            {
+              label: 'Undo',
+              onClick: handleUndo,
+            },
+          ]}
+        >
+          Item deleted.
+        </Snackbar>
+      )}
+
+      {undone && (
+        <div style={{
+          marginTop: '0.75rem',
+          padding: '1rem',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '0.375rem',
+          color: '#166534',
+        }}>
+          Delete undone!
+        </div>
+      )}
+    </div>
+  );
+};
+
+# Snackbar
+
+A brief, dismissible toast notification that appears at the bottom of the screen. Unlike Notice (which stays visible in the sidebar until dismissed), Snackbar is designed for transient confirmations — "Settings saved", "Item added", "Link copied" — that auto-dismiss after a few seconds. Mirrors the WordPress [`Snackbar`](https://developer.wordpress.org/block-editor/reference-guides/components/snackbar/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BasicDemo />
+
+```jsx
+import { useState, useEffect } from '@wordpress/element';
+
+const [showSnackbar, setShowSnackbar] = useState(false);
+
+useEffect(() => {
+  if (showSnackbar) {
+    const timer = setTimeout(() => setShowSnackbar(false), 3000);
+    return () => clearTimeout(timer);
+  }
+}, [showSnackbar]);
+
+<Button onClick={() => setShowSnackbar(true)}>
+  Perform Action
+</Button>
+
+{showSnackbar && (
+  <Snackbar onRemove={() => setShowSnackbar(false)}>
+    Action completed successfully!
+  </Snackbar>
+)}
+```
+
+## With Action Button
+
+<WithActionDemo />
+
+```jsx
+const [showSnackbar, setShowSnackbar] = useState(false);
+
+const handleDelete = () => {
+  setShowSnackbar(true);
+};
+
+const handleUndo = () => {
+  // Restore item
+  setShowSnackbar(false);
+};
+
+{showSnackbar && (
+  <Snackbar
+    onRemove={() => setShowSnackbar(false)}
+    actions={[
+      {
+        label: 'Undo',
+        onClick: handleUndo,
+      },
+    ]}
+  >
+    Item deleted.
+  </Snackbar>
+)}
+```
+
+## WordPress Usage (edit.js)
+
+For production WordPress blocks, use the `@wordpress/notices` store instead of rendering `Snackbar` directly:
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { Button, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { dispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+
+  const handleSave = () => {
+    // ... do save work ...
+
+    dispatch( noticesStore ).createSuccessNotice(
+      __( 'Settings saved.', 'your-text-domain' ),
+      {
+        type: 'snackbar',
+        isDismissible: true,
+      }
+    );
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText( 'https://example.com' );
+
+    dispatch( noticesStore ).createInfoNotice(
+      __( 'Link copied to clipboard.', 'your-text-domain' ),
+      {
+        type: 'snackbar',
+        isDismissible: true,
+      }
+    );
+  };
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Actions', 'your-text-domain' ) }>
+          <Button variant="primary" onClick={ handleSave }>
+            { __( 'Save Settings', 'your-text-domain' ) }
+          </Button>
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps }>
+        <Button variant="secondary" onClick={ handleCopy }>
+          { __( 'Copy Link', 'your-text-domain' ) }
+        </Button>
+      </div>
+    </>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'onRemove',
+    type: 'function',
+    required: false,
+    default: '',
+    description: 'Callback fired when the snackbar is dismissed.'
+  },
+  {
+    name: 'actions',
+    type: 'array',
+    required: false,
+    default: '[]',
+    description: 'Array of { label, onClick } action objects.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Additional CSS class names.'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    required: true,
+    default: '',
+    description: 'Snackbar message content.'
+  }
+]} />
+
+## WordPress Mapping
+
+In the WordPress block editor, the canonical way to trigger snackbars is via the `@wordpress/notices` dispatch. Use the raw `Snackbar` component only for custom rendering outside the standard notices area.

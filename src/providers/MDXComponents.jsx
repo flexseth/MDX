@@ -1,5 +1,5 @@
 import { MDXProvider } from '@mdx-js/react';
-import { Alert, BoxControl, Button, Card, CheckboxControl, CodeBlock, CodeTabs, ComboboxControl, PropsTable, ToggleControl, SelectControl, RangeControl, TextControl, DateTimePicker, ColorPalette, ColorPicker } from '../components';
+import { Alert, BaseControl, BoxControl, Button, ButtonGroup, Card, CheckboxControl, CodeBlock, CodeTabs, ColorPalette, ColorPicker, ComboboxControl, CustomSelectControl, DateTimePicker, DropdownMenu, Flex, FlexItem, FlexBlock, NumberControl, Popover, PropsTable, RangeControl, SearchControl, SelectControl, Snackbar, Spacer, Tabs, TextControl, ToggleControl, ToggleGroupControl, ToggleGroupControlOption, ToggleGroupControlOptionIcon, ToolsPanel, ToolsPanelItem } from '../components';
 
 /**
  * Maps standard markdown elements and custom components
@@ -31,21 +31,39 @@ const components = {
 
 	// Custom components available in MDX without imports.
 	Alert,
+	BaseControl,
 	BoxControl,
 	Button,
+	ButtonGroup,
 	Card,
 	CheckboxControl,
 	CodeBlock,
 	CodeTabs,
-	PropsTable,
-	ToggleControl,
-	SelectControl,
-	RangeControl,
-	TextControl,
-	DateTimePicker,
 	ColorPalette,
 	ColorPicker,
 	ComboboxControl,
+	CustomSelectControl,
+	DateTimePicker,
+	DropdownMenu,
+	Flex,
+	FlexItem,
+	FlexBlock,
+	NumberControl,
+	Popover,
+	PropsTable,
+	RangeControl,
+	SearchControl,
+	SelectControl,
+	Snackbar,
+	Spacer,
+	Tabs,
+	TextControl,
+	ToggleControl,
+	ToggleGroupControl,
+	ToggleGroupControlOption,
+	ToggleGroupControlOptionIcon,
+	ToolsPanel,
+	ToolsPanelItem,
 };
 
 /**

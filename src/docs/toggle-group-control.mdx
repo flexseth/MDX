@@ -1,0 +1,242 @@
+import ToggleGroupControl, { ToggleGroupControlOption } from '../components/ToggleGroupControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [justification, setJustification] = useLocalStorage('demo-toggle-group-justify', 'left');
+  return (
+    <div>
+      <ToggleGroupControl
+        label="Justification"
+        value={justification}
+        onChange={setJustification}
+        isBlock
+      >
+        <ToggleGroupControlOption value="left" label="Left" />
+        <ToggleGroupControlOption value="center" label="Center" />
+        <ToggleGroupControlOption value="right" label="Right" />
+      </ToggleGroupControl>
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        textAlign: justification,
+      }}>
+        Preview text with {justification} alignment
+      </div>
+    </div>
+  );
+};
+
+export const SizeDemo = () => {
+  const [size, setSize] = useLocalStorage('demo-toggle-group-size', 'medium');
+  return (
+    <div>
+      <ToggleGroupControl
+        label="Size"
+        value={size}
+        onChange={setSize}
+        isBlock
+      >
+        <ToggleGroupControlOption value="small" label="Small" />
+        <ToggleGroupControlOption value="medium" label="Medium" />
+        <ToggleGroupControlOption value="large" label="Large" />
+      </ToggleGroupControl>
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        fontSize: size === 'small' ? '0.875rem' : size === 'large' ? '1.25rem' : '1rem',
+      }}>
+        Preview text in {size} size
+      </div>
+    </div>
+  );
+};
+
+export const LayoutModeDemo = () => {
+  const [layoutMode, setLayoutMode] = useLocalStorage('demo-toggle-group-layout', 'stacked');
+  return (
+    <div>
+      <ToggleGroupControl
+        label="Layout Mode"
+        value={layoutMode}
+        onChange={setLayoutMode}
+      >
+        <ToggleGroupControlOption value="stacked" label="Stacked" />
+        <ToggleGroupControlOption value="grid" label="Grid" />
+        <ToggleGroupControlOption value="masonry" label="Masonry" />
+      </ToggleGroupControl>
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+      }}>
+        Current layout: <strong>{layoutMode}</strong>
+      </div>
+    </div>
+  );
+};
+
+# ToggleGroupControl
+
+A modern radio-style group of toggle buttons for selecting a single option from a set. Preferred over RadioControl in WP 6.x+ blocks. Mirrors the WordPress [`ToggleGroupControl`](https://developer.wordpress.org/block-editor/reference-guides/components/toggle-group-control/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BasicDemo />
+
+```jsx
+<ToggleGroupControl
+  label="Justification"
+  value={justification}
+  onChange={(value) => setAttributes({ justification: value })}
+  isBlock
+>
+  <ToggleGroupControlOption value="left" label="Left" />
+  <ToggleGroupControlOption value="center" label="Center" />
+  <ToggleGroupControlOption value="right" label="Right" />
+</ToggleGroupControl>
+```
+
+## Size Selection
+
+<SizeDemo />
+
+```jsx
+<ToggleGroupControl
+  label="Size"
+  value={size}
+  onChange={(value) => setAttributes({ size: value })}
+  isBlock
+>
+  <ToggleGroupControlOption value="small" label="Small" />
+  <ToggleGroupControlOption value="medium" label="Medium" />
+  <ToggleGroupControlOption value="large" label="Large" />
+</ToggleGroupControl>
+```
+
+## Inline Layout
+
+<LayoutModeDemo />
+
+```jsx
+<ToggleGroupControl
+  label="Layout Mode"
+  value={layoutMode}
+  onChange={(value) => setAttributes({ layoutMode: value })}
+>
+  <ToggleGroupControlOption value="stacked" label="Stacked" />
+  <ToggleGroupControlOption value="grid" label="Grid" />
+  <ToggleGroupControlOption value="masonry" label="Masonry" />
+</ToggleGroupControl>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { ToggleGroupControl, ToggleGroupControlOption } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { PanelBody } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { justification } = attributes;
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Layout', 'your-text-domain' ) }>
+          <ToggleGroupControl
+            label={ __( 'Justification', 'your-text-domain' ) }
+            value={ justification }
+            onChange={ ( value ) => setAttributes( { justification: value } ) }
+            isBlock
+          >
+            <ToggleGroupControlOption
+              value="left"
+              label={ __( 'Left', 'your-text-domain' ) }
+            />
+            <ToggleGroupControlOption
+              value="center"
+              label={ __( 'Center', 'your-text-domain' ) }
+            />
+            <ToggleGroupControlOption
+              value="right"
+              label={ __( 'Right', 'your-text-domain' ) }
+            />
+          </ToggleGroupControl>
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps } style={ { textAlign: justification } }>
+        <p>{ __( 'Block content here.', 'your-text-domain' ) }</p>
+      </div>
+    </>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    required: true,
+    default: '',
+    description: 'Label text for the control group.'
+  },
+  {
+    name: 'value',
+    type: 'string',
+    required: true,
+    default: '',
+    description: 'Currently selected value.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    required: true,
+    default: '',
+    description: 'Callback fired with the new selected value.'
+  },
+  {
+    name: 'isBlock',
+    type: 'boolean',
+    required: false,
+    default: 'false',
+    description: 'Whether to render as block (full width).'
+  },
+  {
+    name: 'help',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Optional help text.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Additional CSS class names.'
+  },
+  {
+    name: 'children',
+    type: 'ReactNode',
+    required: true,
+    default: '',
+    description: 'ToggleGroupControlOption components.'
+  }
+]} />
+
+## WordPress Mapping
+
+Use `ToggleGroupControlOptionIcon` for icon-based options instead of text labels. See the WordPress documentation for examples with icon imports from `@wordpress/icons`.

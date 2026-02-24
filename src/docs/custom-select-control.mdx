@@ -1,0 +1,261 @@
+import CustomSelectControl from '../components/CustomSelectControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const BasicDemo = () => {
+  const [fontFamily, setFontFamily] = useLocalStorage('demo-custom-select-font', 'sans-serif');
+  
+  const fontOptions = [
+    { key: 'sans-serif', name: 'Sans Serif' },
+    { key: 'serif', name: 'Serif' },
+    { key: 'monospace', name: 'Monospace' },
+  ];
+
+  const selectedOption = fontOptions.find(opt => opt.key === fontFamily) || fontOptions[0];
+
+  return (
+    <div>
+      <CustomSelectControl
+        label="Font Family"
+        options={fontOptions}
+        value={selectedOption}
+        onChange={({ selectedItem }) => setFontFamily(selectedItem.key)}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        fontFamily: fontFamily,
+      }}>
+        Preview text with {fontFamily} font
+      </div>
+    </div>
+  );
+};
+
+export const HintTextDemo = () => {
+  const [layout, setLayout] = useLocalStorage('demo-custom-select-layout', 'stacked');
+  
+  const layoutOptions = [
+    { key: 'stacked', name: 'Stacked', hint: 'Image above content' },
+    { key: 'side-by-side', name: 'Side by Side', hint: 'Image left, content right' },
+    { key: 'overlay', name: 'Overlay', hint: 'Content over image' },
+  ];
+
+  const selectedOption = layoutOptions.find(opt => opt.key === layout) || layoutOptions[0];
+
+  return (
+    <div>
+      <CustomSelectControl
+        label="Card Layout"
+        options={layoutOptions}
+        value={selectedOption}
+        onChange={({ selectedItem }) => setLayout(selectedItem.key)}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+      }}>
+        Selected layout: <strong>{selectedOption.name}</strong>
+        <div style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>
+          {selectedOption.hint}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const StylePreviewDemo = () => {
+  const [fontWeight, setFontWeight] = useLocalStorage('demo-custom-select-weight', '400');
+  
+  const fontWeightOptions = [
+    { key: '300', name: 'Light', style: { fontWeight: '300' } },
+    { key: '400', name: 'Normal', style: { fontWeight: '400' } },
+    { key: '600', name: 'Semibold', style: { fontWeight: '600' } },
+    { key: '700', name: 'Bold', style: { fontWeight: '700' } },
+  ];
+
+  const selectedOption = fontWeightOptions.find(opt => opt.key === fontWeight) || fontWeightOptions[1];
+
+  return (
+    <div>
+      <CustomSelectControl
+        label="Font Weight"
+        options={fontWeightOptions}
+        value={selectedOption}
+        onChange={({ selectedItem }) => setFontWeight(selectedItem.key)}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        background: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '0.375rem',
+        fontWeight: fontWeight,
+      }}>
+        Preview text with weight {fontWeight}
+      </div>
+    </div>
+  );
+};
+
+# CustomSelectControl
+
+An improved custom select dropdown with full keyboard navigation, custom option rendering, and accessible UI. Unlike the native `<select>` rendered by `SelectControl`, this component renders a stylized listbox that is fully keyboard-navigable and supports rich option display. Mirrors the WordPress [`CustomSelectControl`](https://developer.wordpress.org/block-editor/reference-guides/components/custom-select-control/) from `@wordpress/components`.
+
+## Basic Usage
+
+<BasicDemo />
+
+```jsx
+const fontOptions = [
+  { key: 'sans-serif', name: 'Sans Serif' },
+  { key: 'serif', name: 'Serif' },
+  { key: 'monospace', name: 'Monospace' },
+];
+
+const selectedOption = fontOptions.find(opt => opt.key === fontFamily) || fontOptions[0];
+
+<CustomSelectControl
+  label="Font Family"
+  options={fontOptions}
+  value={selectedOption}
+  onChange={({ selectedItem }) => setAttributes({ fontFamily: selectedItem.key })}
+/>
+```
+
+## Options with Hint Text
+
+<HintTextDemo />
+
+```jsx
+const layoutOptions = [
+  { key: 'stacked', name: 'Stacked', hint: 'Image above content' },
+  { key: 'side-by-side', name: 'Side by Side', hint: 'Image left, content right' },
+  { key: 'overlay', name: 'Overlay', hint: 'Content over image' },
+];
+
+<CustomSelectControl
+  label="Card Layout"
+  options={layoutOptions}
+  value={selectedOption}
+  onChange={({ selectedItem }) => setAttributes({ layout: selectedItem.key })}
+/>
+```
+
+## Options with Style Previews
+
+<StylePreviewDemo />
+
+```jsx
+const fontWeightOptions = [
+  { key: '300', name: 'Light', style: { fontWeight: '300' } },
+  { key: '400', name: 'Normal', style: { fontWeight: '400' } },
+  { key: '600', name: 'Semibold', style: { fontWeight: '600' } },
+  { key: '700', name: 'Bold', style: { fontWeight: '700' } },
+];
+
+<CustomSelectControl
+  label="Font Weight"
+  options={fontWeightOptions}
+  value={selectedOption}
+  onChange={({ selectedItem }) => setAttributes({ fontWeight: selectedItem.key })}
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { CustomSelectControl, PanelBody } from '@wordpress/components';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+
+const FONT_OPTIONS = [
+  { key: 'sans-serif', name: __( 'Sans Serif', 'your-text-domain' ) },
+  { key: 'serif', name: __( 'Serif', 'your-text-domain' ) },
+  { key: 'monospace', name: __( 'Monospace', 'your-text-domain' ) },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+  const blockProps = useBlockProps();
+  const { fontFamily } = attributes;
+
+  const selectedOption = FONT_OPTIONS.find( ( opt ) => opt.key === fontFamily ) ?? FONT_OPTIONS[ 0 ];
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+          <CustomSelectControl
+            label={ __( 'Font Family', 'your-text-domain' ) }
+            options={ FONT_OPTIONS }
+            value={ selectedOption }
+            onChange={ ( { selectedItem } ) =>
+              setAttributes( { fontFamily: selectedItem.key } )
+            }
+          />
+        </PanelBody>
+      </InspectorControls>
+
+      <div { ...blockProps } style={ { fontFamily } }>
+        <p>{ __( 'Block content.', 'your-text-domain' ) }</p>
+      </div>
+    </>
+  );
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    required: true,
+    default: '',
+    description: 'Label text for the control.'
+  },
+  {
+    name: 'options',
+    type: 'array',
+    required: true,
+    default: '[]',
+    description: 'Array of { key, name, hint?, style? } option objects.'
+  },
+  {
+    name: 'value',
+    type: 'object',
+    required: true,
+    default: '',
+    description: 'Currently selected option object.'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    required: true,
+    default: '',
+    description: 'Callback fired with { selectedItem } on selection.'
+  },
+  {
+    name: 'help',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Optional help text.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    required: false,
+    default: '',
+    description: 'Additional CSS class names.'
+  }
+]} />
+
+## WordPress Mapping
+
+This documents the **v2 API** (stable). The original `CustomSelectControl` (v1) is deprecated. The v2 import is the same name but with a different prop shape.
