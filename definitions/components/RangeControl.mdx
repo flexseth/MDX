@@ -1,0 +1,467 @@
+---
+title: RangeControl Component
+component: RangeControl
+package: '@wordpress/components'
+category: Form Controls
+description: A slider component for selecting numeric values within a range in WordPress blocks
+---
+
+# RangeControl Component
+
+The `RangeControl` component provides a slider input for selecting numeric values within a specified range.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { RangeControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"fontSize": {
+			"type": "number",
+			"default": 16
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RangeControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontSize } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<RangeControl
+				label={ __( 'Font Size', 'your-text-domain' ) }
+				value={ fontSize }
+				onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+				min={ 12 }
+				max={ 48 }
+			/>
+			<p style={ { fontSize: `${ fontSize }px` } }>
+				{ __( 'Sample text with custom font size', 'your-text-domain' ) }
+			</p>
+		</div>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { fontSize } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<p style={ { fontSize: `${ fontSize }px` } }>
+				Sample text with custom font size
+			</p>
+		</div>
+	);
+}
+```
+
+## With Custom Step Value
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RangeControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { opacity } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<RangeControl
+				label={ __( 'Opacity', 'your-text-domain' ) }
+				value={ opacity }
+				onChange={ ( value ) => setAttributes( { opacity: value } ) }
+				min={ 0 }
+				max={ 1 }
+				step={ 0.1 }
+			/>
+			<div
+				style={ {
+					backgroundColor: '#000',
+					opacity: opacity,
+					padding: '20px',
+					color: '#fff',
+				} }
+			>
+				{ __( 'Opacity Example', 'your-text-domain' ) }
+			</div>
+		</div>
+	);
+}
+```
+
+### block.json for opacity
+
+```json
+{
+	"attributes": {
+		"opacity": {
+			"type": "number",
+			"default": 1
+		}
+	}
+}
+```
+
+## With Help Text
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RangeControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { columns } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<RangeControl
+				label={ __( 'Number of Columns', 'your-text-domain' ) }
+				value={ columns }
+				onChange={ ( value ) => setAttributes( { columns: value } ) }
+				min={ 1 }
+				max={ 6 }
+				help={ __( 'Set the number of columns for the grid layout', 'your-text-domain' ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for columns
+
+```json
+{
+	"attributes": {
+		"columns": {
+			"type": "number",
+			"default": 3
+		}
+	}
+}
+```
+
+## Multiple RangeControls
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RangeControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { paddingTop, paddingBottom, paddingLeft, paddingRight } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<RangeControl
+				label={ __( 'Padding Top', 'your-text-domain' ) }
+				value={ paddingTop }
+				onChange={ ( value ) => setAttributes( { paddingTop: value } ) }
+				min={ 0 }
+				max={ 100 }
+			/>
+			<RangeControl
+				label={ __( 'Padding Bottom', 'your-text-domain' ) }
+				value={ paddingBottom }
+				onChange={ ( value ) => setAttributes( { paddingBottom: value } ) }
+				min={ 0 }
+				max={ 100 }
+			/>
+			<RangeControl
+				label={ __( 'Padding Left', 'your-text-domain' ) }
+				value={ paddingLeft }
+				onChange={ ( value ) => setAttributes( { paddingLeft: value } ) }
+				min={ 0 }
+				max={ 100 }
+			/>
+			<RangeControl
+				label={ __( 'Padding Right', 'your-text-domain' ) }
+				value={ paddingRight }
+				onChange={ ( value ) => setAttributes( { paddingRight: value } ) }
+				min={ 0 }
+				max={ 100 }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for padding
+
+```json
+{
+	"attributes": {
+		"paddingTop": {
+			"type": "number",
+			"default": 20
+		},
+		"paddingBottom": {
+			"type": "number",
+			"default": 20
+		},
+		"paddingLeft": {
+			"type": "number",
+			"default": 20
+		},
+		"paddingRight": {
+			"type": "number",
+			"default": 20
+		}
+	}
+}
+```
+
+## With InspectorControls (Sidebar)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RangeControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { borderRadius, borderWidth } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Border Settings', 'your-text-domain' ) }>
+					<RangeControl
+						label={ __( 'Border Radius', 'your-text-domain' ) }
+						value={ borderRadius }
+						onChange={ ( value ) => setAttributes( { borderRadius: value } ) }
+						min={ 0 }
+						max={ 50 }
+					/>
+					<RangeControl
+						label={ __( 'Border Width', 'your-text-domain' ) }
+						value={ borderWidth }
+						onChange={ ( value ) => setAttributes( { borderWidth: value } ) }
+						min={ 0 }
+						max={ 10 }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ {
+					border: `${ borderWidth }px solid #000`,
+					borderRadius: `${ borderRadius }px`,
+					padding: '20px',
+				} }
+			>
+				{ __( 'Box with custom border', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for border settings
+
+```json
+{
+	"attributes": {
+		"borderRadius": {
+			"type": "number",
+			"default": 0
+		},
+		"borderWidth": {
+			"type": "number",
+			"default": 1
+		}
+	}
+}
+```
+
+### save.js for border example
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { borderRadius, borderWidth } = attributes;
+
+	return (
+		<div
+			{ ...blockProps }
+			style={ {
+				border: `${ borderWidth }px solid #000`,
+				borderRadius: `${ borderRadius }px`,
+				padding: '20px',
+			} }
+		>
+			Box with custom border
+		</div>
+	);
+}
+```
+
+## With Reset Button
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RangeControl, Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { spacing } = attributes;
+	const DEFAULT_SPACING = 20;
+
+	return (
+		<div { ...blockProps }>
+			<RangeControl
+				label={ __( 'Spacing', 'your-text-domain' ) }
+				value={ spacing }
+				onChange={ ( value ) => setAttributes( { spacing: value } ) }
+				min={ 0 }
+				max={ 100 }
+			/>
+			<Button
+				variant="secondary"
+				onClick={ () => setAttributes( { spacing: DEFAULT_SPACING } ) }
+			>
+				{ __( 'Reset to Default', 'your-text-domain' ) }
+			</Button>
+		</div>
+	);
+}
+```
+
+### block.json for reset example
+
+```json
+{
+	"attributes": {
+		"spacing": {
+			"type": "number",
+			"default": 20
+		}
+	}
+}
+```
+
+## With Marks (Tick Marks)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RangeControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { rating } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<RangeControl
+				label={ __( 'Rating', 'your-text-domain' ) }
+				value={ rating }
+				onChange={ ( value ) => setAttributes( { rating: value } ) }
+				min={ 0 }
+				max={ 5 }
+				marks={ [
+					{ value: 0, label: '0' },
+					{ value: 1, label: '1' },
+					{ value: 2, label: '2' },
+					{ value: 3, label: '3' },
+					{ value: 4, label: '4' },
+					{ value: 5, label: '5' },
+				] }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for marks
+
+```json
+{
+	"attributes": {
+		"rating": {
+			"type": "number",
+			"default": 3
+		}
+	}
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Label text for the range control |
+| `value` | number | - | Current value of the slider |
+| `onChange` | function | - | Callback when value changes |
+| `min` | number | `0` | Minimum value |
+| `max` | number | `100` | Maximum value |
+| `step` | number | `1` | Step increment |
+| `help` | string | - | Help text displayed below the control |
+| `marks` | array | - | Array of marks/tick marks to display |
+| `disabled` | boolean | `false` | Disable the control |
+| `allowReset` | boolean | `false` | Show reset button |
+| `resetFallbackValue` | number | - | Value to use when reset is clicked |
+| `className` | string | - | Additional CSS classes |
+| `withInputField` | boolean | `true` | Show/hide the numeric input field |
+
+## Common Use Cases
+
+1. **Font Sizing**: Control text size with min/max bounds
+2. **Spacing/Padding**: Adjust margins, padding, gaps
+3. **Opacity**: Control transparency (0-1 with step 0.1)
+4. **Columns/Grid**: Set number of columns or grid items
+5. **Border Properties**: Control border radius, width
+
+## Best Practices
+
+- Set appropriate `min` and `max` values
+- Use `step` for precision control (e.g., 0.1 for decimals)
+- Provide `help` text for complex controls
+- Set sensible defaults in `block.json`
+- Consider using `marks` for discrete values
+- Show live preview of the value's effect
+
+## Accessibility
+
+- Automatically labeled for screen readers
+- Keyboard navigable (arrow keys)
+- Supports focus management
+- Works with assistive technologies
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for translatable text
+- Define numeric attributes in `block.json`
+- Use number type for attributes

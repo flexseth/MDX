@@ -1,0 +1,431 @@
+---
+title: ToggleControl Component
+component: ToggleControl
+package: '@wordpress/components'
+category: Form Controls
+description: A toggle switch component for boolean on/off settings in WordPress blocks
+---
+
+# ToggleControl Component
+
+The `ToggleControl` component provides a toggle switch for boolean (true/false) settings.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { ToggleControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"isEnabled": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { isEnabled } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<ToggleControl
+				label={ __( 'Enable Feature', 'your-text-domain' ) }
+				checked={ isEnabled }
+				onChange={ ( value ) => setAttributes( { isEnabled: value } ) }
+			/>
+			{ isEnabled && (
+				<p>{ __( 'Feature is enabled!', 'your-text-domain' ) }</p>
+			) }
+		</div>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { isEnabled } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ isEnabled && <p>Feature is enabled!</p> }
+		</div>
+	);
+}
+```
+
+## With Help Text
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { showDate } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<ToggleControl
+				label={ __( 'Show Date', 'your-text-domain' ) }
+				help={ __( 'Display the publication date below the title', 'your-text-domain' ) }
+				checked={ showDate }
+				onChange={ ( value ) => setAttributes( { showDate: value } ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for help text
+
+```json
+{
+	"attributes": {
+		"showDate": {
+			"type": "boolean",
+			"default": true
+		}
+	}
+}
+```
+
+## Multiple ToggleControls
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { showTitle, showExcerpt, showAuthor, showFeaturedImage } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<ToggleControl
+				label={ __( 'Show Title', 'your-text-domain' ) }
+				checked={ showTitle }
+				onChange={ ( value ) => setAttributes( { showTitle: value } ) }
+			/>
+			<ToggleControl
+				label={ __( 'Show Excerpt', 'your-text-domain' ) }
+				checked={ showExcerpt }
+				onChange={ ( value ) => setAttributes( { showExcerpt: value } ) }
+			/>
+			<ToggleControl
+				label={ __( 'Show Author', 'your-text-domain' ) }
+				checked={ showAuthor }
+				onChange={ ( value ) => setAttributes( { showAuthor: value } ) }
+			/>
+			<ToggleControl
+				label={ __( 'Show Featured Image', 'your-text-domain' ) }
+				checked={ showFeaturedImage }
+				onChange={ ( value ) => setAttributes( { showFeaturedImage: value } ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for multiple toggles
+
+```json
+{
+	"attributes": {
+		"showTitle": {
+			"type": "boolean",
+			"default": true
+		},
+		"showExcerpt": {
+			"type": "boolean",
+			"default": true
+		},
+		"showAuthor": {
+			"type": "boolean",
+			"default": false
+		},
+		"showFeaturedImage": {
+			"type": "boolean",
+			"default": true
+		}
+	}
+}
+```
+
+## Conditional Display Based on Toggle
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleControl, TextControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { enableCustomText, customText } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<ToggleControl
+				label={ __( 'Enable Custom Text', 'your-text-domain' ) }
+				checked={ enableCustomText }
+				onChange={ ( value ) => setAttributes( { enableCustomText: value } ) }
+			/>
+			{ enableCustomText && (
+				<TextControl
+					label={ __( 'Custom Text', 'your-text-domain' ) }
+					value={ customText }
+					onChange={ ( value ) => setAttributes( { customText: value } ) }
+				/>
+			) }
+		</div>
+	);
+}
+```
+
+### block.json for conditional display
+
+```json
+{
+	"attributes": {
+		"enableCustomText": {
+			"type": "boolean",
+			"default": false
+		},
+		"customText": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## With InspectorControls (Sidebar)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleControl, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { isDarkMode, hasAnimation, isShadowEnabled } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Display Settings', 'your-text-domain' ) }>
+					<ToggleControl
+						label={ __( 'Dark Mode', 'your-text-domain' ) }
+						checked={ isDarkMode }
+						onChange={ ( value ) => setAttributes( { isDarkMode: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Enable Animation', 'your-text-domain' ) }
+						checked={ hasAnimation }
+						onChange={ ( value ) => setAttributes( { hasAnimation: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Enable Shadow', 'your-text-domain' ) }
+						checked={ isShadowEnabled }
+						onChange={ ( value ) => setAttributes( { isShadowEnabled: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				className={ `
+					${ isDarkMode ? 'dark-mode' : '' }
+					${ hasAnimation ? 'animated' : '' }
+					${ isShadowEnabled ? 'has-shadow' : '' }
+				`.trim() }
+			>
+				{ __( 'Content with toggleable features', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for sidebar settings
+
+```json
+{
+	"attributes": {
+		"isDarkMode": {
+			"type": "boolean",
+			"default": false
+		},
+		"hasAnimation": {
+			"type": "boolean",
+			"default": true
+		},
+		"isShadowEnabled": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}
+```
+
+### save.js for sidebar example
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { isDarkMode, hasAnimation, isShadowEnabled } = attributes;
+
+	return (
+		<div
+			{ ...blockProps }
+			className={ `
+				${ isDarkMode ? 'dark-mode' : '' }
+				${ hasAnimation ? 'animated' : '' }
+				${ isShadowEnabled ? 'has-shadow' : '' }
+			`.trim() }
+		>
+			Content with toggleable features
+		</div>
+	);
+}
+```
+
+## Toggle with Dynamic Styling
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { isFullWidth } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<ToggleControl
+				label={ __( 'Full Width', 'your-text-domain' ) }
+				checked={ isFullWidth }
+				onChange={ ( value ) => setAttributes( { isFullWidth: value } ) }
+			/>
+			<div
+				style={ {
+					width: isFullWidth ? '100%' : 'auto',
+					maxWidth: isFullWidth ? '100%' : '600px',
+					backgroundColor: '#f0f0f0',
+					padding: '20px',
+				} }
+			>
+				{ __( 'Content container', 'your-text-domain' ) }
+			</div>
+		</div>
+	);
+}
+```
+
+### block.json for styling
+
+```json
+{
+	"attributes": {
+		"isFullWidth": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}
+```
+
+## Disabled State
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ToggleControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { isPremiumEnabled } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<ToggleControl
+				label={ __( 'Premium Feature', 'your-text-domain' ) }
+				help={ __( 'This feature requires a premium subscription', 'your-text-domain' ) }
+				checked={ isPremiumEnabled }
+				onChange={ ( value ) => setAttributes( { isPremiumEnabled: value } ) }
+				disabled
+			/>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Label text for the toggle |
+| `checked` | boolean | - | Current state of the toggle |
+| `onChange` | function | - | Callback when toggle state changes |
+| `help` | string | - | Help text displayed below the toggle |
+| `disabled` | boolean | `false` | Disable the toggle |
+| `className` | string | - | Additional CSS classes |
+
+## Common Use Cases
+
+1. **Visibility Controls**: Show/hide content elements
+2. **Feature Flags**: Enable/disable block features
+3. **Display Options**: Toggle layout or styling options
+4. **Settings**: Boolean configuration options
+5. **Conditional Rendering**: Show different content based on state
+
+## Best Practices
+
+- Use clear, descriptive labels
+- Provide `help` text for complex options
+- Set sensible defaults in `block.json`
+- Use conditional rendering based on toggle state
+- Group related toggles in PanelBody components
+- Consider user expectations (what should default to on/off)
+
+## Accessibility
+
+- Automatically labeled for screen readers
+- Keyboard accessible (Space/Enter to toggle)
+- Supports focus management
+- ARIA attributes handled automatically
+- Works with assistive technologies
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for translatable text
+- Define boolean attributes in `block.json`
+- Use `checked` prop (not `value`)
+- Store state in block attributes

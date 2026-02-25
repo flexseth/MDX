@@ -1,0 +1,538 @@
+---
+title: PanelBody Component
+component: PanelBody
+package: '@wordpress/components'
+category: Layout
+description: A collapsible panel component for organizing settings and controls in WordPress block sidebars
+---
+
+# PanelBody Component
+
+The `PanelBody` component provides a collapsible container for grouping related settings, commonly used in the block inspector sidebar.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { PanelBody, PanelRow } from '@wordpress/components';
+import { InspectorControls } from '@wordpress/block-editor';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { PanelBody, TextControl } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'your-text-domain' ) }>
+					<TextControl
+						label={ __( 'Title', 'your-text-domain' ) }
+						value={ title }
+						onChange={ ( value ) => setAttributes( { title: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<h2>{ title || __( 'Add title...', 'your-text-domain' ) }</h2>
+			</div>
+		</>
+	);
+}
+```
+
+### block.json
+
+```json
+{
+	"attributes": {
+		"title": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Multiple PanelBody Components
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import {
+	PanelBody,
+	TextControl,
+	ToggleControl,
+	RangeControl,
+} from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { heading, showDate, fontSize } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Content Settings', 'your-text-domain' ) }
+					initialOpen={ true }
+				>
+					<TextControl
+						label={ __( 'Heading', 'your-text-domain' ) }
+						value={ heading }
+						onChange={ ( value ) => setAttributes( { heading: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Show Date', 'your-text-domain' ) }
+						checked={ showDate }
+						onChange={ ( value ) => setAttributes( { showDate: value } ) }
+					/>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Typography Settings', 'your-text-domain' ) }
+					initialOpen={ false }
+				>
+					<RangeControl
+						label={ __( 'Font Size', 'your-text-domain' ) }
+						value={ fontSize }
+						onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+						min={ 12 }
+						max={ 72 }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<h2 style={ { fontSize: `${ fontSize }px` } }>
+					{ heading || __( 'Add heading...', 'your-text-domain' ) }
+				</h2>
+				{ showDate && <p>{ new Date().toLocaleDateString() }</p> }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for multiple panels
+
+```json
+{
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"default": ""
+		},
+		"showDate": {
+			"type": "boolean",
+			"default": false
+		},
+		"fontSize": {
+			"type": "number",
+			"default": 24
+		}
+	}
+}
+```
+
+## Using PanelRow
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { PanelBody, PanelRow, Button, TextControl } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { url } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Link Settings', 'your-text-domain' ) }>
+					<PanelRow>
+						<TextControl
+							label={ __( 'URL', 'your-text-domain' ) }
+							value={ url }
+							onChange={ ( value ) => setAttributes( { url: value } ) }
+						/>
+					</PanelRow>
+					<PanelRow>
+						<Button
+							variant="secondary"
+							onClick={ () => setAttributes( { url: '' } ) }
+						>
+							{ __( 'Clear URL', 'your-text-domain' ) }
+						</Button>
+					</PanelRow>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ url && <a href={ url }>{ __( 'Link', 'your-text-domain' ) }</a> }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for panel row
+
+```json
+{
+	"attributes": {
+		"url": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## With Icon
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { PanelBody, ToggleControl } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { cog } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { isEnabled } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Advanced Settings', 'your-text-domain' ) }
+					icon={ cog }
+				>
+					<ToggleControl
+						label={ __( 'Enable Advanced Features', 'your-text-domain' ) }
+						checked={ isEnabled }
+						onChange={ ( value ) => setAttributes( { isEnabled: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ isEnabled && __( 'Advanced features enabled', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for icon
+
+```json
+{
+	"attributes": {
+		"isEnabled": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}
+```
+
+## Controlled Open/Close State
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { PanelBody, TextControl } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { content } = attributes;
+	const [ isPanelOpen, setIsPanelOpen ] = useState( true );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Content', 'your-text-domain' ) }
+					opened={ isPanelOpen }
+					onToggle={ () => setIsPanelOpen( ! isPanelOpen ) }
+				>
+					<TextControl
+						label={ __( 'Content', 'your-text-domain' ) }
+						value={ content }
+						onChange={ ( value ) => setAttributes( { content: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<p>{ content }</p>
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for controlled state
+
+```json
+{
+	"attributes": {
+		"content": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Comprehensive Settings Example
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import {
+	PanelBody,
+	PanelRow,
+	TextControl,
+	ToggleControl,
+	RangeControl,
+	SelectControl,
+	ColorPalette,
+} from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const {
+		title,
+		subtitle,
+		showImage,
+		columns,
+		alignment,
+		backgroundColor,
+	} = attributes;
+
+	const colors = [
+		{ name: 'Red', color: '#f44336' },
+		{ name: 'Blue', color: '#2196f3' },
+		{ name: 'Green', color: '#4caf50' },
+	];
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Content', 'your-text-domain' ) }
+					initialOpen={ true }
+				>
+					<TextControl
+						label={ __( 'Title', 'your-text-domain' ) }
+						value={ title }
+						onChange={ ( value ) => setAttributes( { title: value } ) }
+					/>
+					<TextControl
+						label={ __( 'Subtitle', 'your-text-domain' ) }
+						value={ subtitle }
+						onChange={ ( value ) => setAttributes( { subtitle: value } ) }
+					/>
+					<ToggleControl
+						label={ __( 'Show Featured Image', 'your-text-domain' ) }
+						checked={ showImage }
+						onChange={ ( value ) => setAttributes( { showImage: value } ) }
+					/>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Layout', 'your-text-domain' ) }
+					initialOpen={ false }
+				>
+					<RangeControl
+						label={ __( 'Columns', 'your-text-domain' ) }
+						value={ columns }
+						onChange={ ( value ) => setAttributes( { columns: value } ) }
+						min={ 1 }
+						max={ 4 }
+					/>
+					<SelectControl
+						label={ __( 'Alignment', 'your-text-domain' ) }
+						value={ alignment }
+						options={ [
+							{ label: __( 'Left', 'your-text-domain' ), value: 'left' },
+							{ label: __( 'Center', 'your-text-domain' ), value: 'center' },
+							{ label: __( 'Right', 'your-text-domain' ), value: 'right' },
+						] }
+						onChange={ ( value ) => setAttributes( { alignment: value } ) }
+					/>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Colors', 'your-text-domain' ) }
+					initialOpen={ false }
+				>
+					<PanelRow>
+						<label>{ __( 'Background Color', 'your-text-domain' ) }</label>
+					</PanelRow>
+					<ColorPalette
+						colors={ colors }
+						value={ backgroundColor }
+						onChange={ ( color ) => setAttributes( { backgroundColor: color } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+
+			<div
+				{ ...blockProps }
+				style={ {
+					backgroundColor: backgroundColor,
+					textAlign: alignment,
+					padding: '20px',
+				} }
+			>
+				{ title && <h2>{ title }</h2> }
+				{ subtitle && <p>{ subtitle }</p> }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for comprehensive example
+
+```json
+{
+	"attributes": {
+		"title": {
+			"type": "string",
+			"default": ""
+		},
+		"subtitle": {
+			"type": "string",
+			"default": ""
+		},
+		"showImage": {
+			"type": "boolean",
+			"default": false
+		},
+		"columns": {
+			"type": "number",
+			"default": 2
+		},
+		"alignment": {
+			"type": "string",
+			"default": "left"
+		},
+		"backgroundColor": {
+			"type": "string",
+			"default": "#ffffff"
+		}
+	}
+}
+```
+
+## With Custom Class Name
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { PanelBody, TextControl } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { customClass } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody
+					title={ __( 'Advanced', 'your-text-domain' ) }
+					className="custom-panel"
+				>
+					<TextControl
+						label={ __( 'Custom CSS Class', 'your-text-domain' ) }
+						value={ customClass }
+						onChange={ ( value ) => setAttributes( { customClass: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } className={ customClass }>
+				{ __( 'Content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for custom class
+
+```json
+{
+	"attributes": {
+		"customClass": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Props Reference
+
+### PanelBody
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `title` | string | - | Panel header title |
+| `icon` | Component | - | Icon component from `@wordpress/icons` |
+| `initialOpen` | boolean | `true` | Whether panel is open by default |
+| `opened` | boolean | - | Controlled open state |
+| `onToggle` | function | - | Callback when panel is toggled |
+| `className` | string | - | Additional CSS classes |
+| `children` | node | - | Panel content |
+
+### PanelRow
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `className` | string | - | Additional CSS classes |
+| `children` | node | - | Row content |
+
+## Common Use Cases
+
+1. **Settings Organization**: Group related settings together
+2. **Inspector Controls**: Standard sidebar settings panel
+3. **Progressive Disclosure**: Hide advanced settings by default
+4. **Visual Hierarchy**: Organize complex interfaces
+5. **Collapsible Sections**: Save space in crowded sidebars
+
+## Best Practices
+
+- Use descriptive panel titles
+- Set `initialOpen={ true }` for most important panels
+- Group logically related controls together
+- Don't nest PanelBody components
+- Use PanelRow for custom layouts within panels
+- Keep panels focused on a single topic
+- Order panels by importance (most used first)
+
+## Accessibility
+
+- Keyboard navigable (Enter/Space to toggle)
+- ARIA attributes handled automatically
+- Focus management built-in
+- Screen reader friendly
+- Supports assistive technologies
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use with `InspectorControls` from `@wordpress/block-editor`
+- Use `@wordpress/i18n` for translatable text
+- Follow block editor design patterns
+- Use icons from `@wordpress/icons`

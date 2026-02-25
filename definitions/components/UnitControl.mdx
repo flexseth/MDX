@@ -1,0 +1,312 @@
+---
+title: UnitControl Component
+component: UnitControl
+package: '@wordpress/components'
+category: Spacing Controls
+description: A numeric input with an attached unit selector (px, em, rem, %, vw, vh); the standard control for any CSS dimension value
+---
+
+# UnitControl Component
+
+`UnitControl` pairs a numeric text input with a unit selector dropdown. Use it wherever you need CSS dimension values — widths, heights, font sizes, spacing — especially when users should be able to switch between `px`, `em`, `rem`, `%`, `vw`, and `vh`.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { UnitControl } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"blockWidth": {
+			"type": "string",
+			"default": "100%"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, UnitControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { blockWidth } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Dimensions', 'your-text-domain' ) }>
+					<UnitControl
+						label={ __( 'Width', 'your-text-domain' ) }
+						value={ blockWidth }
+						onChange={ ( value ) => setAttributes( { blockWidth: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { width: blockWidth, maxWidth: '100%' } }>
+				{ __( 'Block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Custom Units
+
+Restrict available units for specific use cases:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, UnitControl } from '@wordpress/components';
+
+const FONT_UNITS = [
+	{ value: 'px', label: 'px', default: 16 },
+	{ value: 'em', label: 'em', default: 1 },
+	{ value: 'rem', label: 'rem', default: 1 },
+];
+
+const SPACING_UNITS = [
+	{ value: 'px', label: 'px', default: 0 },
+	{ value: 'em', label: 'em', default: 0 },
+	{ value: 'rem', label: 'rem', default: 0 },
+	{ value: '%', label: '%', default: 0 },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontSize, paddingTop } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<UnitControl
+						label={ __( 'Font size', 'your-text-domain' ) }
+						value={ fontSize }
+						units={ FONT_UNITS }
+						onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+					/>
+				</PanelBody>
+				<PanelBody title={ __( 'Spacing', 'your-text-domain' ) }>
+					<UnitControl
+						label={ __( 'Top padding', 'your-text-domain' ) }
+						value={ paddingTop }
+						units={ SPACING_UNITS }
+						min={ 0 }
+						onChange={ ( value ) => setAttributes( { paddingTop: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { fontSize, paddingTop } }>
+				{ __( 'Styled block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json
+
+```json
+{
+	"attributes": {
+		"fontSize": { "type": "string", "default": "16px" },
+		"paddingTop": { "type": "string", "default": "0px" }
+	}
+}
+```
+
+## Min/Max Constraints
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, UnitControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageWidth } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Image Settings', 'your-text-domain' ) }>
+					<UnitControl
+						label={ __( 'Image width', 'your-text-domain' ) }
+						value={ imageWidth }
+						units={ [
+							{ value: 'px', label: 'px', default: 300, min: 50, max: 1200 },
+							{ value: '%', label: '%', default: 100, min: 10, max: 100 },
+						] }
+						min={ 50 }
+						max={ 1200 }
+						onChange={ ( value ) => setAttributes( { imageWidth: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				<div style={ { width: imageWidth } }>
+					{ __( '[Image]', 'your-text-domain' ) }
+				</div>
+			</div>
+		</>
+	);
+}
+```
+
+## Four-Sided Spacing with UnitControl
+
+For per-side control without `BoxControl`:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, UnitControl, __experimentalGrid as Grid } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { paddingTop, paddingRight, paddingBottom, paddingLeft } = attributes;
+
+	const units = [ { value: 'px', label: 'px', default: 0 } ];
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Padding', 'your-text-domain' ) }>
+					<Grid columns={ 2 }>
+						<UnitControl
+							label={ __( 'Top', 'your-text-domain' ) }
+							value={ paddingTop }
+							units={ units }
+							min={ 0 }
+							onChange={ ( v ) => setAttributes( { paddingTop: v } ) }
+						/>
+						<UnitControl
+							label={ __( 'Right', 'your-text-domain' ) }
+							value={ paddingRight }
+							units={ units }
+							min={ 0 }
+							onChange={ ( v ) => setAttributes( { paddingRight: v } ) }
+						/>
+						<UnitControl
+							label={ __( 'Bottom', 'your-text-domain' ) }
+							value={ paddingBottom }
+							units={ units }
+							min={ 0 }
+							onChange={ ( v ) => setAttributes( { paddingBottom: v } ) }
+						/>
+						<UnitControl
+							label={ __( 'Left', 'your-text-domain' ) }
+							value={ paddingLeft }
+							units={ units }
+							min={ 0 }
+							onChange={ ( v ) => setAttributes( { paddingLeft: v } ) }
+						/>
+					</Grid>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ { paddingTop, paddingRight, paddingBottom, paddingLeft } }
+			>
+				{ __( 'Content with custom padding', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for four-sided padding
+
+```json
+{
+	"attributes": {
+		"paddingTop": { "type": "string", "default": "0px" },
+		"paddingRight": { "type": "string", "default": "0px" },
+		"paddingBottom": { "type": "string", "default": "0px" },
+		"paddingLeft": { "type": "string", "default": "0px" }
+	}
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { blockWidth, fontSize } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { width: blockWidth, fontSize } }>
+			{ /* Block content */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `label` | string | - | Visible label above the control |
+| `value` | string | - | Current value including unit (e.g. `'16px'`, `'1.5rem'`) |
+| `onChange` | function | - | Callback receiving the new string value with unit |
+| `units` | array | Default CSS units | Array of `{ value, label, default, min, max }` unit objects |
+| `min` | number | - | Minimum allowed numeric value |
+| `max` | number | - | Maximum allowed numeric value |
+| `step` | number | `1` | Step increment for the input |
+| `size` | string | `'default'` | Control size: `'default'`, `'small'`, `'__unstable-large'` |
+| `isUnitSelectTabbable` | boolean | `true` | Whether unit select is tab-focusable |
+| `isPressEnterToChange` | boolean | `false` | Only trigger onChange on Enter/blur |
+| `disabled` | boolean | `false` | Disables the control |
+| `className` | string | - | Additional CSS classes |
+
+## Default Available Units
+
+```javascript
+[
+	{ value: 'px',  label: 'px',  default: 0 },
+	{ value: 'em',  label: 'em',  default: 0 },
+	{ value: 'rem', label: 'rem', default: 0 },
+	{ value: '%',   label: '%',   default: 0 },
+	{ value: 'vw',  label: 'vw',  default: 0 },
+	{ value: 'vh',  label: 'vh',  default: 0 },
+]
+```
+
+## Common Use Cases
+
+1. **Width / height controls**: Any dimension where unit matters
+2. **Font size overrides**: When users need em/rem in addition to px
+3. **Gap and spacing**: Row/column gaps in grid or flex layouts
+4. **Border radius**: Pixel or percentage corner rounding
+5. **Min/max height**: Content area height constraints
+
+## Accessibility
+
+- Renders as a `<input type="number">` with an adjacent `<select>` for units
+- Both the number input and unit select have separate accessible labels
+- Arrow key increments work in the number input; unit select uses standard `<select>` keyboard navigation
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Store values as strings with units (e.g. `'16px'`) not bare numbers
+- Use `units` prop to restrict available units to what your CSS context supports
+- For full padding/margin control, use `BoxControl` instead of four separate `UnitControl` instances
+- Apply stored values directly as CSS in `style` props — no conversion needed

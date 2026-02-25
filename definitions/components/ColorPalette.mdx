@@ -1,0 +1,511 @@
+---
+title: ColorPalette Component
+component: ColorPalette
+package: '@wordpress/components'
+category: Color Controls
+description: A color picker component for selecting colors from a predefined palette in WordPress blocks
+---
+
+# ColorPalette Component
+
+The `ColorPalette` component provides a color picker with predefined color swatches and optional custom color selection.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { ColorPalette } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"backgroundColor": {
+			"type": "string",
+			"default": "#ffffff"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ColorPalette } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { backgroundColor } = attributes;
+
+	const colors = [
+		{ name: 'Red', color: '#f44336' },
+		{ name: 'Blue', color: '#2196f3' },
+		{ name: 'Green', color: '#4caf50' },
+		{ name: 'Yellow', color: '#ffeb3b' },
+		{ name: 'Purple', color: '#9c27b0' },
+	];
+
+	return (
+		<div { ...blockProps }>
+			<ColorPalette
+				colors={ colors }
+				value={ backgroundColor }
+				onChange={ ( color ) => setAttributes( { backgroundColor: color } ) }
+			/>
+			<div
+				style={ {
+					backgroundColor: backgroundColor,
+					padding: '20px',
+					marginTop: '10px',
+				} }
+			>
+				{ __( 'Background color preview', 'your-text-domain' ) }
+			</div>
+		</div>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { backgroundColor } = attributes;
+
+	return (
+		<div
+			{ ...blockProps }
+			style={ { backgroundColor: backgroundColor, padding: '20px' } }
+		>
+			Background color preview
+		</div>
+	);
+}
+```
+
+## With Custom Colors Disabled
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ColorPalette } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { textColor } = attributes;
+
+	const colors = [
+		{ name: 'Black', color: '#000000' },
+		{ name: 'Dark Gray', color: '#333333' },
+		{ name: 'Medium Gray', color: '#666666' },
+		{ name: 'White', color: '#ffffff' },
+	];
+
+	return (
+		<div { ...blockProps }>
+			<ColorPalette
+				colors={ colors }
+				value={ textColor }
+				onChange={ ( color ) => setAttributes( { textColor: color } ) }
+				disableCustomColors
+			/>
+			<p style={ { color: textColor } }>
+				{ __( 'Text with custom color', 'your-text-domain' ) }
+			</p>
+		</div>
+	);
+}
+```
+
+### block.json for text color
+
+```json
+{
+	"attributes": {
+		"textColor": {
+			"type": "string",
+			"default": "#000000"
+		}
+	}
+}
+```
+
+## With Clear Button
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ColorPalette } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { borderColor } = attributes;
+
+	const colors = [
+		{ name: 'Red', color: '#ff0000' },
+		{ name: 'Green', color: '#00ff00' },
+		{ name: 'Blue', color: '#0000ff' },
+	];
+
+	return (
+		<div { ...blockProps }>
+			<ColorPalette
+				colors={ colors }
+				value={ borderColor }
+				onChange={ ( color ) => setAttributes( { borderColor: color } ) }
+				clearable
+			/>
+			<div
+				style={ {
+					border: borderColor ? `3px solid ${ borderColor }` : 'none',
+					padding: '20px',
+					marginTop: '10px',
+				} }
+			>
+				{ __( 'Box with colored border', 'your-text-domain' ) }
+			</div>
+		</div>
+	);
+}
+```
+
+### block.json for clearable
+
+```json
+{
+	"attributes": {
+		"borderColor": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Multiple Color Pickers
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ColorPalette, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { bgColor, textColor, borderColor } = attributes;
+
+	const colors = [
+		{ name: 'Red', color: '#f44336' },
+		{ name: 'Blue', color: '#2196f3' },
+		{ name: 'Green', color: '#4caf50' },
+		{ name: 'Yellow', color: '#ffeb3b' },
+		{ name: 'Purple', color: '#9c27b0' },
+		{ name: 'Black', color: '#000000' },
+		{ name: 'White', color: '#ffffff' },
+	];
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Color Settings', 'your-text-domain' ) }>
+					<p>{ __( 'Background Color', 'your-text-domain' ) }</p>
+					<ColorPalette
+						colors={ colors }
+						value={ bgColor }
+						onChange={ ( color ) => setAttributes( { bgColor: color } ) }
+					/>
+					<p>{ __( 'Text Color', 'your-text-domain' ) }</p>
+					<ColorPalette
+						colors={ colors }
+						value={ textColor }
+						onChange={ ( color ) => setAttributes( { textColor: color } ) }
+					/>
+					<p>{ __( 'Border Color', 'your-text-domain' ) }</p>
+					<ColorPalette
+						colors={ colors }
+						value={ borderColor }
+						onChange={ ( color ) => setAttributes( { borderColor: color } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ {
+					backgroundColor: bgColor,
+					color: textColor,
+					border: `3px solid ${ borderColor }`,
+					padding: '20px',
+				} }
+			>
+				{ __( 'Styled content with multiple colors', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for multiple colors
+
+```json
+{
+	"attributes": {
+		"bgColor": {
+			"type": "string",
+			"default": "#ffffff"
+		},
+		"textColor": {
+			"type": "string",
+			"default": "#000000"
+		},
+		"borderColor": {
+			"type": "string",
+			"default": "#cccccc"
+		}
+	}
+}
+```
+
+### save.js for multiple colors
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { bgColor, textColor, borderColor } = attributes;
+
+	return (
+		<div
+			{ ...blockProps }
+			style={ {
+				backgroundColor: bgColor,
+				color: textColor,
+				border: `3px solid ${ borderColor }`,
+				padding: '20px',
+			} }
+		>
+			Styled content with multiple colors
+		</div>
+	);
+}
+```
+
+## Using Theme Colors
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ColorPalette } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useSelect } from '@wordpress/data';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { themeColor } = attributes;
+
+	// Get theme colors from settings
+	const colors = useSelect( ( select ) => {
+		const settings = select( 'core/block-editor' ).getSettings();
+		return settings.colors;
+	}, [] );
+
+	return (
+		<div { ...blockProps }>
+			<ColorPalette
+				colors={ colors }
+				value={ themeColor }
+				onChange={ ( color ) => setAttributes( { themeColor: color } ) }
+			/>
+			<div
+				style={ {
+					backgroundColor: themeColor,
+					padding: '20px',
+					marginTop: '10px',
+				} }
+			>
+				{ __( 'Using theme colors', 'your-text-domain' ) }
+			</div>
+		</div>
+	);
+}
+```
+
+### block.json for theme colors
+
+```json
+{
+	"attributes": {
+		"themeColor": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## With PanelColorSettings (Recommended)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { PanelColorSettings } from '@wordpress/block-editor';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { backgroundColor, textColor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelColorSettings
+					title={ __( 'Color Settings', 'your-text-domain' ) }
+					colorSettings={ [
+						{
+							value: backgroundColor,
+							onChange: ( color ) => setAttributes( { backgroundColor: color } ),
+							label: __( 'Background Color', 'your-text-domain' ),
+						},
+						{
+							value: textColor,
+							onChange: ( color ) => setAttributes( { textColor: color } ),
+							label: __( 'Text Color', 'your-text-domain' ),
+						},
+					] }
+				/>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ {
+					backgroundColor: backgroundColor,
+					color: textColor,
+					padding: '20px',
+				} }
+			>
+				{ __( 'Content with color settings', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Custom Color Format
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { ColorPalette } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { overlayColor } = attributes;
+
+	const colors = [
+		{ name: 'Semi-Transparent Black', color: 'rgba(0, 0, 0, 0.5)' },
+		{ name: 'Semi-Transparent White', color: 'rgba(255, 255, 255, 0.5)' },
+		{ name: 'Semi-Transparent Red', color: 'rgba(244, 67, 54, 0.5)' },
+	];
+
+	return (
+		<div { ...blockProps }>
+			<ColorPalette
+				colors={ colors }
+				value={ overlayColor }
+				onChange={ ( color ) => setAttributes( { overlayColor: color } ) }
+			/>
+			<div
+				style={ {
+					position: 'relative',
+					height: '200px',
+					backgroundImage: 'url(https://placehold.co/600x400)',
+					backgroundSize: 'cover',
+				} }
+			>
+				<div
+					style={ {
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
+						backgroundColor: overlayColor,
+					} }
+				/>
+			</div>
+		</div>
+	);
+}
+```
+
+### block.json for rgba
+
+```json
+{
+	"attributes": {
+		"overlayColor": {
+			"type": "string",
+			"default": "rgba(0, 0, 0, 0.5)"
+		}
+	}
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `colors` | array | - | Array of color objects with `name` and `color` properties |
+| `value` | string | - | Currently selected color (hex, rgb, rgba) |
+| `onChange` | function | - | Callback when color changes |
+| `disableCustomColors` | boolean | `false` | Disable custom color picker |
+| `clearable` | boolean | `true` | Show clear/reset button |
+| `className` | string | - | Additional CSS classes |
+
+## Color Object Format
+
+```javascript
+{
+	name: 'Color Name', // Display name
+	color: '#hexcode'   // Color value (hex, rgb, rgba)
+}
+```
+
+## Common Use Cases
+
+1. **Background Colors**: Set element background colors
+2. **Text Colors**: Control text/foreground colors
+3. **Border Colors**: Style border colors
+4. **Overlay Colors**: Semi-transparent overlays
+5. **Theme Integration**: Use WordPress theme colors
+
+## Best Practices
+
+- Provide descriptive color names
+- Include sufficient color variety
+- Consider accessibility (contrast ratios)
+- Use theme colors when possible with `useSelect`
+- Use `PanelColorSettings` for better UX in sidebar
+- Set sensible defaults in `block.json`
+- Support both hex and rgba formats
+
+## Accessibility
+
+- Ensure color contrast meets WCAG standards
+- Don't rely solely on color to convey information
+- Provide text alternatives when needed
+- Test with color blindness simulators
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for translatable text
+- Consider using `PanelColorSettings` from `@wordpress/block-editor`
+- Access theme colors with `useSelect` and `@wordpress/data`
+- Store color values as strings in attributes

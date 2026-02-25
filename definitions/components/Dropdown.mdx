@@ -1,0 +1,344 @@
+---
+title: Dropdown Component
+component: Dropdown
+package: '@wordpress/components'
+category: Layout
+description: A composable dropdown that renders a custom trigger and popover panel; used for toolbar menus, custom pickers, and contextual action menus
+---
+
+# Dropdown Component
+
+`Dropdown` renders a custom toggle button and an associated popover panel. Unlike `SelectControl` (which has a native `<select>` dropdown) or `DropdownMenu` (which renders a button list), `Dropdown` is fully composable — you define both the trigger and the panel content. Use it for custom pickers, toolbar menus, and color/icon selectors that need a popover layout.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Dropdown, Button } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps } from '@wordpress/block-editor';
+import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
+import { chevronDown } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { style } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<Dropdown
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<Button
+						variant="secondary"
+						onClick={ onToggle }
+						aria-expanded={ isOpen }
+						icon={ chevronDown }
+						iconPosition="right"
+					>
+						{ style || __( 'Choose style', 'your-text-domain' ) }
+					</Button>
+				) }
+				renderContent={ ( { onClose } ) => (
+					<MenuGroup>
+						{ [ 'Classic', 'Modern', 'Minimal' ].map( ( option ) => (
+							<MenuItem
+								key={ option }
+								isSelected={ style === option }
+								role="menuitemradio"
+								onClick={ () => {
+									setAttributes( { style: option } );
+									onClose();
+								} }
+							>
+								{ option }
+							</MenuItem>
+						) ) }
+					</MenuGroup>
+				) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json
+
+```json
+{
+	"attributes": {
+		"style": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Dropdown with Icon Picker
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, Dropdown, Button } from '@wordpress/components';
+import {
+	star,
+	heart,
+	check,
+	close,
+	plus,
+	minus,
+	arrowRight,
+	arrowLeft,
+} from '@wordpress/icons';
+import Icon from '@wordpress/icons';
+
+const ICONS = [
+	{ name: 'star', icon: star },
+	{ name: 'heart', icon: heart },
+	{ name: 'check', icon: check },
+	{ name: 'close', icon: close },
+	{ name: 'plus', icon: plus },
+	{ name: 'minus', icon: minus },
+	{ name: 'arrowRight', icon: arrowRight },
+	{ name: 'arrowLeft', icon: arrowLeft },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { selectedIcon } = attributes;
+	const activeIcon = ICONS.find( ( i ) => i.name === selectedIcon );
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Icon', 'your-text-domain' ) }>
+					<Dropdown
+						renderToggle={ ( { isOpen, onToggle } ) => (
+							<Button
+								variant="secondary"
+								onClick={ onToggle }
+								aria-expanded={ isOpen }
+							>
+								{ activeIcon && <Icon icon={ activeIcon.icon } /> }
+								{ __( 'Choose icon', 'your-text-domain' ) }
+							</Button>
+						) }
+						renderContent={ ( { onClose } ) => (
+							<div style={ { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '4px', padding: '8px' } }>
+								{ ICONS.map( ( { name, icon } ) => (
+									<Button
+										key={ name }
+										icon={ icon }
+										label={ name }
+										isPressed={ selectedIcon === name }
+										onClick={ () => {
+											setAttributes( { selectedIcon: name } );
+											onClose();
+										} }
+									/>
+								) ) }
+							</div>
+						) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ activeIcon && <Icon icon={ activeIcon.icon } size={ 32 } /> }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for icon picker
+
+```json
+{
+	"attributes": {
+		"selectedIcon": { "type": "string", "default": "" }
+	}
+}
+```
+
+## Dropdown in Block Toolbar
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import { ToolbarGroup, Dropdown, ToolbarButton, MenuGroup, MenuItem } from '@wordpress/components';
+import { moreHorizontal } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { variant } = attributes;
+
+	return (
+		<>
+			<BlockControls>
+				<ToolbarGroup>
+					<Dropdown
+						renderToggle={ ( { isOpen, onToggle } ) => (
+							<ToolbarButton
+								icon={ moreHorizontal }
+								label={ __( 'More options', 'your-text-domain' ) }
+								onClick={ onToggle }
+								aria-expanded={ isOpen }
+							/>
+						) }
+						renderContent={ ( { onClose } ) => (
+							<MenuGroup label={ __( 'Variant', 'your-text-domain' ) }>
+								{ [ 'default', 'featured', 'minimal' ].map( ( v ) => (
+									<MenuItem
+										key={ v }
+										isSelected={ variant === v }
+										role="menuitemradio"
+										onClick={ () => {
+											setAttributes( { variant: v } );
+											onClose();
+										} }
+									>
+										{ v.charAt( 0 ).toUpperCase() + v.slice( 1 ) }
+									</MenuItem>
+								) ) }
+							</MenuGroup>
+						) }
+					/>
+				</ToolbarGroup>
+			</BlockControls>
+			<div { ...blockProps } className={ `variant-${ variant }` }>
+				{ __( 'Block content', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Dropdown with Popover Position
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, Dropdown, Button, ColorPalette } from '@wordpress/components';
+
+const COLORS = [
+	{ name: 'Red', color: '#f44336' },
+	{ name: 'Blue', color: '#2196f3' },
+	{ name: 'Green', color: '#4caf50' },
+	{ name: 'Purple', color: '#9c27b0' },
+	{ name: 'Orange', color: '#ff9800' },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { accentColor } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Colors', 'your-text-domain' ) }>
+					<Dropdown
+						popoverProps={ { placement: 'bottom-start' } }
+						renderToggle={ ( { isOpen, onToggle } ) => (
+							<Button
+								variant="secondary"
+								onClick={ onToggle }
+								aria-expanded={ isOpen }
+							>
+								<span
+									style={ {
+										display: 'inline-block',
+										width: '16px',
+										height: '16px',
+										borderRadius: '50%',
+										backgroundColor: accentColor || '#ccc',
+										marginRight: '8px',
+									} }
+								/>
+								{ __( 'Accent color', 'your-text-domain' ) }
+							</Button>
+						) }
+						renderContent={ () => (
+							<div style={ { padding: '12px', width: '220px' } }>
+								<ColorPalette
+									colors={ COLORS }
+									value={ accentColor }
+									onChange={ ( value ) => setAttributes( { accentColor: value } ) }
+								/>
+							</div>
+						) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { borderLeft: `4px solid ${ accentColor }`, paddingLeft: '12px' } }>
+				{ __( 'Block with accent border', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`Dropdown` is editor-only and does not render on the front end:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { style, accentColor } = attributes;
+
+	return (
+		<div { ...blockProps } className={ `style-${ style }` } style={ { borderLeft: `4px solid ${ accentColor }` } }>
+			{ /* Block content */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### Dropdown
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `renderToggle` | function | - | Render prop returning the trigger element; receives `{ isOpen, onToggle, onClose }` |
+| `renderContent` | function | - | Render prop returning the popover content; receives `{ onToggle, onClose }` |
+| `className` | string | - | Additional CSS classes on the wrapper |
+| `contentClassName` | string | - | Additional CSS classes on the popover |
+| `popoverProps` | object | - | Props passed to the underlying `Popover` (e.g. `placement`, `offset`) |
+| `focusOnMount` | boolean\|string | `'firstElement'` | Where to move focus when the dropdown opens |
+| `onToggle` | function | - | Callback fired when the dropdown opens or closes, receives `isOpen` |
+| `onClose` | function | - | Callback fired when the dropdown closes |
+| `defaultOpen` | boolean | `false` | Whether the dropdown starts open |
+
+## Common Use Cases
+
+1. **Custom color pickers**: Swatch grids or free-form color inputs
+2. **Icon selectors**: Grid of icons to pick from
+3. **Toolbar action menus**: "More options" (⋯) button revealing a list of actions
+4. **Format style pickers**: Custom heading level or text style selectors
+5. **Date/time popover**: Trigger a `DateTimePicker` from a toolbar button
+
+## Accessibility
+
+- `renderToggle` should set `aria-expanded={ isOpen }` on the toggle button
+- The popover receives `role="menu"` automatically when children use `MenuItem`
+- `focusOnMount="firstElement"` moves focus to the first interactive element inside the popover
+- Escape key closes the dropdown and returns focus to the toggle button
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `MenuItem` with `MenuGroup` inside `renderContent` for list-style menus
+- Pass `onClose` to item click handlers to close the dropdown after selection
+- For simple text selects, prefer `SelectControl`; for navigation menus, prefer `DropdownMenu`
+- `Dropdown` is editor-only; never place it in `save.js`

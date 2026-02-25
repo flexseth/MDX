@@ -1,0 +1,276 @@
+---
+title: FontSizePicker Component
+component: FontSizePicker
+package: '@wordpress/components'
+category: Typography Controls
+description: A font size selector that integrates with theme.json presets; supports predefined size options with a custom value fallback
+---
+
+# FontSizePicker Component
+
+`FontSizePicker` renders a font size control that integrates with WordPress theme.json typography presets. It shows preset size labels (Small, Medium, Large, etc.) plus a custom value input, producing a value that can be applied as a CSS custom property or direct pixel value.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { FontSizePicker } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"fontSize": {
+			"type": "number",
+			"default": 16
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, FontSizePicker } from '@wordpress/components';
+
+const FONT_SIZES = [
+	{ name: __( 'Small', 'your-text-domain' ), slug: 'small', size: 13 },
+	{ name: __( 'Normal', 'your-text-domain' ), slug: 'normal', size: 16 },
+	{ name: __( 'Medium', 'your-text-domain' ), slug: 'medium', size: 20 },
+	{ name: __( 'Large', 'your-text-domain' ), slug: 'large', size: 36 },
+	{ name: __( 'Extra Large', 'your-text-domain' ), slug: 'extra-large', size: 54 },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontSize } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<FontSizePicker
+						fontSizes={ FONT_SIZES }
+						value={ fontSize }
+						onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { fontSize: `${ fontSize }px` } }>
+				{ __( 'Sample text at the selected size.', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## Theme.json Integration
+
+Read font sizes from the active theme's presets using `useSetting`:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls, useSetting } from '@wordpress/block-editor';
+import { PanelBody, FontSizePicker } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontSize } = attributes;
+	// Reads fontSizes from the active theme's theme.json
+	const fontSizes = useSetting( 'typography.fontSizes' ) || [];
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<FontSizePicker
+						fontSizes={ fontSizes }
+						value={ fontSize }
+						onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+						disableCustomFontSizes={ false }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { fontSize: fontSize ? `${ fontSize }px` : undefined } }>
+				{ __( 'Theme-aware text', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## FontSizePicker with fontSizeSlug
+
+Store both the slug (for CSS custom property reference) and the numeric value:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, FontSizePicker } from '@wordpress/components';
+
+const FONT_SIZES = [
+	{ name: __( 'Small', 'your-text-domain' ), slug: 'small', size: 13 },
+	{ name: __( 'Normal', 'your-text-domain' ), slug: 'normal', size: 16 },
+	{ name: __( 'Large', 'your-text-domain' ), slug: 'large', size: 36 },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontSize, fontSizeSlug } = attributes;
+
+	const handleChange = ( newSize ) => {
+		// Find the matching slug if a preset is selected
+		const preset = FONT_SIZES.find( ( f ) => f.size === newSize );
+		setAttributes( {
+			fontSize: newSize,
+			fontSizeSlug: preset ? preset.slug : 'custom',
+		} );
+	};
+
+	// Use CSS custom property when a preset slug is available
+	const fontSizeStyle = fontSizeSlug && fontSizeSlug !== 'custom'
+		? { fontSize: `var(--wp--preset--font-size--${ fontSizeSlug })` }
+		: { fontSize: fontSize ? `${ fontSize }px` : undefined };
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<FontSizePicker
+						fontSizes={ FONT_SIZES }
+						value={ fontSize }
+						onChange={ handleChange }
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ fontSizeStyle }>
+				{ __( 'Text using CSS custom properties when possible.', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for slug
+
+```json
+{
+	"attributes": {
+		"fontSize": { "type": "number", "default": 16 },
+		"fontSizeSlug": { "type": "string", "default": "normal" }
+	}
+}
+```
+
+## Disable Custom Sizes
+
+Restrict users to only the predefined theme sizes:
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, FontSizePicker } from '@wordpress/components';
+
+const FONT_SIZES = [
+	{ name: __( 'Small', 'your-text-domain' ), slug: 'small', size: 13 },
+	{ name: __( 'Normal', 'your-text-domain' ), slug: 'normal', size: 16 },
+	{ name: __( 'Large', 'your-text-domain' ), slug: 'large', size: 36 },
+];
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { fontSize } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Typography', 'your-text-domain' ) }>
+					<FontSizePicker
+						fontSizes={ FONT_SIZES }
+						value={ fontSize }
+						onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+						disableCustomFontSizes
+					/>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps } style={ { fontSize: `${ fontSize }px` } }>
+				{ __( 'Preset sizes only.', 'your-text-domain' ) }
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { fontSize, fontSizeSlug } = attributes;
+
+	const style = fontSizeSlug && fontSizeSlug !== 'custom'
+		? { fontSize: `var(--wp--preset--font-size--${ fontSizeSlug })` }
+		: { fontSize: fontSize ? `${ fontSize }px` : undefined };
+
+	return (
+		<div { ...blockProps } style={ style }>
+			{ /* Block text content */ }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `fontSizes` | array | `[]` | Array of `{ name, slug, size }` preset objects |
+| `value` | number | - | Current font size value in pixels |
+| `onChange` | function | - | Callback receiving the new numeric size (or `undefined` when reset) |
+| `disableCustomFontSizes` | boolean | `false` | Hides the custom size input; only preset options shown |
+| `withSlider` | boolean | `false` | Shows a range slider alongside the input field |
+| `withReset` | boolean | `true` | Shows a reset button to clear the value |
+| `size` | string | `'default'` | Control size: `'default'` or `'__unstable-large'` |
+| `__nextHasNoMarginBottom` | boolean | `false` | Removes bottom margin (design system opt-in) |
+
+## fontSizes Array Shape
+
+```javascript
+{
+	name: 'Large',     // Human-readable label shown in the UI
+	slug: 'large',     // Used for CSS custom property: var(--wp--preset--font-size--large)
+	size: 36,          // Numeric pixel value
+}
+```
+
+## Common Use Cases
+
+1. **Heading size control**: Let users choose H2/H3 font size from presets
+2. **Body text size**: Adjust paragraph font size to match reading context
+3. **Label / caption size**: Fine-grained control for smaller UI text
+4. **Responsive type**: Store a size that maps to a CSS custom property for theme scaling
+5. **Plugin admin typography**: Font size in settings pages and dashboards
+
+## Accessibility
+
+- Renders as a button group for preset sizes — keyboard navigable with arrow keys
+- Custom input is a standard `<input type="number">` with accessible label
+- Reset button has an accessible label ("Reset")
+- Selected preset is highlighted with `aria-pressed="true"`
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Define `fontSizes` using `__()` from `@wordpress/i18n` for all name strings
+- Store both the numeric `fontSize` and the `fontSizeSlug` when referencing theme presets
+- Use `var(--wp--preset--font-size--{slug})` CSS custom properties in `save.js` when a preset is active — this respects theme overrides
+- For full block typography support, use `typography` in `block.json` `supports` instead of manual `FontSizePicker`

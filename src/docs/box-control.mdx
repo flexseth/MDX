@@ -1,0 +1,262 @@
+import BoxControl from '../components/BoxControl';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export const PaddingDemo = () => {
+  const [values, setValues] = useLocalStorage('demo-box-padding', {
+    top: '16px', right: '16px', bottom: '16px', left: '16px',
+  });
+  return (
+    <div>
+      <BoxControl
+        label="Padding"
+        values={values}
+        onChange={setValues}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        background: '#e0e7ff',
+        borderRadius: '0.375rem',
+        display: 'inline-block',
+      }}>
+        <div style={{
+          paddingTop:    values.top    || '0',
+          paddingRight:  values.right  || '0',
+          paddingBottom: values.bottom || '0',
+          paddingLeft:   values.left   || '0',
+          background: '#fff',
+          border: '1px solid #c7d2fe',
+          borderRadius: '0.25rem',
+          fontSize: '0.9375rem',
+          minWidth: '120px',
+          textAlign: 'center',
+        }}>
+          Content
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const BorderWidthDemo = () => {
+  const [values, setValues] = useLocalStorage('demo-box-border', {
+    top: '2px', right: '2px', bottom: '2px', left: '2px',
+  });
+  return (
+    <div>
+      <BoxControl
+        label="Border Width"
+        values={values}
+        onChange={setValues}
+        units={[{ value: 'px', label: 'px' }]}
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        padding: '1rem',
+        borderStyle: 'solid',
+        borderColor: '#6366f1',
+        borderTopWidth:    values.top    || '0',
+        borderRightWidth:  values.right  || '0',
+        borderBottomWidth: values.bottom || '0',
+        borderLeftWidth:   values.left   || '0',
+        borderRadius: '0.375rem',
+        fontSize: '0.9375rem',
+        background: '#fafafa',
+      }}>
+        Block with custom border widths
+      </div>
+    </div>
+  );
+};
+
+export const VerticalHorizontalDemo = () => {
+  const [values, setValues] = useLocalStorage('demo-box-axes', {
+    top: '24px', right: '16px', bottom: '24px', left: '16px',
+  });
+  return (
+    <div>
+      <BoxControl
+        label="Padding (axis mode)"
+        values={values}
+        onChange={setValues}
+        splitOnAxis
+      />
+      <div style={{
+        marginTop: '0.75rem',
+        background: '#f0fdf4',
+        borderRadius: '0.375rem',
+        display: 'inline-block',
+      }}>
+        <div style={{
+          paddingTop:    values.top    || '0',
+          paddingRight:  values.right  || '0',
+          paddingBottom: values.bottom || '0',
+          paddingLeft:   values.left   || '0',
+          background: '#fff',
+          border: '1px solid #bbf7d0',
+          borderRadius: '0.25rem',
+          fontSize: '0.9375rem',
+          minWidth: '120px',
+          textAlign: 'center',
+        }}>
+          Content
+        </div>
+      </div>
+    </div>
+  );
+};
+
+# BoxControl
+
+A four-sided control for padding, margin, and border values. Mirrors the WordPress [`__experimentalBoxControl`](https://developer.wordpress.org/block-editor/reference-guides/components/box-control/) from `@wordpress/components`.
+
+Supports linked (all sides equal) and per-side editing. Toggle the link icon to switch modes.
+
+## Padding
+
+<PaddingDemo />
+
+```jsx
+import { __experimentalBoxControl as BoxControl } from '@wordpress/components';
+
+<BoxControl
+  label={ __( 'Padding', 'your-text-domain' ) }
+  values={ paddingValues }
+  onChange={ ( value ) => setAttributes( { paddingValues: value } ) }
+/>
+```
+
+## Border Width
+
+<BorderWidthDemo />
+
+```jsx
+<BoxControl
+  label={ __( 'Border Width', 'your-text-domain' ) }
+  values={ borderWidth }
+  onChange={ ( value ) => setAttributes( { borderWidth: value } ) }
+  units={ [ { value: 'px', label: 'px' } ] }
+/>
+```
+
+## Axis Mode (splitOnAxis)
+
+`splitOnAxis` collapses the four sides into Vertical (top/bottom) and Horizontal (right/left) pairs.
+
+<VerticalHorizontalDemo />
+
+```jsx
+<BoxControl
+  label={ __( 'Padding', 'your-text-domain' ) }
+  values={ paddingValues }
+  onChange={ ( value ) => setAttributes( { paddingValues: value } ) }
+  splitOnAxis
+/>
+```
+
+## WordPress Usage (edit.js)
+
+```jsx
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { PanelBody, __experimentalBoxControl as BoxControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+  const { paddingValues } = attributes;
+  const blockProps = useBlockProps( {
+    style: {
+      paddingTop:    paddingValues?.top,
+      paddingRight:  paddingValues?.right,
+      paddingBottom: paddingValues?.bottom,
+      paddingLeft:   paddingValues?.left,
+    },
+  } );
+
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={ __( 'Spacing', 'your-text-domain' ) }>
+          <BoxControl
+            label={ __( 'Padding', 'your-text-domain' ) }
+            values={ paddingValues }
+            onChange={ ( value ) => setAttributes( { paddingValues: value } ) }
+          />
+        </PanelBody>
+      </InspectorControls>
+      <div { ...blockProps }>
+        { __( 'Block content', 'your-text-domain' ) }
+      </div>
+    </>
+  );
+}
+```
+
+## block.json Attributes
+
+```json
+{
+  "attributes": {
+    "paddingValues": {
+      "type": "object",
+      "default": { "top": "0px", "right": "0px", "bottom": "0px", "left": "0px" }
+    }
+  }
+}
+```
+
+## Props
+
+<PropsTable props={[
+  {
+    name: 'label',
+    type: 'string',
+    default: "'Box Control'",
+    required: false,
+    description: 'Label displayed above the control.'
+  },
+  {
+    name: 'values',
+    type: 'object',
+    default: '{}',
+    required: false,
+    description: 'Current CSS values as an object: { top, right, bottom, left }. Each value is a CSS string like "16px".'
+  },
+  {
+    name: 'onChange',
+    type: 'function',
+    default: '',
+    required: false,
+    description: 'Callback fired with the updated values object whenever any side changes.'
+  },
+  {
+    name: 'units',
+    type: 'Array<{ value, label }>',
+    default: '[px, em, rem, %]',
+    required: false,
+    description: 'Available CSS units. Changing the unit re-emits all values with the new unit.'
+  },
+  {
+    name: 'sides',
+    type: 'string[]',
+    default: "['top','right','bottom','left']",
+    required: false,
+    description: "Limit which sides are shown. E.g. ['top', 'bottom'] for vertical-only."
+  },
+  {
+    name: 'splitOnAxis',
+    type: 'boolean',
+    default: 'false',
+    required: false,
+    description: 'Collapses four inputs into Vertical (top/bottom) and Horizontal (right/left) pairs.'
+  },
+  {
+    name: 'className',
+    type: 'string',
+    default: "''",
+    required: false,
+    description: 'Additional CSS class names applied to the wrapper element.'
+  }
+]} />
+
+## WordPress Mapping
+
+`BoxControl` is imported as `__experimentalBoxControl` from `@wordpress/components` — the `__experimental` prefix means the API may change in future WordPress versions. The `values` object uses complete CSS strings (`"16px"`) not bare numbers, so changes preserve the unit. Store the entire object as an `object` type attribute in `block.json`. Apply values to the block wrapper via `useBlockProps` inline styles or a generated CSS class.

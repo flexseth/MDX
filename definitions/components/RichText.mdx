@@ -1,0 +1,656 @@
+---
+title: RichText Component
+component: RichText
+package: '@wordpress/block-editor'
+category: Content Controls
+description: An editable rich text component for creating formatted text content in WordPress blocks
+---
+
+# RichText Component
+
+The `RichText` component provides an editable rich text field that supports formatting like bold, italic, links, and more.
+
+## Installation
+
+This component is included in the `@wordpress/block-editor` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { RichText } from '@wordpress/block-editor';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"content": {
+			"type": "string",
+			"source": "html",
+			"selector": "p"
+		}
+	}
+}
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { content } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="p"
+			value={ content }
+			onChange={ ( value ) => setAttributes( { content: value } ) }
+			placeholder={ __( 'Enter your text here...', 'your-text-domain' ) }
+		/>
+	);
+}
+```
+
+## save.js
+
+```javascript
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { content } = attributes;
+
+	return (
+		<RichText.Content
+			{ ...blockProps }
+			tagName="p"
+			value={ content }
+		/>
+	);
+}
+```
+
+## Heading (H1-H6)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { heading } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="h2"
+			value={ heading }
+			onChange={ ( value ) => setAttributes( { heading: value } ) }
+			placeholder={ __( 'Enter heading...', 'your-text-domain' ) }
+		/>
+	);
+}
+```
+
+### block.json for heading
+
+```json
+{
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"source": "html",
+			"selector": "h2"
+		}
+	}
+}
+```
+
+### save.js for heading
+
+```javascript
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { heading } = attributes;
+
+	return (
+		<RichText.Content
+			{ ...blockProps }
+			tagName="h2"
+			value={ heading }
+		/>
+	);
+}
+```
+
+## Multiple RichText Fields
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title, subtitle, content } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<RichText
+				tagName="h2"
+				value={ title }
+				onChange={ ( value ) => setAttributes( { title: value } ) }
+				placeholder={ __( 'Enter title...', 'your-text-domain' ) }
+			/>
+			<RichText
+				tagName="h3"
+				value={ subtitle }
+				onChange={ ( value ) => setAttributes( { subtitle: value } ) }
+				placeholder={ __( 'Enter subtitle...', 'your-text-domain' ) }
+			/>
+			<RichText
+				tagName="p"
+				value={ content }
+				onChange={ ( value ) => setAttributes( { content: value } ) }
+				placeholder={ __( 'Enter content...', 'your-text-domain' ) }
+			/>
+		</div>
+	);
+}
+```
+
+### block.json for multiple fields
+
+```json
+{
+	"attributes": {
+		"title": {
+			"type": "string",
+			"source": "html",
+			"selector": "h2"
+		},
+		"subtitle": {
+			"type": "string",
+			"source": "html",
+			"selector": "h3"
+		},
+		"content": {
+			"type": "string",
+			"source": "html",
+			"selector": "p"
+		}
+	}
+}
+```
+
+### save.js for multiple fields
+
+```javascript
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { title, subtitle, content } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<RichText.Content tagName="h2" value={ title } />
+			<RichText.Content tagName="h3" value={ subtitle } />
+			<RichText.Content tagName="p" value={ content } />
+		</div>
+	);
+}
+```
+
+## Limited Formatting (No Bold, Italic)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { plainText } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="p"
+			value={ plainText }
+			onChange={ ( value ) => setAttributes( { plainText: value } ) }
+			placeholder={ __( 'Enter plain text...', 'your-text-domain' ) }
+			allowedFormats={ [] }
+		/>
+	);
+}
+```
+
+### block.json for plain text
+
+```json
+{
+	"attributes": {
+		"plainText": {
+			"type": "string",
+			"source": "html",
+			"selector": "p"
+		}
+	}
+}
+```
+
+## Custom Allowed Formats
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { text } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="p"
+			value={ text }
+			onChange={ ( value ) => setAttributes( { text: value } ) }
+			placeholder={ __( 'Enter text (bold and italic only)...', 'your-text-domain' ) }
+			allowedFormats={ [ 'core/bold', 'core/italic' ] }
+		/>
+	);
+}
+```
+
+### block.json for custom formats
+
+```json
+{
+	"attributes": {
+		"text": {
+			"type": "string",
+			"source": "html",
+			"selector": "p"
+		}
+	}
+}
+```
+
+## With Custom Styling
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { quote } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="blockquote"
+			value={ quote }
+			onChange={ ( value ) => setAttributes( { quote: value } ) }
+			placeholder={ __( 'Enter quote...', 'your-text-domain' ) }
+			style={ {
+				fontStyle: 'italic',
+				fontSize: '24px',
+				borderLeft: '4px solid #ccc',
+				paddingLeft: '20px',
+			} }
+		/>
+	);
+}
+```
+
+### block.json for styled quote
+
+```json
+{
+	"attributes": {
+		"quote": {
+			"type": "string",
+			"source": "html",
+			"selector": "blockquote"
+		}
+	}
+}
+```
+
+### save.js for styled quote
+
+```javascript
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { quote } = attributes;
+
+	return (
+		<RichText.Content
+			{ ...blockProps }
+			tagName="blockquote"
+			value={ quote }
+			style={ {
+				fontStyle: 'italic',
+				fontSize: '24px',
+				borderLeft: '4px solid #ccc',
+				paddingLeft: '20px',
+			} }
+		/>
+	);
+}
+```
+
+## Multiline (Paragraphs)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { content } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="div"
+			multiline="p"
+			value={ content }
+			onChange={ ( value ) => setAttributes( { content: value } ) }
+			placeholder={ __( 'Enter multiple paragraphs...', 'your-text-domain' ) }
+		/>
+	);
+}
+```
+
+### block.json for multiline
+
+```json
+{
+	"attributes": {
+		"content": {
+			"type": "string",
+			"source": "html",
+			"selector": "div",
+			"multiline": "p"
+		}
+	}
+}
+```
+
+### save.js for multiline
+
+```javascript
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { content } = attributes;
+
+	return (
+		<RichText.Content
+			{ ...blockProps }
+			tagName="div"
+			multiline="p"
+			value={ content }
+		/>
+	);
+}
+```
+
+## With Dynamic Class Names
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { text, isHighlighted } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="p"
+			value={ text }
+			onChange={ ( value ) => setAttributes( { text: value } ) }
+			placeholder={ __( 'Enter text...', 'your-text-domain' ) }
+			className={ isHighlighted ? 'highlighted' : '' }
+		/>
+	);
+}
+```
+
+### block.json for dynamic classes
+
+```json
+{
+	"attributes": {
+		"text": {
+			"type": "string",
+			"source": "html",
+			"selector": "p"
+		},
+		"isHighlighted": {
+			"type": "boolean",
+			"default": false
+		}
+	}
+}
+```
+
+## Button with RichText
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { buttonText } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="a"
+			value={ buttonText }
+			onChange={ ( value ) => setAttributes( { buttonText: value } ) }
+			placeholder={ __( 'Button text...', 'your-text-domain' ) }
+			className="wp-block-button__link"
+			allowedFormats={ [] }
+		/>
+	);
+}
+```
+
+### block.json for button
+
+```json
+{
+	"attributes": {
+		"buttonText": {
+			"type": "string",
+			"source": "html",
+			"selector": "a"
+		}
+	}
+}
+```
+
+### save.js for button
+
+```javascript
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { buttonText } = attributes;
+
+	return (
+		<RichText.Content
+			{ ...blockProps }
+			tagName="a"
+			value={ buttonText }
+			className="wp-block-button__link"
+		/>
+	);
+}
+```
+
+## List (Ordered/Unordered)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { listItems } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="ul"
+			multiline="li"
+			value={ listItems }
+			onChange={ ( value ) => setAttributes( { listItems: value } ) }
+			placeholder={ __( 'Add list items...', 'your-text-domain' ) }
+		/>
+	);
+}
+```
+
+### block.json for list
+
+```json
+{
+	"attributes": {
+		"listItems": {
+			"type": "string",
+			"source": "html",
+			"selector": "ul",
+			"multiline": "li"
+		}
+	}
+}
+```
+
+### save.js for list
+
+```javascript
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { listItems } = attributes;
+
+	return (
+		<RichText.Content
+			{ ...blockProps }
+			tagName="ul"
+			multiline="li"
+			value={ listItems }
+		/>
+	);
+}
+```
+
+## Keep Placeholder on Focus
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { content } = attributes;
+
+	return (
+		<RichText
+			{ ...blockProps }
+			tagName="p"
+			value={ content }
+			onChange={ ( value ) => setAttributes( { content: value } ) }
+			placeholder={ __( 'This placeholder stays visible...', 'your-text-domain' ) }
+			keepPlaceholderOnFocus
+		/>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `tagName` | string | - | HTML tag to use (p, h1-h6, div, blockquote, etc.) |
+| `value` | string | - | Current content value (HTML string) |
+| `onChange` | function | - | Callback when content changes |
+| `placeholder` | string | - | Placeholder text when empty |
+| `allowedFormats` | array | all | Allowed formatting options (see below) |
+| `multiline` | string/boolean | `false` | Enable multiline (e.g., 'p', 'li') |
+| `className` | string | - | Additional CSS classes |
+| `style` | object | - | Inline styles |
+| `keepPlaceholderOnFocus` | boolean | `false` | Keep placeholder visible when focused |
+| `withoutInteractiveFormatting` | boolean | `false` | Disable link creation |
+| `preserveWhiteSpace` | boolean | `false` | Preserve white space and line breaks |
+
+## Available Formats
+
+```javascript
+allowedFormats={ [
+	'core/bold',
+	'core/italic',
+	'core/link',
+	'core/image',
+	'core/strikethrough',
+	'core/underline',
+	'core/text-color',
+	'core/subscript',
+	'core/superscript',
+	'core/code',
+] }
+```
+
+## Common Use Cases
+
+1. **Headings**: Editable heading text (h1-h6)
+2. **Paragraphs**: Body content with formatting
+3. **Quotes**: Blockquote or pull quotes
+4. **Buttons**: Button text (usually no formatting)
+5. **Lists**: Ordered or unordered lists
+6. **Call-to-Action**: Marketing copy with emphasis
+
+## Best Practices
+
+- Always use appropriate `tagName` for semantic HTML
+- Set `allowedFormats={ [] }` for plain text (buttons, labels)
+- Use `multiline` for content that needs multiple paragraphs
+- Provide descriptive placeholder text
+- Match edit.js and save.js tag names exactly
+- Use `source: "html"` in block.json attributes
+- Include `selector` in block.json to match tagName
+
+## Accessibility
+
+- Use semantic HTML tags (h1-h6, p, blockquote)
+- Don't skip heading levels
+- Ensure sufficient color contrast
+- Test with screen readers
+- Support keyboard navigation (built-in)
+
+## WordPress Standards
+
+- Import from `@wordpress/block-editor`
+- Use `RichText.Content` in save.js (not RichText)
+- Use `@wordpress/i18n` for translatable placeholders
+- Define HTML source attributes in `block.json`
+- Always specify `selector` for proper content extraction

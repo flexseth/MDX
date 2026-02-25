@@ -1,0 +1,284 @@
+---
+title: Button Component
+component: Button
+package: '@wordpress/components'
+category: Form Controls
+description: A button component for actions and interactions in WordPress blocks
+---
+
+# Button Component
+
+The `Button` component from `@wordpress/components` provides a versatile button element with various styles and states.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { Button } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	const handleClick = () => {
+		alert( __( 'Button clicked!', 'your-text-domain' ) );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="primary"
+				onClick={ handleClick }
+			>
+				{ __( 'Click Me', 'your-text-domain' ) }
+			</Button>
+		</div>
+	);
+}
+```
+
+## Button Variants
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<div style={ { display: 'flex', gap: '10px', flexWrap: 'wrap' } }>
+				<Button variant="primary">
+					{ __( 'Primary', 'your-text-domain' ) }
+				</Button>
+
+				<Button variant="secondary">
+					{ __( 'Secondary', 'your-text-domain' ) }
+				</Button>
+
+				<Button variant="tertiary">
+					{ __( 'Tertiary', 'your-text-domain' ) }
+				</Button>
+
+				<Button variant="link">
+					{ __( 'Link', 'your-text-domain' ) }
+				</Button>
+			</div>
+		</div>
+	);
+}
+```
+
+## Button with Icon
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { plus, trash, edit } from '@wordpress/icons';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<div style={ { display: 'flex', gap: '10px' } }>
+				<Button
+					variant="primary"
+					icon={ plus }
+				>
+					{ __( 'Add Item', 'your-text-domain' ) }
+				</Button>
+
+				<Button
+					variant="secondary"
+					icon={ edit }
+					iconPosition="right"
+				>
+					{ __( 'Edit', 'your-text-domain' ) }
+				</Button>
+
+				<Button
+					isDestructive
+					icon={ trash }
+				>
+					{ __( 'Delete', 'your-text-domain' ) }
+				</Button>
+			</div>
+		</div>
+	);
+}
+```
+
+## Icon-Only Button
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { settings, help, close } from '@wordpress/icons';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<div style={ { display: 'flex', gap: '10px' } }>
+				<Button
+					icon={ settings }
+					label={ __( 'Settings', 'your-text-domain' ) }
+				/>
+
+				<Button
+					icon={ help }
+					label={ __( 'Help', 'your-text-domain' ) }
+					showTooltip
+				/>
+
+				<Button
+					icon={ close }
+					label={ __( 'Close', 'your-text-domain' ) }
+					isDestructive
+				/>
+			</div>
+		</div>
+	);
+}
+```
+
+## Disabled State
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="primary"
+				disabled
+			>
+				{ __( 'Disabled Button', 'your-text-domain' ) }
+			</Button>
+		</div>
+	);
+}
+```
+
+## Loading State (isBusy)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+import { useState } from '@wordpress/element';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+	const [ isBusy, setIsBusy ] = useState( false );
+
+	const handleSubmit = () => {
+		setIsBusy( true );
+
+		// Simulate API call
+		setTimeout( () => {
+			setIsBusy( false );
+			alert( __( 'Submitted!', 'your-text-domain' ) );
+		}, 2000 );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="primary"
+				onClick={ handleSubmit }
+				isBusy={ isBusy }
+			>
+				{ isBusy
+					? __( 'Submitting...', 'your-text-domain' )
+					: __( 'Submit', 'your-text-domain' )
+				}
+			</Button>
+		</div>
+	);
+}
+```
+
+## Full-Width Button
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit() {
+	const blockProps = useBlockProps();
+
+	return (
+		<div { ...blockProps }>
+			<Button
+				variant="primary"
+				__next40pxDefaultSize
+				style={ { width: '100%' } }
+			>
+				{ __( 'Full Width Button', 'your-text-domain' ) }
+			</Button>
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `variant` | string | `'secondary'` | Button style: `'primary'`, `'secondary'`, `'tertiary'`, `'link'` |
+| `onClick` | function | - | Click handler function |
+| `icon` | Component | - | Icon component from `@wordpress/icons` |
+| `iconPosition` | string | `'left'` | Icon position: `'left'` or `'right'` |
+| `label` | string | - | Accessible label (required for icon-only buttons) |
+| `showTooltip` | boolean | `false` | Show tooltip on hover |
+| `disabled` | boolean | `false` | Disable the button |
+| `isBusy` | boolean | `false` | Show loading/busy state |
+| `isDestructive` | boolean | `false` | Style for destructive actions |
+| `isPressed` | boolean | - | For toggle buttons, indicates pressed state |
+| `className` | string | - | Additional CSS classes |
+| `children` | node | - | Button content/text |
+
+## Common Use Cases
+
+1. **Call-to-Action**: Use `variant="primary"` for main actions
+2. **Secondary Actions**: Use `variant="secondary"` for alternative actions
+3. **Destructive Actions**: Add `isDestructive` prop for delete/remove actions
+4. **Toolbar Buttons**: Use icon-only buttons with `label` and `showTooltip`
+5. **Loading States**: Use `isBusy` during async operations
+
+## Accessibility
+
+- Always provide accessible text or `label` prop
+- Use `showTooltip` for icon-only buttons
+- Ensure sufficient color contrast
+- Support keyboard navigation automatically
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `@wordpress/i18n` for translatable text
+- Use icons from `@wordpress/icons`
+- Follow block editor design patterns

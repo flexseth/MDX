@@ -1,0 +1,392 @@
+---
+title: TabPanel Component
+component: TabPanel
+package: '@wordpress/components'
+category: Layout
+description: A tabbed interface for organizing settings into labeled sections; commonly used in complex block sidebars and plugin settings pages
+---
+
+# TabPanel Component
+
+`TabPanel` renders a set of tabs with associated content panels. Use it when a block or settings page has enough controls that a single flat list becomes unwieldy. It is especially useful for separating "General", "Style", and "Advanced" settings in the block inspector.
+
+## Installation
+
+This component is included in the `@wordpress/components` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { TabPanel } from '@wordpress/components';
+```
+
+## Basic Usage in edit.js
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { TabPanel, TextControl, RangeControl, ToggleControl } from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { title, fontSize, showBorder } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<TabPanel
+					tabs={ [
+						{
+							name: 'general',
+							title: __( 'General', 'your-text-domain' ),
+						},
+						{
+							name: 'style',
+							title: __( 'Style', 'your-text-domain' ),
+						},
+					] }
+				>
+					{ ( tab ) => (
+						<>
+							{ tab.name === 'general' && (
+								<TextControl
+									label={ __( 'Title', 'your-text-domain' ) }
+									value={ title }
+									onChange={ ( value ) => setAttributes( { title: value } ) }
+								/>
+							) }
+							{ tab.name === 'style' && (
+								<>
+									<RangeControl
+										label={ __( 'Font size', 'your-text-domain' ) }
+										value={ fontSize }
+										onChange={ ( value ) => setAttributes( { fontSize: value } ) }
+										min={ 12 }
+										max={ 72 }
+									/>
+									<ToggleControl
+										label={ __( 'Show border', 'your-text-domain' ) }
+										checked={ showBorder }
+										onChange={ ( value ) => setAttributes( { showBorder: value } ) }
+									/>
+								</>
+							) }
+						</>
+					) }
+				</TabPanel>
+			</InspectorControls>
+			<div { ...blockProps } style={ { fontSize: `${ fontSize }px`, border: showBorder ? '1px solid currentColor' : 'none' } }>
+				<h2>{ title }</h2>
+			</div>
+		</>
+	);
+}
+```
+
+### block.json
+
+```json
+{
+	"attributes": {
+		"title": { "type": "string", "default": "" },
+		"fontSize": { "type": "number", "default": 16 },
+		"showBorder": { "type": "boolean", "default": false }
+	}
+}
+```
+
+## Three-Tab Settings Panel
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	TabPanel,
+	PanelBody,
+	TextControl,
+	TextareaControl,
+	ColorPalette,
+	RangeControl,
+	SelectControl,
+} from '@wordpress/components';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { heading, description, backgroundColor, padding, layout } = attributes;
+
+	const tabs = [
+		{ name: 'content', title: __( 'Content', 'your-text-domain' ) },
+		{ name: 'design', title: __( 'Design', 'your-text-domain' ) },
+		{ name: 'advanced', title: __( 'Advanced', 'your-text-domain' ) },
+	];
+
+	return (
+		<>
+			<InspectorControls>
+				<TabPanel tabs={ tabs }>
+					{ ( { name } ) => {
+						if ( name === 'content' ) {
+							return (
+								<PanelBody>
+									<TextControl
+										label={ __( 'Heading', 'your-text-domain' ) }
+										value={ heading }
+										onChange={ ( value ) => setAttributes( { heading: value } ) }
+									/>
+									<TextareaControl
+										label={ __( 'Description', 'your-text-domain' ) }
+										value={ description }
+										onChange={ ( value ) => setAttributes( { description: value } ) }
+									/>
+								</PanelBody>
+							);
+						}
+
+						if ( name === 'design' ) {
+							return (
+								<PanelBody>
+									<p>{ __( 'Background Color', 'your-text-domain' ) }</p>
+									<ColorPalette
+										value={ backgroundColor }
+										onChange={ ( value ) => setAttributes( { backgroundColor: value } ) }
+									/>
+									<RangeControl
+										label={ __( 'Padding', 'your-text-domain' ) }
+										value={ padding }
+										onChange={ ( value ) => setAttributes( { padding: value } ) }
+										min={ 0 }
+										max={ 80 }
+									/>
+								</PanelBody>
+							);
+						}
+
+						if ( name === 'advanced' ) {
+							return (
+								<PanelBody>
+									<SelectControl
+										label={ __( 'Layout', 'your-text-domain' ) }
+										value={ layout }
+										options={ [
+											{ label: __( 'Default', 'your-text-domain' ), value: 'default' },
+											{ label: __( 'Wide', 'your-text-domain' ), value: 'wide' },
+											{ label: __( 'Full width', 'your-text-domain' ), value: 'full' },
+										] }
+										onChange={ ( value ) => setAttributes( { layout: value } ) }
+									/>
+								</PanelBody>
+							);
+						}
+					} }
+				</TabPanel>
+			</InspectorControls>
+			<div
+				{ ...blockProps }
+				style={ { backgroundColor, padding: `${ padding }px` } }
+				className={ `layout-${ layout }` }
+			>
+				{ heading && <h2>{ heading }</h2> }
+				{ description && <p>{ description }</p> }
+			</div>
+		</>
+	);
+}
+```
+
+### block.json for three tabs
+
+```json
+{
+	"attributes": {
+		"heading": { "type": "string", "default": "" },
+		"description": { "type": "string", "default": "" },
+		"backgroundColor": { "type": "string", "default": "" },
+		"padding": { "type": "number", "default": 16 },
+		"layout": { "type": "string", "default": "default" }
+	}
+}
+```
+
+## TabPanel with Icons
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { TabPanel, PanelBody, TextControl, RangeControl } from '@wordpress/components';
+import { paragraph, image, settings } from '@wordpress/icons';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { text, imageSize, columns } = attributes;
+
+	return (
+		<>
+			<InspectorControls>
+				<TabPanel
+					tabs={ [
+						{ name: 'text', title: __( 'Text', 'your-text-domain' ), icon: paragraph },
+						{ name: 'media', title: __( 'Media', 'your-text-domain' ), icon: image },
+						{ name: 'settings', title: __( 'Settings', 'your-text-domain' ), icon: settings },
+					] }
+				>
+					{ ( { name } ) => (
+						<PanelBody>
+							{ name === 'text' && (
+								<TextControl
+									label={ __( 'Text content', 'your-text-domain' ) }
+									value={ text }
+									onChange={ ( value ) => setAttributes( { text: value } ) }
+								/>
+							) }
+							{ name === 'media' && (
+								<RangeControl
+									label={ __( 'Image size', 'your-text-domain' ) }
+									value={ imageSize }
+									onChange={ ( value ) => setAttributes( { imageSize: value } ) }
+									min={ 100 }
+									max={ 1200 }
+									step={ 50 }
+								/>
+							) }
+							{ name === 'settings' && (
+								<RangeControl
+									label={ __( 'Columns', 'your-text-domain' ) }
+									value={ columns }
+									onChange={ ( value ) => setAttributes( { columns: value } ) }
+									min={ 1 }
+									max={ 4 }
+								/>
+							) }
+						</PanelBody>
+					) }
+				</TabPanel>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ text && <p>{ text }</p> }
+			</div>
+		</>
+	);
+}
+```
+
+## TabPanel with Active Tab State
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import { TabPanel, PanelBody, Notice } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+export default function Edit( { attributes } ) {
+	const blockProps = useBlockProps();
+	const [ activeTab, setActiveTab ] = useState( 'general' );
+	const hasErrors = ! attributes.title;
+
+	return (
+		<>
+			<InspectorControls>
+				<TabPanel
+					tabs={ [
+						{
+							name: 'general',
+							title: __( 'General', 'your-text-domain' ),
+							className: hasErrors ? 'has-error' : '',
+						},
+						{
+							name: 'style',
+							title: __( 'Style', 'your-text-domain' ),
+						},
+					] }
+					onSelect={ ( tabName ) => setActiveTab( tabName ) }
+					initialTabName="general"
+				>
+					{ ( { name } ) => (
+						<PanelBody>
+							{ name === 'general' && hasErrors && (
+								<Notice status="warning" isDismissible={ false }>
+									{ __( 'Please add a title.', 'your-text-domain' ) }
+								</Notice>
+							) }
+							{ name === 'general' && (
+								<p>{ __( 'General settings content.', 'your-text-domain' ) }</p>
+							) }
+							{ name === 'style' && (
+								<p>{ __( 'Style settings content.', 'your-text-domain' ) }</p>
+							) }
+						</PanelBody>
+					) }
+				</TabPanel>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ __( 'Block content — active tab:', 'your-text-domain' ) } { activeTab }
+			</div>
+		</>
+	);
+}
+```
+
+## save.js
+
+`TabPanel` is editor-only and does not render on the front end:
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { heading, description, backgroundColor, padding } = attributes;
+
+	return (
+		<div { ...blockProps } style={ { backgroundColor, padding: `${ padding }px` } }>
+			{ heading && <h2>{ heading }</h2> }
+			{ description && <p>{ description }</p> }
+		</div>
+	);
+}
+```
+
+## Props Reference
+
+### TabPanel
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `tabs` | array | - | Array of tab objects (required) |
+| `children` | function | - | Render prop receiving the active tab object |
+| `initialTabName` | string | First tab's name | Name of the tab to show on mount |
+| `onSelect` | function | - | Callback receiving the newly selected tab name |
+| `className` | string | - | Additional CSS classes |
+| `orientation` | string | `'horizontal'` | Tab orientation: `'horizontal'` or `'vertical'` |
+
+### Tab Object Shape
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | string | Yes | Unique identifier for the tab |
+| `title` | string | Yes | Visible tab label |
+| `className` | string | No | CSS class applied to the tab button |
+| `icon` | Component | No | Icon from `@wordpress/icons` |
+| `disabled` | boolean | No | Disables this tab |
+
+## Common Use Cases
+
+1. **Content / Design / Advanced** split in sidebar
+2. **Plugin admin pages** with multiple sections
+3. **Responsive settings**: Desktop, Tablet, Mobile tabs
+4. **Before / After**: Compare preview states
+5. **Step-by-step configuration** within the sidebar
+
+## Accessibility
+
+- Renders as `role="tablist"` with individual `role="tab"` buttons
+- Active panel has `role="tabpanel"` with matching `aria-labelledby`
+- Arrow keys navigate between tabs within the tab list
+- Tab key moves focus out of the tab list into the panel content
+
+## WordPress Standards
+
+- Import from `@wordpress/components`
+- Use `PanelBody` inside each tab panel for consistent sidebar styling and spacing
+- Keep tab names short (1-2 words) for the sidebar's limited width
+- Do not use more than 4 tabs in a sidebar — consider nested `PanelBody` instead
+- `TabPanel` is editor-only; never place it in `save.js`

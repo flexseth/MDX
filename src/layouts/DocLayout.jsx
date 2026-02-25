@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 const navItems = [
 	{ path: '/docs/getting-started', label: 'Getting Started' },
 	{ path: '/docs/alert', label: 'Alert' },
+	{ path: '/docs/box-control', label: 'BoxControl' },
 	{ path: '/docs/block-controls', label: 'BlockControls' },
 	{ path: '/docs/button', label: 'Button' },
 	{ path: '/docs/card', label: 'Card' },

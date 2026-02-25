@@ -1,0 +1,622 @@
+---
+title: MediaUpload Component
+component: MediaUpload
+package: '@wordpress/block-editor'
+category: Media
+description: A component for uploading and selecting media from the WordPress Media Library
+---
+
+# MediaUpload Component
+
+The `MediaUpload` component provides access to the WordPress Media Library for selecting images, videos, and other media files.
+
+## Installation
+
+This component is included in the `@wordpress/block-editor` package, which is already available when using `@wordpress/create-block`.
+
+## Required Imports
+
+```javascript
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+```
+
+## block.json Attributes
+
+```json
+{
+	"attributes": {
+		"imageId": {
+			"type": "number",
+			"default": 0
+		},
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"imageAlt": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Basic Image Upload
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageId, imageUrl, imageAlt } = attributes;
+
+	const onSelectImage = ( media ) => {
+		setAttributes( {
+			imageId: media.id,
+			imageUrl: media.url,
+			imageAlt: media.alt,
+		} );
+	};
+
+	const onRemoveImage = () => {
+		setAttributes( {
+			imageId: 0,
+			imageUrl: '',
+			imageAlt: '',
+		} );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<MediaUploadCheck>
+				<MediaUpload
+					onSelect={ onSelectImage }
+					allowedTypes={ [ 'image' ] }
+					value={ imageId }
+					render={ ( { open } ) => (
+						<>
+							{ ! imageUrl ? (
+								<Button variant="primary" onClick={ open }>
+									{ __( 'Upload Image', 'your-text-domain' ) }
+								</Button>
+							) : (
+								<div>
+									<img src={ imageUrl } alt={ imageAlt } />
+									<Button variant="secondary" onClick={ open }>
+										{ __( 'Replace Image', 'your-text-domain' ) }
+									</Button>
+									<Button isDestructive onClick={ onRemoveImage }>
+										{ __( 'Remove Image', 'your-text-domain' ) }
+									</Button>
+								</div>
+							) }
+						</>
+					) }
+				/>
+			</MediaUploadCheck>
+		</div>
+	);
+}
+```
+
+## save.js for Image
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { imageUrl, imageAlt } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			{ imageUrl && <img src={ imageUrl } alt={ imageAlt } /> }
+		</div>
+	);
+}
+```
+
+## Multiple Images (Gallery)
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { images } = attributes;
+
+	const onSelectImages = ( media ) => {
+		const selectedImages = media.map( ( image ) => ( {
+			id: image.id,
+			url: image.url,
+			alt: image.alt,
+		} ) );
+		setAttributes( { images: selectedImages } );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<MediaUploadCheck>
+				<MediaUpload
+					onSelect={ onSelectImages }
+					allowedTypes={ [ 'image' ] }
+					multiple
+					gallery
+					value={ images.map( ( img ) => img.id ) }
+					render={ ( { open } ) => (
+						<>
+							{ images.length === 0 ? (
+								<Button variant="primary" onClick={ open }>
+									{ __( 'Upload Images', 'your-text-domain' ) }
+								</Button>
+							) : (
+								<div>
+									<div
+										style={ {
+											display: 'grid',
+											gridTemplateColumns: 'repeat(3, 1fr)',
+											gap: '10px',
+										} }
+									>
+										{ images.map( ( image ) => (
+											<img
+												key={ image.id }
+												src={ image.url }
+												alt={ image.alt }
+												style={ { width: '100%' } }
+											/>
+										) ) }
+									</div>
+									<Button variant="secondary" onClick={ open }>
+										{ __( 'Edit Gallery', 'your-text-domain' ) }
+									</Button>
+								</div>
+							) }
+						</>
+					) }
+				/>
+			</MediaUploadCheck>
+		</div>
+	);
+}
+```
+
+### block.json for gallery
+
+```json
+{
+	"attributes": {
+		"images": {
+			"type": "array",
+			"default": []
+		}
+	}
+}
+```
+
+### save.js for gallery
+
+```javascript
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function save( { attributes } ) {
+	const blockProps = useBlockProps.save();
+	const { images } = attributes;
+
+	return (
+		<div { ...blockProps }>
+			<div
+				style={ {
+					display: 'grid',
+					gridTemplateColumns: 'repeat(3, 1fr)',
+					gap: '10px',
+				} }
+			>
+				{ images.map( ( image ) => (
+					<img
+						key={ image.id }
+						src={ image.url }
+						alt={ image.alt }
+						style={ { width: '100%' } }
+					/>
+				) ) }
+			</div>
+		</div>
+	);
+}
+```
+
+## Video Upload
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { videoId, videoUrl } = attributes;
+
+	const onSelectVideo = ( media ) => {
+		setAttributes( {
+			videoId: media.id,
+			videoUrl: media.url,
+		} );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<MediaUploadCheck>
+				<MediaUpload
+					onSelect={ onSelectVideo }
+					allowedTypes={ [ 'video' ] }
+					value={ videoId }
+					render={ ( { open } ) => (
+						<>
+							{ ! videoUrl ? (
+								<Button variant="primary" onClick={ open }>
+									{ __( 'Upload Video', 'your-text-domain' ) }
+								</Button>
+							) : (
+								<div>
+									<video controls src={ videoUrl } style={ { width: '100%' } } />
+									<Button variant="secondary" onClick={ open }>
+										{ __( 'Replace Video', 'your-text-domain' ) }
+									</Button>
+								</div>
+							) }
+						</>
+					) }
+				/>
+			</MediaUploadCheck>
+		</div>
+	);
+}
+```
+
+### block.json for video
+
+```json
+{
+	"attributes": {
+		"videoId": {
+			"type": "number",
+			"default": 0
+		},
+		"videoUrl": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## With Image Sizes
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button, SelectControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageId, imageUrl, imageSize } = attributes;
+
+	const onSelectImage = ( media ) => {
+		const selectedSize = media.sizes[ imageSize ] || media.sizes.full;
+		setAttributes( {
+			imageId: media.id,
+			imageUrl: selectedSize.url,
+		} );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<MediaUploadCheck>
+				<MediaUpload
+					onSelect={ onSelectImage }
+					allowedTypes={ [ 'image' ] }
+					value={ imageId }
+					render={ ( { open } ) => (
+						<>
+							{ imageUrl && (
+								<>
+									<img src={ imageUrl } alt="" />
+									<SelectControl
+										label={ __( 'Image Size', 'your-text-domain' ) }
+										value={ imageSize }
+										options={ [
+											{ label: __( 'Thumbnail', 'your-text-domain' ), value: 'thumbnail' },
+											{ label: __( 'Medium', 'your-text-domain' ), value: 'medium' },
+											{ label: __( 'Large', 'your-text-domain' ), value: 'large' },
+											{ label: __( 'Full', 'your-text-domain' ), value: 'full' },
+										] }
+										onChange={ ( value ) => setAttributes( { imageSize: value } ) }
+									/>
+								</>
+							) }
+							<Button variant="primary" onClick={ open }>
+								{ imageUrl
+									? __( 'Replace Image', 'your-text-domain' )
+									: __( 'Upload Image', 'your-text-domain' )
+								}
+							</Button>
+						</>
+					) }
+				/>
+			</MediaUploadCheck>
+		</div>
+	);
+}
+```
+
+### block.json for image sizes
+
+```json
+{
+	"attributes": {
+		"imageId": {
+			"type": "number",
+			"default": 0
+		},
+		"imageUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"imageSize": {
+			"type": "string",
+			"default": "full"
+		}
+	}
+}
+```
+
+## Background Image
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { backgroundImage } = attributes;
+
+	const onSelectImage = ( media ) => {
+		setAttributes( { backgroundImage: media.url } );
+	};
+
+	return (
+		<div
+			{ ...blockProps }
+			style={ {
+				backgroundImage: backgroundImage ? `url(${ backgroundImage })` : 'none',
+				backgroundSize: 'cover',
+				backgroundPosition: 'center',
+				minHeight: '300px',
+				padding: '20px',
+			} }
+		>
+			<MediaUploadCheck>
+				<MediaUpload
+					onSelect={ onSelectImage }
+					allowedTypes={ [ 'image' ] }
+					value={ backgroundImage }
+					render={ ( { open } ) => (
+						<Button variant="primary" onClick={ open }>
+							{ backgroundImage
+								? __( 'Replace Background', 'your-text-domain' )
+								: __( 'Set Background', 'your-text-domain' )
+							}
+						</Button>
+					) }
+				/>
+			</MediaUploadCheck>
+		</div>
+	);
+}
+```
+
+### block.json for background
+
+```json
+{
+	"attributes": {
+		"backgroundImage": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## With InspectorControls
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button, PanelBody } from '@wordpress/components';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { imageUrl, imageAlt } = attributes;
+
+	const onSelectImage = ( media ) => {
+		setAttributes( {
+			imageUrl: media.url,
+			imageAlt: media.alt,
+		} );
+	};
+
+	return (
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Image Settings', 'your-text-domain' ) }>
+					<MediaUploadCheck>
+						<MediaUpload
+							onSelect={ onSelectImage }
+							allowedTypes={ [ 'image' ] }
+							value={ imageUrl }
+							render={ ( { open } ) => (
+								<Button variant="secondary" onClick={ open }>
+									{ imageUrl
+										? __( 'Replace Image', 'your-text-domain' )
+										: __( 'Select Image', 'your-text-domain' )
+									}
+								</Button>
+							) }
+						/>
+					</MediaUploadCheck>
+				</PanelBody>
+			</InspectorControls>
+			<div { ...blockProps }>
+				{ imageUrl && <img src={ imageUrl } alt={ imageAlt } /> }
+			</div>
+		</>
+	);
+}
+```
+
+## Any Media Type
+
+```javascript
+import { __ } from '@wordpress/i18n';
+import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
+import { Button } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
+
+export default function Edit( { attributes, setAttributes } ) {
+	const blockProps = useBlockProps();
+	const { mediaUrl, mediaType } = attributes;
+
+	const onSelectMedia = ( media ) => {
+		setAttributes( {
+			mediaUrl: media.url,
+			mediaType: media.type,
+		} );
+	};
+
+	return (
+		<div { ...blockProps }>
+			<MediaUploadCheck>
+				<MediaUpload
+					onSelect={ onSelectMedia }
+					allowedTypes={ [ 'image', 'video', 'audio' ] }
+					value={ mediaUrl }
+					render={ ( { open } ) => (
+						<>
+							{ mediaUrl && (
+								<div>
+									{ mediaType === 'image' && <img src={ mediaUrl } alt="" /> }
+									{ mediaType === 'video' && <video controls src={ mediaUrl } /> }
+									{ mediaType === 'audio' && <audio controls src={ mediaUrl } /> }
+								</div>
+							) }
+							<Button variant="primary" onClick={ open }>
+								{ mediaUrl
+									? __( 'Replace Media', 'your-text-domain' )
+									: __( 'Upload Media', 'your-text-domain' )
+								}
+							</Button>
+						</>
+					) }
+				/>
+			</MediaUploadCheck>
+		</div>
+	);
+}
+```
+
+### block.json for any media
+
+```json
+{
+	"attributes": {
+		"mediaUrl": {
+			"type": "string",
+			"default": ""
+		},
+		"mediaType": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}
+```
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `onSelect` | function | - | Callback when media is selected, receives media object |
+| `allowedTypes` | array | - | Array of allowed media types: `'image'`, `'video'`, `'audio'` |
+| `value` | number/string | - | Selected media ID or URL |
+| `multiple` | boolean | `false` | Allow multiple file selection |
+| `gallery` | boolean | `false` | Show gallery view for multiple selection |
+| `render` | function | - | Render prop function, receives `{ open }` parameter |
+
+## Media Object Properties
+
+```javascript
+{
+	id: 123,                    // Media ID
+	url: 'https://...',        // Full URL
+	alt: 'Alt text',           // Alt text
+	title: 'Media title',      // Title
+	caption: 'Caption',        // Caption
+	type: 'image',             // Type: image, video, audio
+	subtype: 'jpeg',           // Subtype: jpeg, png, mp4, etc.
+	sizes: {                   // Available sizes (images only)
+		thumbnail: { url: '...', width: 150, height: 150 },
+		medium: { url: '...', width: 300, height: 300 },
+		large: { url: '...', width: 1024, height: 1024 },
+		full: { url: '...', width: 2000, height: 2000 }
+	}
+}
+```
+
+## Common Use Cases
+
+1. **Featured Images**: Single image selection for blocks
+2. **Image Galleries**: Multiple image selection
+3. **Video Embedding**: Upload and embed videos
+4. **Background Images**: Set block background images
+5. **Media Libraries**: Any media type selection
+
+## Best Practices
+
+- Always wrap MediaUpload in `MediaUploadCheck`
+- Store both ID and URL in attributes
+- Store alt text for accessibility
+- Provide clear button labels
+- Handle empty/missing media states
+- Use appropriate `allowedTypes` for your use case
+- For galleries, store as array of media objects
+- Consider responsive image sizes
+
+## Accessibility
+
+- Always include alt text for images
+- Provide meaningful button labels
+- Support keyboard navigation
+- Use semantic HTML for media elements
+- Consider captions and descriptions
+
+## WordPress Standards
+
+- Import from `@wordpress/block-editor`
+- Use `MediaUploadCheck` for permissions
+- Use `@wordpress/i18n` for translatable text
+- Store media data in block attributes
+- Use WordPress image sizes when available
