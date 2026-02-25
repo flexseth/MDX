@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- `BoxControl` component — four-sided value editor (padding, margin, border-width) mirroring `@wordpress/components`
+  - Props: `label`, `value`, `onChange`, `units`, `splitOnAxis`, `allowReset`, `resetValues`, `sides`, `className`
+  - Linked/unlinked toggle syncs all four sides or edits each independently
+  - `splitOnAxis` collapses inputs to Vertical / Horizontal pairs
+  - Unit picker (px, em, rem, %) applied across all sides simultaneously
+  - `box-control.mdx` — three interactive persistent demos:
+    - `PaddingDemo` — padding editor with live preview box (key: `demo-box-padding`)
+    - `BorderWidthDemo` — border-width editor with live bordered element (key: `demo-box-border`)
+    - `VerticalHorizontalDemo` — `splitOnAxis` mode for vertical/horizontal control (key: `demo-box-axes`)
+  - Registered in `MDXProvider`, barrel export, route `/docs/box-control`, sidebar nav, and `docs.css`
 - `Dropdown` component — composable dropdown with render-prop trigger and popover panel mirroring `@wordpress/components`
   - Props: `renderToggle`, `renderContent`, `popoverProps` (placement), `className`, `contentClassName`, `defaultOpen`, `onToggle`, `onClose`
   - Closes on outside click and Escape key; popover aligns via `placement` option

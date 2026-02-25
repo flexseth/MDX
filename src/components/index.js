@@ -1,4 +1,6 @@
 export { default as Alert } from './Alert';
+export { default as BoxControl } from './BoxControl';
+export { default as BlockControls } from './BlockControls';
 export { default as Button } from './Button';
 export { default as Card } from './Card';
 export { default as CheckboxControl } from './CheckboxControl';
