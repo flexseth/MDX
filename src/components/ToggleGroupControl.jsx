@@ -1,3 +1,5 @@
+import React from 'react';
+
 /**
  * Modern radio-style group of toggle buttons for selecting a single option.
  *
@@ -25,6 +27,11 @@ export default function ToggleGroupControl( {
 } ) {
 	const id = `toggle-group-${ label?.toLowerCase().replace( /\s+/g, '-' ) }`;
 
+	const clonedChildren = React.Children.map( children, ( child ) => {
+		if ( ! React.isValidElement( child ) ) return child;
+		return React.cloneElement( child, { selectedValue: value, onChange } );
+	} );
+
 	return (
 		<div className={ `toggle-group-control${ isBlock ? ' toggle-group-control--block' : '' }${ className ? ` ${ className }` : '' }` } { ...rest }>
 			<label className="toggle-group-control__label" id={ `${ id }-label` }>
@@ -35,7 +42,7 @@ export default function ToggleGroupControl( {
 				role="radiogroup"
 				aria-labelledby={ `${ id }-label` }
 			>
-				{ children }
+				{ clonedChildren }
 			</div>
 			{ help && (
 				<p id={ `${ id }-help` } className="toggle-group-control__help">
@@ -52,10 +59,10 @@ export default function ToggleGroupControl( {
 export function ToggleGroupControlOption( {
 	value,
 	label,
+	selectedValue,
+	onChange,
 	...rest
 } ) {
-	const { value: selectedValue, onChange } = rest;
-
 	const handleClick = () => {
 		if ( onChange ) {
 			onChange( value );
