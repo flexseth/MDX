@@ -17,6 +17,14 @@ All notable changes to this project will be documented in this file.
     - `BorderWidthDemo` — border-width editor with live bordered element (key: `demo-box-border`)
     - `VerticalHorizontalDemo` — `splitOnAxis` mode for vertical/horizontal control (key: `demo-box-axes`)
   - Registered in `MDXProvider`, barrel export, route `/docs/box-control`, sidebar nav, and `docs.css`
+- `Dropdown` component — composable dropdown with render-prop trigger and popover panel mirroring `@wordpress/components`
+  - Props: `renderToggle`, `renderContent`, `popoverProps` (placement), `className`, `contentClassName`, `defaultOpen`, `onToggle`, `onClose`
+  - Closes on outside click and Escape key; popover aligns via `placement` option
+  - `dropdown.mdx` — three interactive persistent demos:
+    - `StyleMenuDemo` — text menu with checkmark on selected item (key: `demo-dropdown-style`)
+    - `IconPickerDemo` — 3×3 symbol grid picker with large preview (key: `demo-dropdown-icon`)
+    - `ColorSwatchDemo` — colored circle trigger opens an 8-swatch palette (key: `demo-dropdown-color`)
+  - Registered in `MDXProvider`, barrel export, route `/docs/dropdown`, sidebar nav, and `docs.css`
 - `ComboboxControl` component — searchable autocomplete dropdown mirroring `@wordpress/components`
   - Props: `label`, `value`, `options`, `onChange`, `onFilterValueChange`, `help`, `isLoading`, `messages`, `className`
   - Full keyboard navigation: arrow keys, Enter to select, Escape to close
@@ -47,6 +55,10 @@ All notable changes to this project will be documented in this file.
     - `MultipleDemo` — three checkboxes drive a simulated post card with title, date, and excerpt (keys: `demo-checkbox-show-title-multi`, `demo-checkbox-show-excerpt`, `demo-checkbox-show-date`)
     - `HelpTextDemo` — checkbox with `help` prop for lazy-load setting (key: `demo-checkbox-lazy-load`)
   - Registered in `MDXProvider`, barrel export, route `/docs/checkbox-control`, sidebar nav
+
+---
+
+## [1.8.1] - 2026-02-20
 
 ### Changed
 - Renamed GitHub Copilot agent file from `my-agent.agent.md` to `MDX-Gutendocs-creator.md` to match the agent's `name` field
