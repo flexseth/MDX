@@ -4,6 +4,7 @@ const navItems = [
 	{ path: '/docs/getting-started', label: 'Getting Started' },
 	{ path: '/docs/alert', label: 'Alert' },
 	{ path: '/docs/box-control', label: 'BoxControl' },
+	{ path: '/docs/block-controls', label: 'BlockControls' },
 	{ path: '/docs/button', label: 'Button' },
 	{ path: '/docs/card', label: 'Card' },
 	{ path: '/docs/checkbox-control', label: 'CheckboxControl' },
@@ -15,6 +16,7 @@ const navItems = [
 	{ path: '/docs/color-palette', label: 'ColorPalette' },
 	{ path: '/docs/color-picker', label: 'ColorPicker' },
 	{ path: '/docs/combobox-control', label: 'ComboboxControl' },
+	{ path: '/docs/dropdown', label: 'Dropdown' },
 ];
 
 /**
